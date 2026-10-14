@@ -5,39 +5,42 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pop</title>
 <style>
-  :root { --bg:#0f0e17; --card:#1b1a2b; --ink:#fffffe; --muted:#a7a9be; --accent:#ff8906; --accent2:#e53170; --ok:#2cb67d; }
+  :root { --bg:#bfe3f5; --bg2:#d9f0fa; --card:#ffffff; --ink:#2b3a44; --muted:#6b7f8c; --accent:#6cc070; --accent2:#f28bb3; --warn:#f5b84b; }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; min-height:100dvh; display:flex; flex-direction:column; }
+  body { margin:0; color:var(--ink); font:17px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; min-height:100dvh; display:flex; flex-direction:column;
+         background-color:var(--bg);
+         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cpath d='M48 70c-8-6-20-14-20-26a10 10 0 0 1 20-3 10 10 0 0 1 20 3c0 12-12 20-20 26z' fill='%23a9d8ee'/%3E%3C/svg%3E");
+         background-size:96px 96px; }
   main { flex:1; display:flex; flex-direction:column; justify-content:center; padding:28px 22px; max-width:440px; margin:0 auto; width:100%; }
-  h1 { font-size:34px; line-height:1.1; margin:0 0 10px; }
+  h1 { font-size:30px; line-height:1.15; margin:0 0 10px; font-weight:800; }
   p { color:var(--muted); margin:0 0 18px; }
-  .alias { color:var(--accent); font-weight:700; }
-  .card { background:var(--card); border-radius:18px; padding:22px; margin:0 0 18px; }
-  .card h2 { margin:0 0 6px; font-size:22px; }
-  .card .where { color:var(--ink); font-size:19px; }
+  .alias { color:var(--ink); font-weight:800; }
+  .card { background:var(--card); border-radius:22px; padding:22px; margin:0 0 18px; box-shadow:0 10px 30px rgba(43,58,68,.10); }
+  .card h2 { margin:0 0 6px; font-size:22px; font-weight:800; }
+  .card .where { font-size:19px; font-weight:600; }
   .card .loc { color:var(--muted); }
-  input { width:100%; padding:14px; border-radius:12px; border:1px solid #2e2d44; background:#15142a; color:var(--ink); font-size:17px; margin:0 0 14px; }
-  button { width:100%; padding:16px; border:0; border-radius:14px; font-size:18px; font-weight:700; color:#0f0e17; background:var(--accent); margin:0 0 12px; }
-  button.secondary { background:#2e2d44; color:var(--ink); font-weight:600; }
-  button.ok { background:var(--ok); }
-  button:disabled { opacity:.45; }
+  .bubble { background:var(--card); border-radius:22px; padding:18px 20px; box-shadow:0 10px 30px rgba(43,58,68,.10); position:relative; margin:0 0 18px; font-weight:600; }
+  .bubble:after { content:""; position:absolute; left:50%; bottom:-10px; width:20px; height:20px; background:var(--card); transform:translateX(-50%) rotate(45deg); border-radius:4px; }
+  input { width:100%; padding:15px 16px; border-radius:16px; border:2px solid #e3eef4; background:#fff; color:var(--ink); font-size:17px; margin:0 0 14px; }
+  input:focus { outline:none; border-color:var(--accent2); }
+  button { width:100%; padding:16px; border:0; border-radius:16px; font-size:18px; font-weight:800; color:#fff; background:var(--accent); margin:0 0 12px; box-shadow:0 6px 0 rgba(0,0,0,.08); }
+  button.secondary { background:#fff; color:var(--muted); font-weight:700; box-shadow:0 6px 0 rgba(0,0,0,.05); }
+  button.ok { background:var(--accent2); }
+  button:disabled { opacity:.5; box-shadow:none; }
+  button:active { transform:translateY(2px); box-shadow:none; }
   .screen { display:none; } .screen.on { display:block; }
   .status { font-size:15px; color:var(--muted); min-height:1.4em; }
-  .pulse { display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--accent2); margin-right:8px; animation:p 1.2s infinite; }
-  @keyframes p { 0%,100%{opacity:.3} 50%{opacity:1} }
-  .err { color:#ff6b6b; font-size:14px; margin-top:10px; min-height:1.2em; }
-  footer { text-align:center; color:#55546a; font-size:12px; padding:12px; }
-  /* waiting screen: Orbit-style orb */
-  .screen.wait.on { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:radial-gradient(120% 80% at 50% 0%, #1a1630 0%, var(--bg) 60%); }
-  .orb-wrap { width:200px; height:200px; display:grid; place-items:center; margin-bottom:34px; }
-  .orb { width:180px; height:180px; border-radius:50%;
-         background: radial-gradient(circle at 30% 30%, #ffb347 0%, #ff8906 28%, #e53170 70%, #7a1f5c 100%);
-         box-shadow: 0 0 60px 10px rgba(229,49,112,.35), 0 0 120px 30px rgba(255,137,6,.18);
-         animation: breathe 3.2s ease-in-out infinite; filter: saturate(1.1); }
-  @keyframes breathe { 0%,100% { transform:scale(1) translate(0,0); } 33% { transform:scale(1.06) translate(3px,-4px); } 66% { transform:scale(1.03) translate(-3px,3px); } }
-  .wait-text { text-align:center; padding:0 28px; }
-  .wait-title { font-size:22px; font-weight:700; }
-  .wait-sub { color:var(--muted); font-size:15px; margin-top:6px; }
+  .err { color:#d64a5a; font-size:14px; margin-top:10px; min-height:1.2em; }
+  footer { text-align:center; color:#7f98a6; font-size:12px; padding:12px; }
+  /* welcome mascot */
+  .mascot { font-size:84px; line-height:1; text-align:center; margin:0 0 10px; filter:drop-shadow(0 8px 10px rgba(43,58,68,.15)); }
+  /* waiting screen */
+  .screen.wait.on { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; }
+  .wait-mascot { font-size:120px; line-height:1; animation:bob 2.4s ease-in-out infinite; filter:drop-shadow(0 12px 14px rgba(43,58,68,.18)); margin-bottom:8px; }
+  @keyframes bob { 0%,100% { transform:translateY(0) rotate(-3deg); } 50% { transform:translateY(-14px) rotate(3deg); } }
+  .wait-text { text-align:center; max-width:420px; width:100%; }
+  .wait-title { font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); font-weight:700; }
+  .wait-sub { font-size:22px; font-weight:800; margin-top:4px; }
   .wait-text .status { font-size:16px; color:var(--ink); margin-top:14px; }
 </style>
 </head>
@@ -45,19 +48,21 @@
 <main>
   <!-- 1. Welcome -->
   <section id="s-welcome" class="screen">
-    <h1>Meet a stranger,<br>at a booth.</h1>
-    <p>You'll be <span class="alias" id="w-alias">…</span> tonight. Nothing is saved after the event.</p>
+    <div class="mascot" id="w-mascot">🫧</div>
+    <h1>Meet a stranger<br>at a booth.</h1>
+    <p>We'll give you an animal name. Nothing is saved after tonight.</p>
     <input id="w-name" placeholder="Your name (optional)" autocomplete="off">
     <button id="w-go">Enter the mix →</button>
     <div class="err" id="w-err"></div>
   </section>
 
-  <!-- 2. Waiting: one breathing orb, text beneath -->
+  <!-- 2. Waiting: your animal, bobbing, with the count -->
   <section id="s-wait" class="screen wait">
-    <div class="orb-wrap"><div class="orb"></div></div>
+    <div class="wait-mascot" id="wt-mascot">🦦</div>
     <div class="wait-text">
       <div class="wait-title">Finding someone nearby</div>
-      <div class="wait-sub">You're <span class="alias" id="wt-alias"></span>. <span id="wt-status"></span></div>
+      <div class="wait-sub">You're <span class="alias" id="wt-alias"></span></div>
+      <div class="status" id="wt-status"></div>
       <div class="status" id="wt-pool"></div>
       <div class="err" id="wt-err"></div>
     </div>
@@ -65,6 +70,7 @@
 
   <!-- 3. The card -->
   <section id="s-card" class="screen">
+    <div class="mascot" id="c-mascot">🦊</div>
     <div class="card">
       <h2 id="c-title">Meet …</h2>
       <div class="where" id="c-vendor"></div>
@@ -78,6 +84,7 @@
 
   <!-- 4. At the booth -->
   <section id="s-booth" class="screen">
+    <div class="mascot">🎉</div>
     <div class="card">
       <h2 id="b-title">It's on.</h2>
       <div class="where" id="b-vendor"></div>
@@ -101,6 +108,8 @@
   const $ = id => document.getElementById(id);
   const show = name => { document.querySelectorAll('.screen').forEach(s => s.classList.remove('on')); $('s-' + name).classList.add('on'); };
   const TIMEOUT_MS = 10 * 60 * 1000, POLL_MS = 3000;
+  const ANIMAL = { Otter:'🦦', Heron:'🪶', Lynx:'🐱', Falcon:'🦅', Fox:'🦊', Badger:'🦡', Ibis:'🦩', Marten:'🐾', Puffin:'🐧', Stoat:'🐿️', Wren:'🐦', Yak:'🐂' };
+  const emojiFor = alias => ANIMAL[(alias || '').split(' ').pop()] || '🫧';
   let me = null, match = null, pollTimer = null, cardTimer = null;
 
   const rpc = async (fn, args) => { const { data, error } = await sb.rpc(fn, args || {}); if (error) throw new Error(error.message); return data; };
@@ -135,7 +144,7 @@
   // ---- 2. waiting / search ----
   async function search() {
     stopPolls(); match = null;
-    $('wt-alias').textContent = (me.name || me.alias); $('wt-status').textContent = me.variant === 'A' ? 'We\'ll pair you with someone else in the mix.' : 'Finding you a booth.';
+    $('wt-alias').textContent = (me.name || me.alias); $('wt-mascot').textContent = emojiFor(me.alias); $('wt-status').textContent = me.variant === 'A' ? 'We\'ll pair you with someone else in the mix.' : 'Finding you a booth.';
     show('wait');
     const tick = async () => {
       try {
@@ -171,6 +180,7 @@
     }, POLL_MS);
   }
   function renderCard(c) {
+    $('c-mascot').textContent = c.partner_alias ? emojiFor(c.partner_alias) : '📍';
     $('c-title').textContent = c.partner_alias ? ('Meet ' + c.partner_alias) : 'Head to the booth';
     $('c-vendor').textContent = c.vendor_name; $('c-loc').textContent = c.vendor_location;
     $('c-status').textContent = c.partner_alias ? 'Both of you have to say yes.' : '';

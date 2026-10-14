@@ -36,6 +36,12 @@
   .dots i { width:12px; height:12px; border-radius:50%; background:var(--green); animation:bounce 1.2s ease-in-out infinite; }
   .dots i:nth-child(2) { animation-delay:.15s; } .dots i:nth-child(3) { animation-delay:.3s; }
   @keyframes bounce { 0%,100% { transform:translateY(0); opacity:.5; } 50% { transform:translateY(-10px); opacity:1; } }
+  /* waiting: floating field of others around you */
+  .field { position:relative; width:320px; height:320px; display:grid; place-items:center; }
+  .field .you { z-index:2; }
+  .floater { position:absolute; left:50%; top:50%; font-size:40px; line-height:1; opacity:0; transform:translate(-50%,-50%) translate(var(--x),var(--y)); transition:opacity .6s ease; filter:drop-shadow(0 6px 6px rgba(0,0,0,.10)); pointer-events:none; }
+  .floater.show { opacity:.95; animation:floaty var(--d) ease-in-out infinite; animation-delay:var(--delay); }
+  @keyframes floaty { 0%,100% { transform:translate(-50%,-50%) translate(var(--x),var(--y)) translateY(0); } 50% { transform:translate(-50%,-50%) translate(var(--x),var(--y)) translateY(-14px); } }
   /* purple screens (match, booth) */
   .screen.purple.on { position:fixed; inset:0; background:var(--purple); color:#fff; padding:28px 22px; overflow:hidden; display:flex; flex-direction:column; }
   .purple .sub, .purple .status { color:rgba(255,255,255,.85); }
@@ -78,7 +84,19 @@
       <h1>Finding someone…</h1>
       <div class="sub">You're <span class="alias" id="wt-alias"></span>. <span id="wt-status"></span></div>
     </div>
-    <div class="stage"><div><div class="hero bob" id="wt-mascot">🦦</div><div class="dots"><i></i><i></i><i></i></div></div></div>
+    <div class="stage">
+      <div class="field" id="field">
+        <div class="hero bob you" id="wt-mascot">🦦</div>
+        <span class="floater" style="--x:-120px;--y:-80px;--d:7s;--delay:0s">🦊</span>
+        <span class="floater" style="--x:125px;--y:-60px;--d:8s;--delay:-2s">🐧</span>
+        <span class="floater" style="--x:-110px;--y:70px;--d:9s;--delay:-4s">🦅</span>
+        <span class="floater" style="--x:130px;--y:85px;--d:7.5s;--delay:-1s">🐱</span>
+        <span class="floater" style="--x:0px;--y:-130px;--d:8.5s;--delay:-3s">🦡</span>
+        <span class="floater" style="--x:10px;--y:135px;--d:9.5s;--delay:-5s">🦩</span>
+        <span class="floater" style="--x:-150px;--y:-5px;--d:8s;--delay:-6s">🐿️</span>
+        <span class="floater" style="--x:155px;--y:10px;--d:7s;--delay:-2.5s">🐦</span>
+      </div>
+    </div>
     <div class="bottom">
       <div class="status" id="wt-pool"></div>
       <div class="err" id="wt-err"></div>
@@ -195,6 +213,7 @@
         if (m && m.id) { stopPolls(); match = m; return card(); }
         const n = await rpc('pool_size');            // includes you
         const others = Math.max(0, (n || 1) - 1);
+        document.querySelectorAll('.floater').forEach((el, i) => el.classList.toggle('show', i < Math.min(others, 8)));
         $('wt-pool').textContent = others === 0 ? 'You\'re the first one here. Hang tight.' : (others === 1 ? '1 other person is nearby.' : others + ' other people are nearby.');
       } catch (e) { err('wt-err', e); }
     };

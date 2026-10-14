@@ -44,10 +44,11 @@
   .crowd-field { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
   .crowd-track { position:absolute; top:0; left:0; height:100%; width:200%; animation:drift 60s linear infinite; will-change:transform; }
   @keyframes drift { from { transform:translateX(-50%); } to { transform:translateX(0); } }
-  .crowd-track img { position:absolute; width:64px; height:64px; border-radius:50%; opacity:.9; animation:floaty var(--d,8s) ease-in-out infinite; animation-delay:var(--delay,0s); filter:drop-shadow(0 6px 6px rgba(0,0,0,.08)); will-change:transform; }
+  .crowd-track img { position:absolute; width:64px; height:64px; border-radius:50%; opacity:1; animation:floaty var(--d,8s) ease-in-out infinite; animation-delay:var(--delay,0s); filter:drop-shadow(0 6px 6px rgba(0,0,0,.08)); will-change:transform; }
   @keyframes floaty { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-14px); } }
   .over { position:relative; z-index:2; }
-  .crowd .top, .crowd .bottom { background:rgba(255,255,255,.72); border-radius:18px; padding:12px; backdrop-filter:blur(2px); }
+  .panel { background:rgba(255,255,255,.86); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); border-radius:24px; padding:22px 20px; text-align:center; box-shadow:0 14px 40px rgba(47,59,69,.14); max-width:360px; }
+  .panel h1 { margin-bottom:6px; }
   .crowd .you { box-shadow:0 0 0 6px #fff, 0 0 0 9px var(--green); }
   /* purple screens (match, booth) */
   .screen.purple.on { position:fixed; inset:0; background:var(--purple); color:#fff; padding:28px 22px; overflow:hidden; display:flex; flex-direction:column; }
@@ -88,15 +89,15 @@
   <!-- 2. Waiting: a full-screen crowd drifting left to right, you in the middle -->
   <section id="s-wait" class="screen crowd">
     <div class="crowd-field" id="crowd"><div class="crowd-track" id="crowd-track"></div></div>
-    <div class="top over">
-      <h1>Finding someone…</h1>
-      <div class="sub">You're <span class="alias" id="wt-alias"></span>. <span id="wt-status"></span></div>
+    <div class="stage over">
+      <div class="panel">
+        <h1>Finding someone…</h1>
+        <div class="sub">You're <span class="alias" id="wt-alias"></span>. <span id="wt-status"></span></div>
+        <div class="status" id="wt-pool"></div>
+        <div class="err" id="wt-err"></div>
+      </div>
     </div>
-    <div class="stage"></div><img id="wt-mascot" alt="" style="display:none">
-    <div class="bottom over">
-      <div class="status" id="wt-pool"></div>
-      <div class="err" id="wt-err"></div>
-    </div>
+    <img id="wt-mascot" alt="" style="display:none">
   </section>
 
   <!-- 3. Match found (purple) -->
@@ -228,7 +229,6 @@
         if (m && m.id) { stopPolls(); match = m; return card(); }
         const n = await rpc('pool_size');            // includes you
         const others = Math.max(0, (n || 1) - 1);
-        document.querySelectorAll('#crowd-track img').forEach(el => el.style.opacity = (+el.dataset.i < others) ? .95 : .28);
         $('wt-pool').textContent = others === 0 ? 'You\'re the first one here. Hang tight.' : (others === 1 ? '1 other person is nearby.' : others + ' other people are nearby.');
       } catch (e) { err('wt-err', e); }
     };

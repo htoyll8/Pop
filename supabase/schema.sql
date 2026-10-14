@@ -12,7 +12,8 @@ create table if not exists people (
   alias         text not null,
   name          text,
   variant       text not null check (variant in ('A','B')),
-  waiting_since timestamptz,                                -- non-null while in the A pool
+  waiting_since timestamptz,                                -- non-null while in the A pool (orders the pool)
+  last_seen     timestamptz,                                -- refreshed on every search (who is here right now)
   created_at    timestamptz not null default now()
 );
 
@@ -100,6 +101,7 @@ begin
   select * into me from people where id = auth.uid();
   if not found then raise exception 'join first'; end if;
   if not exists (select 1 from vendors) then raise exception 'no vendors configured'; end if;
+  update people set last_seen = now() where id = me.id;
 
   select * into m from matches
    where (person_1 = me.id or person_2 = me.id)
@@ -116,9 +118,9 @@ begin
     return m;
   end if;
 
-  -- longest-waiting A person I have never been matched with, in either slot
   select p.* into partner from people p
    where p.variant = 'A' and p.waiting_since is not null and p.id <> me.id
+     and p.last_seen > now() - interval '30 seconds'          -- only people actually searching now
      and not exists (select 1 from matches x
                       where (x.person_1 = me.id and x.person_2 = p.id)
                          or (x.person_1 = p.id and x.person_2 = me.id))
@@ -205,9 +207,9 @@ revoke execute on function match_card(uuid) from anon, public;
 
 -- 6. How many people are in the mix (count only).
 create or replace function pool_size()
-returns int language sql security definer set search_path = public stable as $$
-  select count(*)::int from people where waiting_since is not null and waiting_since > now() - interval '15 minutes';
-$$;
+returns int language sql security definer set search_path = public stable as $fn$
+  select count(*)::int from people where waiting_since is not null and last_seen > now() - interval '30 seconds'
+$fn$;
 grant execute on function pool_size() to authenticated;
 revoke execute on function pool_size() from anon, public;
 

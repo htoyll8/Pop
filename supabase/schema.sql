@@ -14,6 +14,7 @@ create table if not exists people (
   variant       text not null check (variant in ('A','B')),
   waiting_since timestamptz,                                -- non-null while in the A pool (orders the pool)
   last_seen     timestamptz,                                -- refreshed on every search (who is here right now)
+  avatar_seed   text,                                       -- chosen on the welcome screen
   created_at    timestamptz not null default now()
 );
 
@@ -71,20 +72,16 @@ $$;
 -- ---------- functions phones call (security definer = run with table-owner rights) ----------
 
 -- 1. Join: create the caller's people row once. Variant alternates by sign-up order.
-create or replace function join_event(p_name text default null)
+create or replace function join_event(p_name text default null, p_avatar text default null)
 returns people language plpgsql security definer set search_path = public as $$
 declare me people;
 begin
   if auth.uid() is null then raise exception 'not signed in'; end if;
   select * into me from people where id = auth.uid();
   if found then return me; end if;
-  insert into people (id, alias, name, variant)
-  values (auth.uid(), _random_alias(), nullif(trim(p_name), ''), 'A')
+  insert into people (id, alias, name, variant, avatar_seed)
+  values (auth.uid(), _random_alias(), nullif(trim(p_name), ''), 'A', coalesce(nullif(trim(p_avatar), ''), gen_random_uuid()::text))
   returning * into me;
-  -- Everyone is variant A (pair at a booth) for the 2026-10-17 event. To run the A/B
-  -- comparison instead, replace the line above's 'A' with a placeholder and add:
-  --   update people set variant = case when me.seq % 2 = 1 then 'A' else 'B' end
-  --     where id = me.id returning * into me;
   return me;
 end $$;
 
@@ -174,14 +171,14 @@ begin
   return c;
 end $$;
 
-grant execute on function join_event(text), find_match(), respond_to_match(uuid,text), check_in(uuid,text) to authenticated;
-revoke execute on function join_event(text), find_match(), respond_to_match(uuid,text), check_in(uuid,text) from anon, public;  -- signed-out callers get nothing, not even an error message
+grant execute on function join_event(text, text), find_match(), respond_to_match(uuid,text), check_in(uuid,text) to authenticated;
+revoke execute on function join_event(text, text), find_match(), respond_to_match(uuid,text), check_in(uuid,text) from anon, public;  -- signed-out callers get nothing, not even an error message
 revoke execute on function _random_alias() from public;
 
 -- 5. What the card shows: partner alias (A only), vendor name + location, both statuses, my slot.
 create or replace function match_card(p_match uuid)
 returns jsonb language plpgsql security definer set search_path = public as $$
-declare m matches; v vendors; partner_id uuid; partner_alias text; my_slot int; c checkins;
+declare m matches; v vendors; partner_id uuid; partner_alias text; partner_avatar text; my_slot int; c checkins;
 begin
   select * into m from matches where id = p_match;
   if not found then raise exception 'no such match'; end if;
@@ -190,12 +187,12 @@ begin
   else raise exception 'not your match'; end if;
   select * into v from vendors where id = m.vendor_id;
   if partner_id is not null then
-    select coalesce(nullif(trim(name), ''), alias) into partner_alias from people where id = partner_id;
+    select coalesce(nullif(trim(name), ''), alias), coalesce(avatar_seed, alias) into partner_alias, partner_avatar from people where id = partner_id;
   end if;
   select * into c from checkins where match_id = p_match and person_id = auth.uid();
   return jsonb_build_object(
     'id', m.id, 'my_slot', my_slot,
-    'partner_alias', partner_alias,
+    'partner_alias', partner_alias, 'partner_avatar', partner_avatar,
     'vendor_name', v.name, 'vendor_location', v.location,
     'status_1', m.status_1, 'status_2', m.status_2,
     'self_at', c.self_at, 'partner_at', c.partner_at,

@@ -21,6 +21,7 @@
   input { width:100%; padding:15px 16px; border-radius:16px; border:2px solid #e6ebef; background:#fff; color:var(--ink); font:inherit; font-size:17px; margin:0 0 14px; text-align:center; }
   input:focus { outline:none; border-color:var(--purple); }
   button { width:100%; padding:17px; border:0; border-radius:18px; font:inherit; font-size:19px; font-weight:900; color:#fff; background:var(--purple); margin:0 0 12px; box-shadow:0 5px 0 var(--purple2); letter-spacing:.01em; }
+  button.link { width:auto; display:inline-block; background:transparent; color:var(--purple2); box-shadow:none; padding:10px 14px; font-size:16px; margin-top:8px; }
   button.secondary { background:#fff; color:var(--muted); box-shadow:0 5px 0 #e6ebef; border:2px solid #e6ebef; }
   button:active { transform:translateY(3px); box-shadow:none; }
   button:disabled { opacity:.45; box-shadow:none; transform:none; }
@@ -78,7 +79,7 @@
       <h1>Meet a stranger<br>at a booth!</h1>
       <div class="sub">We'll give you a nickname. Nothing is saved after tonight.</div>
     </div>
-    <div class="stage"><img class="avatar hero-img" id="w-avatar" alt=""></div>
+    <div class="stage"><div style="text-align:center"><img class="avatar hero-img" id="w-avatar" alt=""><div><button type="button" class="link" id="w-shuffle">↻ New look</button></div></div></div>
     <div class="bottom">
       <input id="w-name" placeholder="Your name (optional)" autocomplete="off">
       <button id="w-go">Enter the mix</button>
@@ -208,20 +209,23 @@
       // already joined on this device? then jump straight back in
       const { data: rows } = await sb.from('people').select('*').limit(1);
       if (rows && rows[0]) { me = rows[0]; return search(); }
-      $('w-avatar').src = avatarFor('welcome-' + Math.random().toString(36).slice(2));
+      shuffle();
       show('welcome');
     } catch (e) { show('welcome'); err('w-err', e); }
   }
+  let mySeed = null;
+  function shuffle() { mySeed = 'av-' + Math.random().toString(36).slice(2, 10); $('w-avatar').src = avatarFor(mySeed); }
+  $('w-shuffle').onclick = shuffle;
   $('w-go').onclick = async () => {
     $('w-go').disabled = true; err('w-err');
-    try { me = await rpc('join_event', { p_name: $('w-name').value || null }); search(); }
+    try { me = await rpc('join_event', { p_name: $('w-name').value || null, p_avatar: mySeed }); search(); }
     catch (e) { err('w-err', e); $('w-go').disabled = false; }
   };
 
   // ---- 2. waiting / search ----
   async function search() {
     stopPolls(); match = null;
-    $('wt-alias').textContent = (me.name || me.alias); $('wt-mascot').src = avatarFor(me.alias); $('wt-status').textContent = me.variant === 'A' ? 'We\'ll pair you with someone else in the mix.' : 'Finding you a booth.';
+    $('wt-alias').textContent = (me.name || me.alias); $('wt-mascot').src = avatarFor(me.avatar_seed || me.alias); $('wt-status').textContent = me.variant === 'A' ? 'We\'ll pair you with someone else in the mix.' : 'Finding you a booth.';
     show('wait');
     const tick = async () => {
       try {
@@ -260,7 +264,7 @@
     const mine = me.name || me.alias, theirs = c.partner_alias;
     $('c-title').textContent = theirs ? 'You matched!' : 'Head to the booth!';
     $('c-names').textContent = theirs ? (mine + ' & ' + theirs) : mine;
-    $('c-faces').innerHTML = ''; [me.alias].concat(theirs ? [theirs] : []).forEach(s => { const im = document.createElement('img'); im.src = avatarFor(s); im.alt = ''; $('c-faces').appendChild(im); });
+    $('c-faces').innerHTML = ''; [me.avatar_seed || me.alias].concat(theirs ? [c.partner_avatar || theirs] : []).forEach(s => { const im = document.createElement('img'); im.src = avatarFor(s); im.alt = ''; $('c-faces').appendChild(im); });
     $('c-vendor').textContent = c.vendor_name; $('c-loc').textContent = c.vendor_location;
     $('c-status').textContent = theirs ? 'Both of you have to say yes.' : '';
   }

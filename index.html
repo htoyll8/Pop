@@ -39,7 +39,10 @@
   /* waiting: floating field of others around you */
   .field { position:relative; width:320px; height:320px; display:grid; place-items:center; }
   .field .you { z-index:2; }
-  .floater { position:absolute; left:50%; top:50%; font-size:40px; line-height:1; opacity:0; transform:translate(-50%,-50%) translate(var(--x),var(--y)); transition:opacity .6s ease; filter:drop-shadow(0 6px 6px rgba(0,0,0,.10)); pointer-events:none; }
+  .avatar { width:150px; height:150px; border-radius:50%; background:#f1f3ff; object-fit:cover; }
+  .hero-img { position:relative; z-index:1; filter:drop-shadow(0 12px 12px rgba(0,0,0,.12)); }
+  .faces img { width:72px; height:72px; border-radius:50%; background:#fff; margin:0 6px; }
+  .floater { position:absolute; left:50%; top:50%; width:56px; height:56px; border-radius:50%; background:#f1f3ff; opacity:0; transform:translate(-50%,-50%) translate(var(--x),var(--y)); transition:opacity .6s ease; filter:drop-shadow(0 6px 6px rgba(0,0,0,.10)); pointer-events:none; }
   .floater.show { opacity:.95; animation:floaty var(--d) ease-in-out infinite; animation-delay:var(--delay); }
   @keyframes floaty { 0%,100% { transform:translate(-50%,-50%) translate(var(--x),var(--y)) translateY(0); } 50% { transform:translate(-50%,-50%) translate(var(--x),var(--y)) translateY(-14px); } }
   /* purple screens (match, booth) */
@@ -70,7 +73,7 @@
       <h1>Meet a stranger<br>at a booth!</h1>
       <div class="sub">We'll give you an animal name. Nothing is saved after tonight.</div>
     </div>
-    <div class="stage"><div class="hero">🫧</div></div>
+    <div class="stage"><img class="avatar hero-img" id="w-avatar" alt=""></div>
     <div class="bottom">
       <input id="w-name" placeholder="Your name (optional)" autocomplete="off">
       <button id="w-go">Enter the mix</button>
@@ -86,15 +89,15 @@
     </div>
     <div class="stage">
       <div class="field" id="field">
-        <div class="hero bob you" id="wt-mascot">🦦</div>
-        <span class="floater" style="--x:-120px;--y:-80px;--d:7s;--delay:0s">🦊</span>
-        <span class="floater" style="--x:125px;--y:-60px;--d:8s;--delay:-2s">🐧</span>
-        <span class="floater" style="--x:-110px;--y:70px;--d:9s;--delay:-4s">🦅</span>
-        <span class="floater" style="--x:130px;--y:85px;--d:7.5s;--delay:-1s">🐱</span>
-        <span class="floater" style="--x:0px;--y:-130px;--d:8.5s;--delay:-3s">🦡</span>
-        <span class="floater" style="--x:10px;--y:135px;--d:9.5s;--delay:-5s">🦩</span>
-        <span class="floater" style="--x:-150px;--y:-5px;--d:8s;--delay:-6s">🐿️</span>
-        <span class="floater" style="--x:155px;--y:10px;--d:7s;--delay:-2.5s">🐦</span>
+        <img class="avatar hero-img bob you" id="wt-mascot" alt="">
+        <img class="floater" alt="" style="--x:-120px;--y:-80px;--d:7s;--delay:0s">
+        <img class="floater" alt="" style="--x:125px;--y:-60px;--d:8s;--delay:-2s">
+        <img class="floater" alt="" style="--x:-110px;--y:70px;--d:9s;--delay:-4s">
+        <img class="floater" alt="" style="--x:130px;--y:85px;--d:7.5s;--delay:-1s">
+        <img class="floater" alt="" style="--x:0px;--y:-130px;--d:8.5s;--delay:-3s">
+        <img class="floater" alt="" style="--x:10px;--y:135px;--d:9.5s;--delay:-5s">
+        <img class="floater" alt="" style="--x:-150px;--y:-5px;--d:8s;--delay:-6s">
+        <img class="floater" alt="" style="--x:155px;--y:10px;--d:7s;--delay:-2.5s">
       </div>
     </div>
     <div class="bottom">
@@ -172,6 +175,10 @@
   const TIMEOUT_MS = 10 * 60 * 1000, POLL_MS = 3000;
   const ANIMAL = { Otter:'🦦', Heron:'🪶', Lynx:'🐱', Falcon:'🦅', Fox:'🦊', Badger:'🦡', Ibis:'🦩', Marten:'🐾', Puffin:'🐧', Stoat:'🐿️', Wren:'🐦', Yak:'🐂' };
   const emojiFor = alias => ANIMAL[(alias || '').split(' ').pop()] || '🫧';
+  const AV = 'https://api.dicebear.com/9.x/notionists/svg?backgroundColor=f1f3ff,e6e9ff,ffe3ec,e3f6ff&seed=';
+  const avatarFor = seed => AV + encodeURIComponent(seed || 'stranger');
+  // generic floaters: fixed seeds so nobody's real avatar is shown
+  document.querySelectorAll('.floater').forEach((el, i) => el.src = avatarFor('mix-' + i));
   let me = null, match = null, pollTimer = null, cardTimer = null;
 
   const rpc = async (fn, args) => { const { data, error } = await sb.rpc(fn, args || {}); if (error) throw new Error(error.message); return data; };
@@ -193,6 +200,7 @@
       // already joined on this device? then jump straight back in
       const { data: rows } = await sb.from('people').select('*').limit(1);
       if (rows && rows[0]) { me = rows[0]; return search(); }
+      $('w-avatar').src = avatarFor('welcome-' + (Math.floor(Date.now() / 86400000)));
       show('welcome');
     } catch (e) { show('welcome'); err('w-err', e); }
   }
@@ -205,7 +213,7 @@
   // ---- 2. waiting / search ----
   async function search() {
     stopPolls(); match = null;
-    $('wt-alias').textContent = (me.name || me.alias); $('wt-mascot').textContent = emojiFor(me.alias); $('wt-status').textContent = me.variant === 'A' ? 'We\'ll pair you with someone else in the mix.' : 'Finding you a booth.';
+    $('wt-alias').textContent = (me.name || me.alias); $('wt-mascot').src = avatarFor(me.alias); $('wt-status').textContent = me.variant === 'A' ? 'We\'ll pair you with someone else in the mix.' : 'Finding you a booth.';
     show('wait');
     const tick = async () => {
       try {
@@ -245,7 +253,7 @@
     const mine = me.name || me.alias, theirs = c.partner_alias;
     $('c-title').textContent = theirs ? 'You matched!' : 'Head to the booth!';
     $('c-names').textContent = theirs ? (mine + ' & ' + theirs) : mine;
-    $('c-faces').textContent = theirs ? (emojiFor(me.alias) + ' ' + emojiFor(theirs)) : emojiFor(me.alias);
+    $('c-faces').innerHTML = ''; [me.alias].concat(theirs ? [theirs] : []).forEach(s => { const im = document.createElement('img'); im.src = avatarFor(s); im.alt = ''; $('c-faces').appendChild(im); });
     $('c-vendor').textContent = c.vendor_name; $('c-loc').textContent = c.vendor_location;
     $('c-status').textContent = theirs ? 'Both of you have to say yes.' : '';
   }

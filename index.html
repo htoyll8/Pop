@@ -4,42 +4,55 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#ffffff; --ink:#2f3b45; --muted:#6b7a86; --green:#6cc070; --pink:#f28bb3; --peach:#ffd3a8; --card:#f6f8fa; }
+  :root { --ink:#2f3b45; --muted:#6b7a86; --green:#6cc070; --green2:#57a35b; --pink:#f28bb3; --purple:#6a7be8; --purple2:#5a6bd8; --lav:#e6e9ff; --card:#f6f8fa; }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; min-height:100dvh; display:flex; flex-direction:column; }
+  body { margin:0; background:#fff; color:var(--ink); font:17px/1.45 "Nunito",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; font-weight:600; min-height:100dvh; display:flex; flex-direction:column; }
   main { flex:1; display:flex; flex-direction:column; padding:28px 22px; max-width:440px; margin:0 auto; width:100%; }
   .screen { display:none; } .screen.on { display:flex; flex-direction:column; min-height:calc(100dvh - 90px); }
-  .top { text-align:center; padding-top:36px; }
-  h1 { font-size:30px; line-height:1.15; margin:0 0 8px; font-weight:800; }
-  .sub { color:var(--muted); font-size:18px; margin:0 0 10px; }
-  .alias { font-weight:800; color:var(--ink); }
-  .stage { flex:1; display:grid; place-items:center; position:relative; min-height:260px; }
+  .top { text-align:center; padding-top:30px; }
+  h1 { font-size:32px; line-height:1.12; margin:0 0 8px; font-weight:900; letter-spacing:-.01em; }
+  .sub { color:var(--muted); font-size:18px; margin:0 0 10px; font-weight:600; }
+  .alias { font-weight:900; color:var(--ink); }
+  .stage { flex:1; display:grid; place-items:center; position:relative; min-height:240px; }
   .bottom { padding-bottom:12px; }
-  input { width:100%; padding:15px 16px; border-radius:16px; border:2px solid #e6ebef; background:#fff; color:var(--ink); font-size:17px; margin:0 0 14px; text-align:center; }
-  input:focus { outline:none; border-color:var(--pink); }
-  button { width:100%; padding:17px; border:0; border-radius:18px; font-size:19px; font-weight:800; color:#fff; background:var(--green); margin:0 0 12px; box-shadow:0 5px 0 #57a35b; }
-  button.secondary { background:#fff; color:var(--muted); font-weight:700; box-shadow:none; border:2px solid #e6ebef; }
-  button.ok { background:var(--pink); box-shadow:0 5px 0 #d46f98; }
+  input { width:100%; padding:15px 16px; border-radius:16px; border:2px solid #e6ebef; background:#fff; color:var(--ink); font:inherit; font-size:17px; margin:0 0 14px; text-align:center; }
+  input:focus { outline:none; border-color:var(--purple); }
+  button { width:100%; padding:17px; border:0; border-radius:18px; font:inherit; font-size:19px; font-weight:900; color:#fff; background:var(--green); margin:0 0 12px; box-shadow:0 5px 0 var(--green2); letter-spacing:.01em; }
+  button.secondary { background:#fff; color:var(--muted); box-shadow:0 5px 0 #e6ebef; border:2px solid #e6ebef; }
   button:active { transform:translateY(3px); box-shadow:none; }
   button:disabled { opacity:.45; box-shadow:none; transform:none; }
   .status { font-size:15px; color:var(--muted); min-height:1.4em; text-align:center; }
   .err { color:#d64a5a; font-size:14px; margin-top:8px; min-height:1.2em; text-align:center; }
   footer { text-align:center; color:#9aa7b1; font-size:12px; padding:12px; }
-  /* welcome: eggs around a center */
-  .nest { position:relative; width:280px; height:280px; }
-  .nest .egg { position:absolute; font-size:44px; line-height:1; filter:saturate(.9); }
-  .nest .you { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:86px; line-height:1; filter:drop-shadow(0 10px 10px rgba(0,0,0,.12)); }
-  /* waiting: the egg wobbles and cracks */
-  .hatch { font-size:150px; line-height:1; animation:wobble 1.6s ease-in-out infinite; transform-origin:50% 90%; filter:drop-shadow(0 12px 12px rgba(0,0,0,.12)); }
-  @keyframes wobble { 0%,100% { transform:rotate(0); } 20% { transform:rotate(-7deg); } 40% { transform:rotate(6deg); } 60% { transform:rotate(-4deg); } 80% { transform:rotate(3deg); } }
-  /* match found: sunburst */
-  .burst { position:absolute; inset:-40% -60%; background:repeating-conic-gradient(from 0deg, #fff3e3 0deg 12deg, #ffffff 12deg 24deg); border-radius:50%; opacity:.9; animation:spin 40s linear infinite; z-index:0; }
-  @keyframes spin { to { transform:rotate(360deg); } }
-  .hero { position:relative; z-index:1; font-size:110px; line-height:1; filter:drop-shadow(0 12px 12px rgba(0,0,0,.12)); }
+  /* welcome: big character, flat */
+  .hero { font-size:120px; line-height:1; filter:drop-shadow(0 12px 12px rgba(0,0,0,.12)); position:relative; z-index:1; }
+  /* waiting: character bobs, dots bounce */
+  .bob { animation:bob 2.2s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform:translateY(0) rotate(-4deg); } 50% { transform:translateY(-16px) rotate(4deg); } }
+  .dots { display:flex; gap:10px; justify-content:center; margin-top:18px; }
+  .dots i { width:12px; height:12px; border-radius:50%; background:var(--green); animation:bounce 1.2s ease-in-out infinite; }
+  .dots i:nth-child(2) { animation-delay:.15s; } .dots i:nth-child(3) { animation-delay:.3s; }
+  @keyframes bounce { 0%,100% { transform:translateY(0); opacity:.5; } 50% { transform:translateY(-10px); opacity:1; } }
+  /* purple screens (match, booth) */
+  .screen.purple.on { position:fixed; inset:0; background:var(--purple); color:#fff; padding:28px 22px; overflow:hidden; display:flex; flex-direction:column; }
+  .purple .sub, .purple .status { color:rgba(255,255,255,.85); }
+  .purple .alias { color:#fff; }
+  .purple .card { background:rgba(255,255,255,.14); color:#fff; }
+  .purple .card .loc { color:rgba(255,255,255,.8); }
+  .purple button { background:var(--lav); color:var(--purple2); box-shadow:0 5px 0 #b9c0f0; }
+  .purple button.secondary { background:transparent; color:#fff; border:0; box-shadow:none; font-weight:800; }
+  .purple .err { color:#ffd3d8; }
+  .confetti { position:absolute; inset:0; pointer-events:none; }
+  .confetti i { position:absolute; width:12px; height:12px; transform:rotate(45deg); border-radius:2px; opacity:.95; }
+  .pair { display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; z-index:1; }
+  .pair .heart { font-size:56px; line-height:1; }
+  .pair .names { font-size:22px; font-weight:800; text-align:center; }
+  .pair .faces { font-size:64px; line-height:1; letter-spacing:.2em; }
   .card { background:var(--card); border-radius:22px; padding:18px 20px; margin:0 0 14px; text-align:center; }
-  .card h2 { margin:0 0 4px; font-size:22px; font-weight:800; }
-  .card .where { font-size:19px; font-weight:700; }
+  .card .where { font-size:20px; font-weight:900; }
   .card .loc { color:var(--muted); }
 </style>
 </head>
@@ -51,17 +64,7 @@
       <h1>Meet a stranger<br>at a booth!</h1>
       <div class="sub">We'll give you an animal name. Nothing is saved after tonight.</div>
     </div>
-    <div class="stage">
-      <div class="nest">
-        <div class="egg" style="left:118px;top:0">🥚</div>
-        <div class="egg" style="left:16px;top:60px;filter:hue-rotate(200deg)">🥚</div>
-        <div class="egg" style="left:220px;top:60px;filter:hue-rotate(320deg)">🥚</div>
-        <div class="egg" style="left:16px;top:170px;filter:hue-rotate(260deg)">🥚</div>
-        <div class="egg" style="left:220px;top:170px;filter:hue-rotate(120deg)">🥚</div>
-        <div class="egg" style="left:118px;top:232px;filter:hue-rotate(40deg)">🥚</div>
-        <div class="you" id="w-mascot">🐣</div>
-      </div>
-    </div>
+    <div class="stage"><div class="hero">🫧</div></div>
     <div class="bottom">
       <input id="w-name" placeholder="Your name (optional)" autocomplete="off">
       <button id="w-go">Enter the mix</button>
@@ -75,20 +78,32 @@
       <h1>Finding someone…</h1>
       <div class="sub">You're <span class="alias" id="wt-alias"></span>. <span id="wt-status"></span></div>
     </div>
-    <div class="stage"><div class="hatch">🥚</div></div>
+    <div class="stage"><div><div class="hero bob" id="wt-mascot">🦦</div><div class="dots"><i></i><i></i><i></i></div></div></div>
     <div class="bottom">
       <div class="status" id="wt-pool"></div>
       <div class="err" id="wt-err"></div>
     </div>
   </section>
 
-  <!-- 3. Match found -->
-  <section id="s-card" class="screen">
+  <!-- 3. Match found (purple) -->
+  <section id="s-card" class="screen purple">
+    <div class="confetti">
+      <i style="left:8%;top:9%;background:#7be07f"></i><i style="left:28%;top:6%;background:#ff5c9a"></i><i style="left:55%;top:11%;background:#ffb347"></i>
+      <i style="left:80%;top:7%;background:#7be07f"></i><i style="left:93%;top:12%;background:#ffb347"></i><i style="left:42%;top:19%;background:#ffb347"></i>
+      <i style="left:68%;top:14%;background:#ff5c9a"></i><i style="left:24%;top:22%;background:#ff5c9a"></i><i style="left:64%;top:23%;background:#4fd8ff"></i>
+      <i style="left:12%;top:30%;background:#4fd8ff"></i><i style="left:88%;top:28%;background:#7be07f"></i>
+    </div>
     <div class="top">
       <h1 id="c-title">You matched!</h1>
       <div class="sub" id="c-status">Both of you have to say yes.</div>
     </div>
-    <div class="stage"><div class="burst"></div><div class="hero" id="c-mascot">🦊</div></div>
+    <div class="stage">
+      <div class="pair">
+        <div class="heart">❤️</div>
+        <div class="names" id="c-names"></div>
+        <div class="faces" id="c-faces"></div>
+      </div>
+    </div>
     <div class="bottom">
       <div class="card">
         <div class="where" id="c-vendor"></div>
@@ -100,20 +115,26 @@
     </div>
   </section>
 
-  <!-- 4. At the booth -->
-  <section id="s-booth" class="screen">
+  <!-- 4. At the booth (purple) -->
+  <section id="s-booth" class="screen purple">
+    <div class="confetti">
+      <i style="left:8%;top:9%;background:#7be07f"></i><i style="left:28%;top:6%;background:#ff5c9a"></i><i style="left:55%;top:11%;background:#ffb347"></i>
+      <i style="left:80%;top:7%;background:#7be07f"></i><i style="left:93%;top:12%;background:#ffb347"></i><i style="left:42%;top:19%;background:#ffb347"></i>
+      <i style="left:68%;top:14%;background:#ff5c9a"></i><i style="left:24%;top:22%;background:#ff5c9a"></i><i style="left:64%;top:23%;background:#4fd8ff"></i>
+      <i style="left:12%;top:30%;background:#4fd8ff"></i><i style="left:88%;top:28%;background:#7be07f"></i>
+    </div>
     <div class="top">
       <h1 id="b-title">It's on!</h1>
       <div class="sub">Head over and say hi.</div>
     </div>
-    <div class="stage"><div class="burst"></div><div class="hero">🎉</div></div>
+    <div class="stage"><div class="hero">🎉</div></div>
     <div class="bottom">
       <div class="card">
         <div class="where" id="b-vendor"></div>
         <div class="loc" id="b-loc"></div>
       </div>
-      <button id="b-self" class="ok">I'm at the booth</button>
-      <button id="b-partner" class="ok">My match showed up</button>
+      <button id="b-self">I'm at the booth</button>
+      <button id="b-partner">My match showed up</button>
       <div class="status" id="b-status"></div>
       <button id="b-again" class="secondary">Find someone new</button>
       <div class="err" id="b-err"></div>
@@ -166,7 +187,7 @@
   // ---- 2. waiting / search ----
   async function search() {
     stopPolls(); match = null;
-    $('wt-alias').textContent = (me.name || me.alias); $('wt-status').textContent = me.variant === 'A' ? 'We\'ll pair you with someone else in the mix.' : 'Finding you a booth.';
+    $('wt-alias').textContent = (me.name || me.alias); $('wt-mascot').textContent = emojiFor(me.alias); $('wt-status').textContent = me.variant === 'A' ? 'We\'ll pair you with someone else in the mix.' : 'Finding you a booth.';
     show('wait');
     const tick = async () => {
       try {
@@ -202,10 +223,12 @@
     }, POLL_MS);
   }
   function renderCard(c) {
-    $('c-mascot').textContent = c.partner_alias ? emojiFor(c.partner_alias) : '📍';
-    $('c-title').textContent = c.partner_alias ? ('You matched with ' + c.partner_alias + '!') : 'Head to the booth!';
+    const mine = me.name || me.alias, theirs = c.partner_alias;
+    $('c-title').textContent = theirs ? 'You matched!' : 'Head to the booth!';
+    $('c-names').textContent = theirs ? (mine + ' & ' + theirs) : mine;
+    $('c-faces').textContent = theirs ? (emojiFor(me.alias) + ' ' + emojiFor(theirs)) : emojiFor(me.alias);
     $('c-vendor').textContent = c.vendor_name; $('c-loc').textContent = c.vendor_location;
-    $('c-status').textContent = c.partner_alias ? 'Both of you have to say yes.' : '';
+    $('c-status').textContent = theirs ? 'Both of you have to say yes.' : '';
   }
   $('c-yes').onclick = async () => {
     $('c-yes').disabled = true; err('c-err');

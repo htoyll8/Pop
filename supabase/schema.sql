@@ -78,10 +78,12 @@ begin
   select * into me from people where id = auth.uid();
   if found then return me; end if;
   insert into people (id, alias, name, variant)
-  values (auth.uid(), _random_alias(), nullif(trim(p_name), ''), 'A')   -- placeholder, fixed below
+  values (auth.uid(), _random_alias(), nullif(trim(p_name), ''), 'A')
   returning * into me;
-  update people set variant = case when me.seq % 2 = 1 then 'A' else 'B' end
-    where id = me.id returning * into me;
+  -- Everyone is variant A (pair at a booth) for the 2026-10-17 event. To run the A/B
+  -- comparison instead, replace the line above's 'A' with a placeholder and add:
+  --   update people set variant = case when me.seq % 2 = 1 then 'A' else 'B' end
+  --     where id = me.id returning * into me;
   return me;
 end $$;
 

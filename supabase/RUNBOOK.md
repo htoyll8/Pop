@@ -38,3 +38,9 @@ Anonymous sign-in, join_event (variants alternate), find_match (A pool + pairing
 
 ## What the page will call (next step)
 `supabase.auth.signInAnonymously()` once → `rpc('join_event', {p_name})` → `rpc('find_match')` every 3 s until non-null → show card → `rpc('respond_to_match', ...)` → `rpc('check_in', ...)`.
+
+## Demo / event-day reset
+```sql
+truncate checkins, matches, people;   -- keeps vendors and the schema; phones re-join on next tap
+```
+Variant: everyone is A for the 10/17 event (see join_event in schema.sql for how to restore A/B alternation).

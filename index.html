@@ -36,15 +36,16 @@
   .dots i { width:12px; height:12px; border-radius:50%; background:var(--green); animation:bounce 1.2s ease-in-out infinite; }
   .dots i:nth-child(2) { animation-delay:.15s; } .dots i:nth-child(3) { animation-delay:.3s; }
   @keyframes bounce { 0%,100% { transform:translateY(0); opacity:.5; } 50% { transform:translateY(-10px); opacity:1; } }
-  /* waiting: floating field of others around you */
-  .field { position:relative; width:320px; height:320px; display:grid; place-items:center; }
-  .field .you { z-index:2; }
-  .avatar { width:150px; height:150px; border-radius:50%; background:#f1f3ff; object-fit:cover; }
-  .hero-img { position:relative; z-index:1; filter:drop-shadow(0 12px 12px rgba(0,0,0,.12)); }
-  .faces img { width:72px; height:72px; border-radius:50%; background:#fff; margin:0 6px; }
-  .floater { position:absolute; left:50%; top:50%; width:56px; height:56px; border-radius:50%; background:#f1f3ff; opacity:0; transform:translate(-50%,-50%) translate(var(--x),var(--y)); transition:opacity .6s ease; filter:drop-shadow(0 6px 6px rgba(0,0,0,.10)); pointer-events:none; }
-  .floater.show { opacity:.95; animation:floaty var(--d) ease-in-out infinite; animation-delay:var(--delay); }
-  @keyframes floaty { 0%,100% { transform:translate(-50%,-50%) translate(var(--x),var(--y)) translateY(0); } 50% { transform:translate(-50%,-50%) translate(var(--x),var(--y)) translateY(-14px); } }
+  /* waiting: full-screen crowd, drifting */
+  .screen.crowd.on { position:fixed; inset:0; display:flex; flex-direction:column; padding:28px 22px; overflow:hidden; }
+  .crowd-field { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+  .crowd-track { position:absolute; top:0; left:0; height:100%; width:200%; animation:drift 60s linear infinite; will-change:transform; }
+  @keyframes drift { from { transform:translateX(-50%); } to { transform:translateX(0); } }
+  .crowd-track img { position:absolute; width:58px; height:58px; border-radius:50%; background:#f1f3ff; opacity:.9; animation:floaty var(--d,8s) ease-in-out infinite; animation-delay:var(--delay,0s); filter:drop-shadow(0 6px 6px rgba(0,0,0,.08)); }
+  @keyframes floaty { 0%,100% { margin-top:0; } 50% { margin-top:-12px; } }
+  .over { position:relative; z-index:2; }
+  .crowd .top, .crowd .bottom { background:rgba(255,255,255,.72); border-radius:18px; padding:12px; backdrop-filter:blur(2px); }
+  .crowd .you { box-shadow:0 0 0 6px #fff, 0 0 0 9px var(--green); }
   /* purple screens (match, booth) */
   .screen.purple.on { position:fixed; inset:0; background:var(--purple); color:#fff; padding:28px 22px; overflow:hidden; display:flex; flex-direction:column; }
   .purple .sub, .purple .status { color:rgba(255,255,255,.85); }
@@ -81,26 +82,15 @@
     </div>
   </section>
 
-  <!-- 2. Waiting -->
-  <section id="s-wait" class="screen">
-    <div class="top">
+  <!-- 2. Waiting: a full-screen crowd drifting left to right, you in the middle -->
+  <section id="s-wait" class="screen crowd">
+    <div class="crowd-field" id="crowd"><div class="crowd-track" id="crowd-track"></div></div>
+    <div class="top over">
       <h1>Finding someone…</h1>
       <div class="sub">You're <span class="alias" id="wt-alias"></span>. <span id="wt-status"></span></div>
     </div>
-    <div class="stage">
-      <div class="field" id="field">
-        <img class="avatar hero-img bob you" id="wt-mascot" alt="">
-        <img class="floater" alt="" style="--x:-120px;--y:-80px;--d:7s;--delay:0s">
-        <img class="floater" alt="" style="--x:125px;--y:-60px;--d:8s;--delay:-2s">
-        <img class="floater" alt="" style="--x:-110px;--y:70px;--d:9s;--delay:-4s">
-        <img class="floater" alt="" style="--x:130px;--y:85px;--d:7.5s;--delay:-1s">
-        <img class="floater" alt="" style="--x:0px;--y:-130px;--d:8.5s;--delay:-3s">
-        <img class="floater" alt="" style="--x:10px;--y:135px;--d:9.5s;--delay:-5s">
-        <img class="floater" alt="" style="--x:-150px;--y:-5px;--d:8s;--delay:-6s">
-        <img class="floater" alt="" style="--x:155px;--y:10px;--d:7s;--delay:-2.5s">
-      </div>
-    </div>
-    <div class="bottom">
+    <div class="stage over"><img class="avatar hero-img bob you" id="wt-mascot" alt=""></div>
+    <div class="bottom over">
       <div class="status" id="wt-pool"></div>
       <div class="err" id="wt-err"></div>
     </div>
@@ -177,8 +167,22 @@
   const emojiFor = alias => ANIMAL[(alias || '').split(' ').pop()] || '🫧';
   const AV = 'https://api.dicebear.com/9.x/notionists/svg?backgroundColor=f1f3ff,e6e9ff,ffe3ec,e3f6ff&seed=';
   const avatarFor = seed => AV + encodeURIComponent(seed || 'stranger');
-  // generic floaters: fixed seeds so nobody's real avatar is shown
-  document.querySelectorAll('.floater').forEach((el, i) => el.src = avatarFor('mix-' + i));
+  // the crowd: a jittered grid of generic faces, duplicated once so the drift wraps seamlessly
+  (function buildCrowd() {
+    const track = $('crowd-track'); const cols = 5, rows = 7, N = cols * rows;
+    const rnd = (i, k) => { const x = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
+    for (let half = 0; half < 2; half++) {
+      for (let i = 0; i < N; i++) {
+        const c = i % cols, r = Math.floor(i / cols);
+        const im = document.createElement('img'); im.alt = ''; im.src = avatarFor('crowd-' + i);
+        im.style.left = (half * 50 + (c + 0.15 + rnd(i, 1) * 0.7) * (50 / cols)) + '%';
+        im.style.top = ((r + 0.1 + rnd(i, 2) * 0.8) * (100 / rows)) + '%';
+        im.style.setProperty('--d', (6 + rnd(i, 3) * 6).toFixed(1) + 's');
+        im.style.setProperty('--delay', (-rnd(i, 4) * 8).toFixed(1) + 's');
+        im.dataset.i = i; track.appendChild(im);
+      }
+    }
+  })();
   let me = null, match = null, pollTimer = null, cardTimer = null;
 
   const rpc = async (fn, args) => { const { data, error } = await sb.rpc(fn, args || {}); if (error) throw new Error(error.message); return data; };
@@ -221,7 +225,7 @@
         if (m && m.id) { stopPolls(); match = m; return card(); }
         const n = await rpc('pool_size');            // includes you
         const others = Math.max(0, (n || 1) - 1);
-        document.querySelectorAll('.floater').forEach((el, i) => el.classList.toggle('show', i < Math.min(others, 8)));
+        document.querySelectorAll('#crowd-track img').forEach(el => el.style.opacity = (+el.dataset.i < others) ? .95 : .28);
         $('wt-pool').textContent = others === 0 ? 'You\'re the first one here. Hang tight.' : (others === 1 ? '1 other person is nearby.' : others + ' other people are nearby.');
       } catch (e) { err('wt-err', e); }
     };

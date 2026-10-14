@@ -39,7 +39,7 @@
   @keyframes bounce { 0%,100% { transform:translateY(0); opacity:.5; } 50% { transform:translateY(-10px); opacity:1; } }
   .avatar { width:150px; height:150px; border-radius:50%; background:#f1f3ff; object-fit:cover; }
   .hero-img { position:relative; z-index:1; filter:drop-shadow(0 12px 12px rgba(0,0,0,.12)); }
-  .faces img { width:72px; height:72px; border-radius:50%; background:#fff; margin:0 6px; }
+  .faces img { width:64px; height:64px; border-radius:50%; background:#fff; margin:0 6px; }
   /* waiting: full-screen crowd, drifting */
   .screen.crowd.on { position:fixed; inset:0; display:flex; flex-direction:column; padding:28px 22px; overflow:hidden; }
   .crowd-field { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
@@ -52,7 +52,10 @@
   .panel h1 { margin-bottom:6px; }
 
   /* purple screens (match, booth) */
-  .screen.purple.on { position:fixed; inset:0; background:var(--purple); color:#fff; padding:28px 22px; overflow:hidden; display:flex; flex-direction:column; }
+  .screen.purple.on { position:fixed; inset:0; background:var(--purple); color:#fff; padding:20px 22px calc(env(safe-area-inset-bottom) + 16px); overflow-y:auto; display:flex; flex-direction:column; }
+  .purple .stage { min-height:150px; }
+  .purple .top { padding-top:18px; }
+  .purple button { padding:15px; margin-bottom:10px; }
   .purple .sub, .purple .status { color:rgba(255,255,255,.85); }
   .purple .alias { color:#fff; }
   .purple .card { background:rgba(255,255,255,.14); color:#fff; }
@@ -63,7 +66,7 @@
   .confetti { position:absolute; inset:0; pointer-events:none; }
   .confetti i { position:absolute; width:12px; height:12px; transform:rotate(45deg); border-radius:2px; opacity:.95; }
   .pair { display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; z-index:1; }
-  .pair .heart { font-size:56px; line-height:1; }
+  .pair .heart { font-size:44px; line-height:1; }
   .pair .names { font-size:22px; font-weight:800; text-align:center; }
   .pair .faces { font-size:64px; line-height:1; letter-spacing:.2em; }
   .card { background:var(--card); border-radius:22px; padding:18px 20px; margin:0 0 14px; text-align:center; }
@@ -141,7 +144,7 @@
     </div>
     <div class="top">
       <h1 id="b-title">It's on!</h1>
-      <div class="sub">Head over and say hi.</div>
+      <div class="sub" id="b-sub">Head over and say hi.</div>
     </div>
     <div class="stage"><div class="hero">🎉</div></div>
     <div class="bottom">
@@ -286,14 +289,20 @@
   // ---- 4. at the booth ----
   function booth(c) {
     stopPolls();
+    if (c.partner_alias) {
+      const note = () => rpc('match_card', { p_match: match.id }).then(c2 => {
+        if (c2.partner_self_at) { $('b-sub').textContent = c2.partner_alias + ' is at the booth waiting for you!'; }
+      }).catch(() => {});
+      note(); pollTimer = setInterval(note, POLL_MS);
+    }
     $('b-title').textContent = c.partner_alias ? ('It\'s on with ' + c.partner_alias + '!') : 'It\'s on!';
     $('b-vendor').textContent = c.vendor_name; $('b-loc').textContent = c.vendor_location;
     $('b-partner').style.display = c.partner_alias ? '' : 'none';
     $('b-self').disabled = !!c.self_at; $('b-partner').disabled = !!c.partner_at;
-    $('b-status').textContent = ''; err('b-err');
+    $('b-status').textContent = ''; err('b-err'); $('b-sub').textContent = c.partner_alias ? 'Head over and say hi. We\'ll tell you when they arrive.' : 'Head over and say hi.';
     show('booth');
   }
-  $('b-self').onclick = async () => { try { await rpc('check_in', { p_match: match.id, p_kind: 'self' }); $('b-self').disabled = true; $('b-status').textContent = 'Checked in. Have fun.'; } catch (e) { err('b-err', e); } };
+  $('b-self').onclick = async () => { try { await rpc('check_in', { p_match: match.id, p_kind: 'self' }); $('b-self').disabled = true; $('b-status').textContent = 'Checked in. Your match will see that you\'re here.'; } catch (e) { err('b-err', e); } };
   $('b-partner').onclick = async () => { try { await rpc('check_in', { p_match: match.id, p_kind: 'partner' }); $('b-partner').disabled = true; $('b-status').textContent = 'Nice. Thanks for confirming.'; } catch (e) { err('b-err', e); } };
   $('b-again').onclick = async () => { try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
 

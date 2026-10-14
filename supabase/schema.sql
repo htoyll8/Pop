@@ -177,8 +177,8 @@ revoke execute on function _random_alias() from public;
 
 -- 5. What the card shows: partner alias (A only), vendor name + location, both statuses, my slot.
 create or replace function match_card(p_match uuid)
-returns jsonb language plpgsql security definer set search_path = public as $$
-declare m matches; v vendors; partner_id uuid; partner_alias text; partner_avatar text; my_slot int; c checkins;
+returns jsonb language plpgsql security definer set search_path = public as $fn$
+declare m matches; v vendors; partner_id uuid; partner_alias text; partner_avatar text; partner_self timestamptz; my_slot int; c checkins;
 begin
   select * into m from matches where id = p_match;
   if not found then raise exception 'no such match'; end if;
@@ -188,16 +188,17 @@ begin
   select * into v from vendors where id = m.vendor_id;
   if partner_id is not null then
     select coalesce(nullif(trim(name), ''), alias), coalesce(avatar_seed, alias) into partner_alias, partner_avatar from people where id = partner_id;
+    select self_at into partner_self from checkins where match_id = p_match and person_id = partner_id;
   end if;
   select * into c from checkins where match_id = p_match and person_id = auth.uid();
   return jsonb_build_object(
     'id', m.id, 'my_slot', my_slot,
-    'partner_alias', partner_alias, 'partner_avatar', partner_avatar,
+    'partner_alias', partner_alias, 'partner_avatar', partner_avatar, 'partner_self_at', partner_self,
     'vendor_name', v.name, 'vendor_location', v.location,
     'status_1', m.status_1, 'status_2', m.status_2,
     'self_at', c.self_at, 'partner_at', c.partner_at,
     'created_at', m.created_at);
-end $$;
+end $fn$;
 grant execute on function match_card(uuid) to authenticated;
 revoke execute on function match_card(uuid) from anon, public;
 

@@ -10,7 +10,7 @@
      ('Vendor Two', 'left of the stage');
    ```
    The `location` text is what the rendezvous card shows; write it the way you'd say it out loud.
-5. **Copy two keys** from Project Settings → API: the **Project URL** and the **anon public key** go in the page. The **service_role key** stays on your laptop, never in the page.
+5. **Copy two values.** Settings → Data API shows the **Project URL** (`https://<ref>.supabase.co`). Settings → API Keys shows the **publishable key** (`sb_publishable_...`, formerly called the anon key); both go in the page. The **secret key** (`sb_secret_...`, formerly service_role) stays on your laptop, never in the page.
 6. **Smoke test in the SQL editor** (simulates two phones; the editor runs as the owner, so we set the uid by hand):
    ```sql
    -- phone 1 joins and searches (variant A, first sign-up)

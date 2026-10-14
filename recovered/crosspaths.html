@@ -1,0 +1,432 @@
+<title>Crosspaths</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --ground:#141021; --surface:#1e1834; --surface2:#281f45; --border:#382c5a;
+    --ink:#f3ecff; --muted:#a99cc9; --faint:#7d719c;
+    --brand:#ff6f5e; --brand-ink:#2a0f0c; --go:#48d6ae; --amber:#ffcf5c;
+    --radius:18px;
+    --display:"Bricolage Grotesque", system-ui, sans-serif;
+    --body:"DM Sans", system-ui, sans-serif;
+    --mono:"DM Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--ground); color:var(--ink); font-family:var(--body);
+       -webkit-font-smoothing:antialiased; line-height:1.5;}
+  .wrap{max-width:460px; margin:0 auto; padding:16px 16px 40px; min-height:100%;}
+  header{display:flex; align-items:center; justify-content:space-between; gap:12px; padding-block:6px 18px;}
+  .brand{font-family:var(--display); font-weight:800; font-size:22px; letter-spacing:-.02em; display:flex; align-items:center; gap:8px;}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--brand); box-shadow:0 0 12px var(--brand);}
+  .you{font-family:var(--mono); font-size:12px; color:var(--muted); text-align:right; line-height:1.3;}
+  .you b{display:block; color:var(--ink); font-size:13px; letter-spacing:.01em;}
+
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px;}
+  h1{font-family:var(--display); font-weight:800; font-size:clamp(30px,9vw,40px); line-height:1.02; letter-spacing:-.03em; margin:2px 0 8px; text-wrap:balance;}
+  h1 em{font-style:normal; color:var(--brand);}
+  .lede{color:var(--muted); font-size:15px; margin:0 0 20px;}
+  .label{font-family:var(--mono); text-transform:uppercase; letter-spacing:.14em; font-size:11px; color:var(--faint); margin:0 0 10px;}
+
+  .handle{font-family:var(--mono); font-size:26px; font-weight:500; letter-spacing:-.01em; color:var(--ink); display:flex; align-items:center; gap:10px;}
+  .reroll{margin-left:auto; background:var(--surface2); color:var(--muted); border:1px solid var(--border); border-radius:999px; font-size:12px; padding:7px 12px; cursor:pointer; font-family:var(--body);}
+  .reroll:hover{color:var(--ink)}
+
+  .btn{display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:16px; border-radius:14px; border:none; cursor:pointer; font-family:var(--display); font-weight:700; font-size:17px; letter-spacing:-.01em;}
+  .btn-primary{background:var(--brand); color:var(--brand-ink);}
+  .btn-go{background:var(--go); color:#052b22;}
+  .btn-ghost{background:transparent; color:var(--muted); border:1px solid var(--border);}
+  .btn-ghost:hover{color:var(--ink)}
+  .btn:disabled{opacity:.4; cursor:default;}
+  .stack{display:flex; flex-direction:column; gap:10px; margin-top:18px;}
+
+  /* progress bar */
+  .progress{display:flex; gap:6px; margin:0 0 20px;}
+  .progress i{height:3px; flex:1; border-radius:2px; background:var(--border);}
+  .progress i.on{background:var(--brand);}
+
+  /* phone entry */
+  .field{display:flex; gap:10px; margin-top:6px;}
+  .cc{position:relative; display:flex; align-items:center; background:var(--surface2); border:1px solid var(--border); border-radius:12px;}
+  .cc select{appearance:none; -webkit-appearance:none; background:transparent; border:none; color:var(--ink); font-size:18px; font-family:var(--body); padding:15px 30px 15px 14px; cursor:pointer;}
+  .cc::after{content:"▾"; position:absolute; right:11px; top:50%; transform:translateY(-50%); color:var(--muted); pointer-events:none; font-size:12px;}
+  .cc select:focus-visible{outline:none;}
+  .phone-in{flex:1; min-width:0; background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:15px 16px; font-size:20px; font-family:var(--mono); color:var(--ink); letter-spacing:.03em;}
+  .phone-in::placeholder{color:var(--faint); letter-spacing:.02em;}
+  .phone-in:focus-visible{outline:none; border-color:var(--brand);}
+  .consent{color:var(--faint); font-size:12px; line-height:1.6; margin-top:14px;}
+  .consent a{color:var(--muted); text-decoration:underline; cursor:pointer;}
+
+  /* otp */
+  .otp{display:flex; gap:10px; margin-top:6px;}
+  .otp input{flex:1; width:100%; aspect-ratio:1/1.15; text-align:center; font-family:var(--mono); font-size:28px; font-weight:500; background:var(--surface2); border:1px solid var(--border); border-radius:12px; color:var(--ink);}
+  .otp input:focus-visible{outline:none; border-color:var(--brand); box-shadow:0 0 0 2px rgba(255,111,94,.25);}
+  .resend{margin-top:16px; text-align:center; font-family:var(--mono); font-size:12.5px; color:var(--faint);}
+  .resend button{background:none; border:none; color:var(--brand); font-family:var(--mono); font-size:12.5px; cursor:pointer; padding:0;}
+  .resend button:disabled{color:var(--faint); cursor:default;}
+  .changenum{margin-top:14px; text-align:center;}
+  .changenum button{background:none; border:none; color:var(--muted); font-family:var(--body); font-size:13px; cursor:pointer; text-decoration:underline;}
+  .changenum button:hover{color:var(--ink)}
+
+  .meta{color:var(--faint); font-size:12.5px; font-family:var(--mono); margin-top:14px; text-align:center;}
+  .meta b{color:var(--go)}
+
+  .dispatch{background:linear-gradient(160deg,#241a3d,#1a1430); border:1px solid var(--border); border-radius:var(--radius); padding:22px 20px; position:relative; overflow:hidden;}
+  .dispatch::before{content:""; position:absolute; inset:0; background:radial-gradient(120px 80px at 85% 0%, rgba(255,111,94,.18), transparent 70%); pointer-events:none;}
+  .dispatch .kicker{font-family:var(--mono); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--brand); margin:0 0 14px;}
+  .line{font-family:var(--mono); font-size:15px; line-height:1.9; letter-spacing:.01em; color:var(--muted);}
+  .line .v{color:var(--ink); font-weight:500;}
+  .line .who{color:var(--ink);}
+  .line .spot{color:var(--amber);}
+  .line .time{color:var(--go);}
+  .line .arrow{color:var(--faint); padding:0 2px;}
+  .status{margin-top:16px; font-size:14px; color:var(--muted);}
+  .status.lock{color:var(--go); font-weight:600;}
+  .tag{display:inline-block; font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); border:1px solid var(--border); border-radius:6px; padding:2px 7px; margin-left:8px;}
+
+  .looking{display:flex; align-items:center; gap:12px;}
+  .pulse{display:flex; gap:5px;}
+  .pulse i{width:9px;height:9px;border-radius:50%; background:var(--brand); opacity:.35; animation:b 1.2s infinite;}
+  .pulse i:nth-child(2){animation-delay:.2s} .pulse i:nth-child(3){animation-delay:.4s}
+  @keyframes b{0%,100%{opacity:.3;transform:scale(.85)}50%{opacity:1;transform:scale(1)}}
+  @media (prefers-reduced-motion:reduce){.pulse i{animation:none;opacity:.7}}
+
+  .hint{margin-top:22px; text-align:center; color:var(--faint); font-size:12px; line-height:1.6;}
+  .banner{background:var(--surface2); border:1px dashed var(--border); border-radius:12px; padding:10px 12px; font-size:12.5px; color:var(--muted); margin-bottom:14px;}
+  section[hidden]{display:none!important}
+  :focus-visible{outline:2px solid var(--brand); outline-offset:2px; border-radius:8px;}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="dot"></span>Crosspaths</div>
+    <div class="you" id="you" hidden>you are<b id="you-handle">—</b></div>
+  </header>
+
+  <div id="banner" class="banner" hidden></div>
+
+  <!-- PHONE -->
+  <section id="s-phone">
+    <div class="card">
+      <div class="progress"><i class="on"></i><i></i><i></i></div>
+      <h1>What&rsquo;s your <em>number?</em></h1>
+      <p class="lede">We&rsquo;ll text you the moment someone crosses your path. That&rsquo;s the only reason we ask.</p>
+      <p class="label">Mobile number</p>
+      <div class="field">
+        <div class="cc">
+          <select id="cc-sel" aria-label="Country code">
+            <option value="+1" selected>🇺🇸 +1</option>
+            <option value="+1ca">🇨🇦 +1</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="+61">🇦🇺 +61</option>
+            <option value="+91">🇮🇳 +91</option>
+            <option value="+49">🇩🇪 +49</option>
+            <option value="+33">🇫🇷 +33</option>
+            <option value="+52">🇲🇽 +52</option>
+            <option value="+81">🇯🇵 +81</option>
+          </select>
+        </div>
+        <input id="phone-num" class="phone-in" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="(555) 123-4567" aria-label="Phone number">
+      </div>
+      <p class="consent">By tapping Next you agree to receive one verification text now, and a text when you match. Message &amp; data rates may apply.</p>
+      <div class="stack">
+        <button class="btn btn-primary" id="phone-next" type="button" disabled>Next</button>
+      </div>
+    </div>
+    <p class="hint">Anonymous after this — no profile, no photo. Your number is never shown to anyone you match with.</p>
+  </section>
+
+  <!-- VERIFY -->
+  <section id="s-verify" hidden>
+    <div class="card">
+      <div class="progress"><i class="on"></i><i class="on"></i><i></i></div>
+      <h1>Enter the <em>code</em></h1>
+      <p class="lede" id="verify-lede">We texted a 4-digit code to your number.</p>
+      <div class="otp" id="otp">
+        <input type="tel" inputmode="numeric" maxlength="1" aria-label="Digit 1">
+        <input type="tel" inputmode="numeric" maxlength="1" aria-label="Digit 2">
+        <input type="tel" inputmode="numeric" maxlength="1" aria-label="Digit 3">
+        <input type="tel" inputmode="numeric" maxlength="1" aria-label="Digit 4">
+      </div>
+      <div class="stack">
+        <button class="btn btn-primary" id="verify-next" type="button" disabled>Verify</button>
+      </div>
+      <p class="resend">Didn&rsquo;t get it? <button id="resend" type="button" disabled>Resend in 30s</button></p>
+      <p class="changenum"><button id="changenum" type="button">Change number</button></p>
+    </div>
+    <p class="hint">Demo build &mdash; no real SMS is sent. Any 4 digits will verify.</p>
+  </section>
+
+  <!-- ONBOARD -->
+  <section id="s-onboard" hidden>
+    <div class="card">
+      <div class="progress"><i class="on"></i><i class="on"></i><i class="on"></i></div>
+      <h1>Meet a stranger,<br><em>somewhere good.</em></h1>
+      <p class="lede">Anonymous. No profiles, no photos. One tap pairs you with someone here right now — and names a spot &amp; a time to cross paths.</p>
+      <p class="label">Your alias tonight</p>
+      <div class="handle"><span id="ob-handle">Velvet Fox</span>
+        <button class="reroll" id="reroll" type="button">↻ reroll</button></div>
+      <div class="stack" style="margin-top:24px">
+        <button class="btn btn-primary" id="enter" type="button">Enter the mix →</button>
+      </div>
+    </div>
+
+    <p class="label" style="margin:24px 4px 10px">A match looks like this</p>
+    <div class="dispatch" aria-hidden="true">
+      <p class="kicker">Rendezvous <span class="tag">sample</span></p>
+      <div class="line">
+        <span class="v">Meet</span> <span class="arrow">▸</span> <span class="who">Neon Otter</span><br>
+        <span class="v">at</span> <span class="arrow">▸</span> <span class="spot">the Mango Cart</span><br>
+        <span class="v">by</span> <span class="arrow">▸</span> <span class="time">9:48 PM</span>
+      </div>
+    </div>
+    <p class="hint">Share this page’s link so others can join. Everyone who opens it can match with each other.</p>
+  </section>
+
+  <!-- HOME -->
+  <section id="s-home" hidden>
+    <div class="card">
+      <p class="label">You’re in</p>
+      <h1>You’re in the mix</h1>
+      <p class="lede">One tap and we’ll pair you with someone here right now, then name a spot for you both to meet.</p>
+      <div class="stack">
+        <button class="btn btn-primary" id="matchme" type="button">Find someone →</button>
+      </div>
+      <p class="meta"><b id="count">0</b> people looking right now</p>
+    </div>
+  </section>
+
+  <!-- WAITING -->
+  <section id="s-waiting" hidden>
+    <div class="card">
+      <p class="label">Looking…</p>
+      <div class="looking">
+        <span class="pulse"><i></i><i></i><i></i></span>
+        <span id="wait-line" style="font-size:15px;color:var(--muted)">Finding someone here now</span>
+      </div>
+      <div class="stack">
+        <button class="btn btn-ghost" id="cancel" type="button">Cancel</button>
+      </div>
+      <p class="meta">Keep this open — you’ll get a buzz the moment someone matches.</p>
+    </div>
+  </section>
+
+  <!-- RENDEZVOUS -->
+  <section id="s-rz" hidden>
+    <div class="dispatch">
+      <p class="kicker" id="rz-kicker">Rendezvous proposed</p>
+      <div class="line">
+        <span class="v">Meet</span> <span class="arrow">▸</span> <span class="who" id="rz-who">—</span><br>
+        <span class="v">at</span> <span class="arrow">▸</span> <span class="spot" id="rz-spot">—</span><br>
+        <span class="v">by</span> <span class="arrow">▸</span> <span class="time" id="rz-time">—</span>
+      </div>
+      <p class="status" id="rz-status">Both of you confirm to lock it in.</p>
+    </div>
+    <div class="stack">
+      <button class="btn btn-go" id="confirm" type="button">I’m in — confirm</button>
+      <button class="btn btn-ghost" id="pass" type="button">Pass, find another</button>
+      <button class="btn btn-ghost" id="newmatch" type="button" hidden>Find someone new</button>
+    </div>
+    <p class="hint">Meet in the open, trust your gut, and it’s always okay to pass.</p>
+  </section>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const ADJ = ["Velvet","Neon","Golden","Wild","Cosmic","Mellow","Electric","Hazy","Lunar","Copper","Disco","Sundown","Feral","Silk","Amber","Midnight"];
+  const NOUN = ["Fox","Otter","Moth","Lark","Comet","Finch","Jaguar","Koi","Heron","Wren","Lynx","Bison","Egret","Marten","Falcon","Hare"];
+  // EDIT THIS for your festival's real vendors/landmarks:
+  const SPOTS = ["the Taco Truck","the Mango Cart","the Cold Brew stand","the Vinyl Tent","the Glitter Bar","the Falafel Wagon","the Kombucha Kiosk","the Main Stage rail","the Hammock Grove","the Neon Noodle bar"];
+  const pick = a => a[Math.floor(Math.random()*a.length)];
+  const genHandle = () => pick(ADJ)+" "+pick(NOUN);
+  const plusMin = m => { const d=new Date(Date.now()+m*60000); let h=d.getHours(), mm=String(d.getMinutes()).padStart(2,"0"), ap=h>=12?"PM":"AM"; h=h%12||12; return h+":"+mm+" "+ap; };
+
+  const SCREENS = ["phone","verify","onboard","home","waiting","rz"];
+  function show(name){ SCREENS.forEach(s=>{ const el=$("s-"+s); if(el) el.hidden=(s!==name); }); }
+  function banner(msg){ const b=$("banner"); if(!msg){b.hidden=true;return;} b.textContent=msg; b.hidden=false; }
+  function localId(){ try{ let v=localStorage.getItem("cx_uid"); if(!v){ v="u-"+Math.random().toString(36).slice(2,10); localStorage.setItem("cx_uid",v);} return v; }catch(_){ return "u-"+Math.random().toString(36).slice(2,10); } }
+  function store(k,v){ try{ localStorage.setItem(k,v); }catch(_){} }
+  function load(k){ try{ return localStorage.getItem(k); }catch(_){ return null; } }
+
+  // ---- in-page notifications (sound + vibrate + tab-title flash) ----
+  let actx=null;
+  function unlockAudio(){ try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended") actx.resume(); }catch(_){} }
+  function blip(hi){ try{ if(!actx) return; const o=actx.createOscillator(), g=actx.createGain(); o.connect(g); g.connect(actx.destination); o.type="sine";
+      o.frequency.setValueAtTime(hi?720:560, actx.currentTime); o.frequency.exponentialRampToValueAtTime(hi?1040:880, actx.currentTime+0.12);
+      g.gain.setValueAtTime(0.0001, actx.currentTime); g.gain.exponentialRampToValueAtTime(0.22, actx.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+0.34);
+      o.start(); o.stop(actx.currentTime+0.35);}catch(_){} }
+  let titleTimer=null;
+  function flashTitle(t){ try{ document.title=t+" · Crosspaths"; clearTimeout(titleTimer);
+      const restore=()=>{ document.title="Crosspaths"; window.removeEventListener("focus",restore); };
+      window.addEventListener("focus",restore); titleTimer=setTimeout(restore,10000);}catch(_){} }
+  function notify(kind){ blip(kind==="match"); try{ navigator.vibrate && navigator.vibrate(kind==="match"?[130,60,130]:[80]); }catch(_){}
+      flashTitle(kind==="match"?"✨ You matched!":"✅ They’re in!"); }
+
+  let db=null, uid=null, me=null, obHandle=genHandle();
+  let myRz=null, waiting=false, subsStarted=false, canWrite=true;
+  let lastRzId=null, lastTheirOK=false, firstSnap=true;
+
+  // ---------- PHONE ENTRY ----------
+  const phoneInput=$("phone-num"), ccSel=$("cc-sel"), phoneNext=$("phone-next");
+  function digits(s){ return (s||"").replace(/\D/g,""); }
+  function validPhone(){ return digits(phoneInput.value).length>=7; }
+  function fullNumber(){ const cc=ccSel.value.replace(/[a-z]/g,""); return cc+" "+phoneInput.value.trim(); }
+  phoneInput.addEventListener("input", ()=>{ phoneNext.disabled=!validPhone(); });
+  phoneInput.addEventListener("keydown", e=>{ if(e.key==="Enter" && validPhone()){ unlockAudio(); goVerify(); } });
+  phoneNext.addEventListener("click", ()=>{ unlockAudio(); goVerify(); });
+
+  // ---------- OTP VERIFY ----------
+  const otpBoxes=Array.from($("otp").querySelectorAll("input"));
+  const verifyNext=$("verify-next"), resendBtn=$("resend");
+  let resendTimer=null;
+  function otpValue(){ return otpBoxes.map(b=>b.value).join(""); }
+  function otpComplete(){ return digits(otpValue()).length===4; }
+  function refreshVerifyBtn(){ verifyNext.disabled=!otpComplete(); }
+  otpBoxes.forEach((box,i)=>{
+    box.addEventListener("input", ()=>{
+      box.value=box.value.replace(/\D/g,"").slice(0,1);
+      if(box.value && i<otpBoxes.length-1) otpBoxes[i+1].focus();
+      refreshVerifyBtn();
+    });
+    box.addEventListener("keydown", e=>{
+      if(e.key==="Backspace" && !box.value && i>0){ otpBoxes[i-1].focus(); otpBoxes[i-1].value=""; refreshVerifyBtn(); }
+      if(e.key==="Enter" && otpComplete()){ verifyDone(); }
+    });
+  });
+  verifyNext.addEventListener("click", verifyDone);
+  resendBtn.addEventListener("click", ()=>{ startResendCountdown(); });
+  $("changenum").addEventListener("click", ()=>{ show("phone"); phoneInput.focus(); });
+
+  function startResendCountdown(){
+    let t=30; resendBtn.disabled=true; resendBtn.textContent="Resend in "+t+"s";
+    clearInterval(resendTimer);
+    resendTimer=setInterval(()=>{ t--; if(t<=0){ clearInterval(resendTimer); resendBtn.disabled=false; resendBtn.textContent="Resend code"; }
+      else{ resendBtn.textContent="Resend in "+t+"s"; } }, 1000);
+  }
+
+  function goVerify(){
+    if(!validPhone()) return;
+    store("cx_phone", fullNumber());
+    $("verify-lede").textContent="We texted a 4-digit code to "+fullNumber()+".";
+    otpBoxes.forEach(b=>b.value=""); refreshVerifyBtn();
+    show("verify"); startResendCountdown();
+    setTimeout(()=>otpBoxes[0].focus(), 60);
+  }
+  function verifyDone(){
+    if(!otpComplete()) return;
+    clearInterval(resendTimer);
+    store("cx_verified","1");
+    obHandle=genHandle(); $("ob-handle").textContent=obHandle; $("enter").textContent="Enter the mix →";
+    show("onboard");
+  }
+
+  // ---------- ALIAS / ONBOARD ----------
+  $("ob-handle").textContent = obHandle;
+  $("reroll").addEventListener("click", ()=>{ obHandle=genHandle(); $("ob-handle").textContent=obHandle; $("enter").textContent="Enter as "+obHandle+" →"; });
+  $("enter").textContent = "Enter the mix →";
+  $("enter").addEventListener("click", ()=>{ unlockAudio(); enter(); });
+  $("matchme").addEventListener("click", ()=>{ unlockAudio(); matchMe(); });
+  $("cancel").addEventListener("click", cancelWait);
+  $("confirm").addEventListener("click", confirmRz);
+  $("pass").addEventListener("click", passRz);
+  $("newmatch").addEventListener("click", newMatch);
+
+  function setYou(){ if(!me) return; $("you").hidden=false; $("you-handle").textContent=me.handle; }
+
+  async function enter(){
+    me = {handle:obHandle, ts:Date.now()};
+    if(db && uid && canWrite){
+      try{ await db.doc("profiles/"+uid).set(me); }
+      catch(e){ if(e&&e.code==="invalid_argument"){ canWrite=false; banner("You’re in view-only mode — ask the owner for “Can interact” access to match live."); } }
+    }
+    setYou(); show("home"); startSubs();
+  }
+
+  async function matchMe(){
+    if(!(db && uid && canWrite)){ demoMatch(); return; }
+    waiting=true; show("waiting");
+    try{
+      await db.doc("queue/"+uid).set({handle:me.handle, ts:Date.now()});
+      const snap = await db.collection("queue").orderBy("ts").limit(8).get();
+      const cand = snap.docs.map(d=>Object.assign({id:d.id}, d.data())).find(d=>d.id!==uid);
+      if(cand){
+        const rid = db.collection("rendezvous").doc().id;
+        await db.doc("rendezvous/"+rid).set({
+          members:[uid, cand.id], aId:uid, bId:cand.id, aHandle:me.handle, bHandle:cand.handle,
+          spot:pick(SPOTS), time:plusMin(20), confirmA:false, confirmB:false, status:"proposed", ts:Date.now()
+        });
+        await db.doc("queue/"+uid).delete().catch(()=>{});
+        await db.doc("queue/"+cand.id).delete().catch(()=>{});
+      }
+      // else: stay waiting; the rendezvous subscription catches a match made by someone else
+    }catch(e){ banner("Couldn’t reach the matchboard — try again in a sec."); waiting=false; show("home"); }
+  }
+
+  async function cancelWait(){ waiting=false; if(db && uid){ try{ await db.doc("queue/"+uid).delete(); }catch(_){} } show("home"); }
+
+  function renderRz(r){
+    const iAmA = r.aId===uid;
+    const otherHandle = iAmA ? r.bHandle : r.aHandle;
+    const myOK = iAmA ? r.confirmA : r.confirmB;
+    const theirOK = iAmA ? r.confirmB : r.confirmA;
+    $("rz-who").textContent = otherHandle || "Someone";
+    $("rz-spot").textContent = r.spot;
+    $("rz-time").textContent = r.time;
+    const st=$("rz-status"), cf=$("confirm"), ps=$("pass"), nm=$("newmatch");
+    if(myOK && theirOK){ $("rz-kicker").textContent="Locked in"; st.className="status lock"; st.textContent="You’re both in — go find "+otherHandle+" ✨"; cf.hidden=true; ps.hidden=true; nm.hidden=false; }
+    else if(myOK){ $("rz-kicker").textContent="Rendezvous proposed"; st.className="status"; st.textContent="You’re in. Waiting on "+otherHandle+"…"; cf.hidden=true; ps.hidden=false; nm.hidden=true; }
+    else if(theirOK){ $("rz-kicker").textContent="Rendezvous proposed"; st.className="status"; st.textContent=otherHandle+" is in! Confirm to lock it."; cf.hidden=false; ps.hidden=false; nm.hidden=true; }
+    else { $("rz-kicker").textContent="Rendezvous proposed"; st.className="status"; st.textContent="Both of you confirm to lock it in."; cf.hidden=false; ps.hidden=false; nm.hidden=true; }
+    show("rz");
+  }
+
+  async function confirmRz(){
+    if(!(db && myRz)){ $("confirm").hidden=true; $("pass").hidden=true; $("newmatch").hidden=false; $("rz-status").className="status lock"; $("rz-status").textContent="Locked in (demo)"; return; }
+    const patch = (myRz.aId===uid) ? {confirmA:true} : {confirmB:true};
+    try{ await db.doc("rendezvous/"+myRz.id).update(patch); }catch(_){}
+  }
+  async function passRz(){ if(db && myRz){ try{ await db.doc("rendezvous/"+myRz.id).update({status:"cancelled"}); }catch(_){} } myRz=null; show("home"); }
+  async function newMatch(){ if(db && myRz){ try{ await db.doc("rendezvous/"+myRz.id).update({status:"done"}); }catch(_){} } myRz=null; show("home"); }
+
+  function startSubs(){
+    if(subsStarted || !(db && uid)) return; subsStarted=true;
+    db.collection("rendezvous").where("members","array-contains",uid).orderBy("ts","desc").limit(6)
+      .onSnapshot(snap=>{
+        const active = snap.docs.map(d=>Object.assign({id:d.id}, d.data())).filter(r=>r.status!=="cancelled" && r.status!=="done")[0];
+        if(active){
+          const iAmA = active.aId===uid;
+          const theirOK = iAmA ? active.confirmB : active.confirmA;
+          if(!firstSnap){
+            if(active.id!==lastRzId) notify("match");
+            else if(theirOK && !lastTheirOK) notify("confirm");
+          }
+          lastRzId=active.id; lastTheirOK=theirOK; myRz=active; waiting=false; renderRz(active);
+        } else { lastRzId=null; lastTheirOK=false; myRz=null; if(!waiting) show("home"); }
+        firstSnap=false;
+      }, ()=>{});
+    db.collection("queue").onSnapshot(s=>{ const c=$("count"); if(c) c.textContent=s.size; }, ()=>{});
+  }
+
+  function demoMatch(){
+    waiting=true; show("waiting");
+    setTimeout(()=>{ notify("match"); myRz={aId:uid,bId:"demo",aHandle:me.handle,bHandle:genHandle(),spot:pick(SPOTS),time:plusMin(20),confirmA:false,confirmB:false,status:"proposed"};
+      $("rz-kicker").textContent="Rendezvous proposed"; renderRz(myRz); }, 1400);
+  }
+
+  (async function boot(){
+    try{
+      const [d,u] = await Promise.all([claude.use("db"), claude.use("user")]);
+      db=d;
+      // Identity is PER-DEVICE (each phone = one attendee), not per-account.
+      if(u){ try{ const cw=u.can && u.can("data.write"); canWrite=(cw!==false); }catch(_){} }
+      uid = localId();
+      if(!db){ banner("Preview mode — publish & open the shared link so people can match live."); }
+      if(db && uid && canWrite){
+        try{ const snap=await db.doc("profiles/"+uid).get(); if(snap.exists){ me=snap.data(); setYou(); show("home"); startSubs(); return; } }catch(_){}
+      }
+      // New here: verified phone but no profile yet -> straight to alias; otherwise start at phone.
+      show(load("cx_verified")==="1" ? "onboard" : "phone");
+    }catch(_){ uid=localId(); banner("Preview mode — publish & open the shared link so people can match live."); show(load("cx_verified")==="1" ? "onboard" : "phone"); }
+  })();
+})();
+</script>

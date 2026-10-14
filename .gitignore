@@ -1,0 +1,7 @@
+# never commit keys or env files
+.env
+.env.*
+*.key
+supabase/.temp/
+# OS / editor
+.DS_Store

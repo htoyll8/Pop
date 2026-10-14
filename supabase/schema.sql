@@ -97,6 +97,7 @@ declare
 begin
   select * into me from people where id = auth.uid();
   if not found then raise exception 'join first'; end if;
+  if not exists (select 1 from vendors) then raise exception 'no vendors configured'; end if;
 
   -- an existing live match wins
   select * into m from matches

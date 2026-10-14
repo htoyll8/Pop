@@ -203,6 +203,14 @@ grant execute on function match_card(uuid) to authenticated;
 revoke execute on function match_card(uuid) from anon, public;
 
 
+-- 6. How many people are in the mix (count only).
+create or replace function pool_size()
+returns int language sql security definer set search_path = public stable as $$
+  select count(*)::int from people where waiting_since is not null and waiting_since > now() - interval '15 minutes';
+$$;
+grant execute on function pool_size() to authenticated;
+revoke execute on function pool_size() from anon, public;
+
 -- ---------- Saturday-night results (run as you, in the SQL editor) ----------
 create or replace view results as
 select

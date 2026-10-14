@@ -45,6 +45,7 @@
     <h1>You're in the mix.</h1>
     <p><span class="pulse"></span>Looking for someone near you, <span class="alias" id="wt-alias"></span>…</p>
     <div class="status" id="wt-status"></div>
+    <div class="status" id="wt-pool"></div>
     <div class="err" id="wt-err"></div>
   </section>
 
@@ -126,6 +127,9 @@
       try {
         const m = await rpc('find_match');
         if (m && m.id) { stopPolls(); match = m; return card(); }
+        const n = await rpc('pool_size');            // includes you
+        const others = Math.max(0, (n || 1) - 1);
+        $('wt-pool').textContent = others === 0 ? 'You\'re the first one in the mix right now.' : (others === 1 ? '1 other person is searching.' : others + ' other people are searching.');
       } catch (e) { err('wt-err', e); }
     };
     await tick();

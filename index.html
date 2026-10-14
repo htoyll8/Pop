@@ -21,6 +21,7 @@
   input { width:100%; padding:15px 16px; border-radius:16px; border:2px solid #e6ebef; background:#fff; color:var(--ink); font:inherit; font-size:17px; margin:0 0 14px; text-align:center; }
   input:focus { outline:none; border-color:var(--purple); }
   button { width:100%; padding:17px; border:0; border-radius:18px; font:inherit; font-size:19px; font-weight:900; color:#fff; background:var(--purple); margin:0 0 12px; box-shadow:0 5px 0 var(--purple2); letter-spacing:.01em; }
+  button.link.inline { padding:2px 8px; margin:0; font-size:18px; vertical-align:baseline; }
   button.link { width:auto; display:inline-block; background:transparent; color:var(--purple2); box-shadow:none; padding:10px 14px; font-size:16px; margin-top:8px; }
   button.secondary { background:#fff; color:var(--muted); box-shadow:0 5px 0 #e6ebef; border:2px solid #e6ebef; }
   button:active { transform:translateY(3px); box-shadow:none; }
@@ -80,7 +81,7 @@
   <section id="s-welcome" class="screen">
     <div class="top">
       <h1>Meet a stranger<br>at a booth!</h1>
-      <div class="sub">We'll give you a nickname. Nothing is saved after tonight.</div>
+      <div class="sub">Tonight you're <span class="alias" id="w-alias">…</span> <button type="button" class="link inline" id="w-shuffle-name">↻</button></div>
     </div>
     <div class="stage"><div style="text-align:center"><img class="avatar hero-img" id="w-avatar" alt=""><div><button type="button" class="link" id="w-shuffle">↻ New look</button></div></div></div>
     <div class="bottom">
@@ -212,16 +213,20 @@
       // already joined on this device? then jump straight back in
       const { data: rows } = await sb.from('people').select('*').limit(1);
       if (rows && rows[0]) { me = rows[0]; return search(); }
-      shuffle();
+      shuffle(); shuffleName();
       show('welcome');
     } catch (e) { show('welcome'); err('w-err', e); }
   }
-  let mySeed = null;
+  let mySeed = null, myAlias = null;
+  const ADJ = ['Neon','Velvet','Copper','Lunar','Amber','Indigo','Mossy','Scarlet','Golden','Cobalt','Pearl','Ember'];
+  const ANIMALS = ['Otter','Heron','Lynx','Falcon','Fox','Badger','Ibis','Marten','Puffin','Stoat','Wren','Yak'];
+  const pick = a => a[Math.floor(Math.random() * a.length)];
   function shuffle() { mySeed = 'av-' + Math.random().toString(36).slice(2, 10); $('w-avatar').src = avatarFor(mySeed); }
-  $('w-shuffle').onclick = shuffle;
+  function shuffleName() { myAlias = pick(ADJ) + ' ' + pick(ANIMALS); $('w-alias').textContent = myAlias; }
+  $('w-shuffle').onclick = shuffle; $('w-shuffle-name').onclick = shuffleName;
   $('w-go').onclick = async () => {
     $('w-go').disabled = true; err('w-err');
-    try { me = await rpc('join_event', { p_name: $('w-name').value || null, p_avatar: mySeed }); search(); }
+    try { me = await rpc('join_event', { p_name: $('w-name').value || null, p_avatar: mySeed, p_alias: myAlias }); search(); }
     catch (e) { err('w-err', e); $('w-go').disabled = false; }
   };
 

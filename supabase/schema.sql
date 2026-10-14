@@ -116,9 +116,13 @@ begin
     return m;
   end if;
 
-  select * into partner from people
-   where variant = 'A' and waiting_since is not null and id <> me.id
-   order by waiting_since asc limit 1 for update skip locked;
+  -- longest-waiting A person I have never been matched with, in either slot
+  select p.* into partner from people p
+   where p.variant = 'A' and p.waiting_since is not null and p.id <> me.id
+     and not exists (select 1 from matches x
+                      where (x.person_1 = me.id and x.person_2 = p.id)
+                         or (x.person_1 = p.id and x.person_2 = me.id))
+   order by p.waiting_since asc limit 1 for update skip locked;
   if found then
     update people set waiting_since = null where id in (partner.id, me.id);
     select * into v from vendors order by last_assigned_at nulls first, random() limit 1 for update;
@@ -183,7 +187,9 @@ begin
   elsif m.person_2 = auth.uid() then my_slot := 2; partner_id := m.person_1;
   else raise exception 'not your match'; end if;
   select * into v from vendors where id = m.vendor_id;
-  if partner_id is not null then select alias into partner_alias from people where id = partner_id; end if;
+  if partner_id is not null then
+    select coalesce(nullif(trim(name), ''), alias) into partner_alias from people where id = partner_id;
+  end if;
   select * into c from checkins where match_id = p_match and person_id = auth.uid();
   return jsonb_build_object(
     'id', m.id, 'my_slot', my_slot,

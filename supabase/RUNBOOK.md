@@ -25,7 +25,11 @@
    select * from check_in('<match id>', 'self');
    select * from results;
    ```
-7. **Saturday night:** `select * from results;` and the raw tables, in the SQL editor.
+7. **If the schema was already run before 10/14 14:10:** run this once in the SQL editor:
+   ```sql
+   revoke execute on function join_event(text), find_match(), respond_to_match(uuid,text), check_in(uuid,text) from anon, public;
+   ```
+8. **Saturday night:** `select * from results;` and the raw tables, in the SQL editor.
 
 ## What the page will call (next step)
 `supabase.auth.signInAnonymously()` once → `rpc('join_event', {p_name})` → `rpc('find_match')` every 3 s until non-null → show card → `rpc('respond_to_match', ...)` → `rpc('check_in', ...)`.

@@ -168,6 +168,7 @@ begin
 end $$;
 
 grant execute on function join_event(text), find_match(), respond_to_match(uuid,text), check_in(uuid,text) to authenticated;
+revoke execute on function join_event(text), find_match(), respond_to_match(uuid,text), check_in(uuid,text) from anon, public;  -- signed-out callers get nothing, not even an error message
 revoke execute on function _random_alias() from public;
 
 -- ---------- Saturday-night results (run as you, in the SQL editor) ----------

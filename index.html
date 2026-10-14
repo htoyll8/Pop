@@ -5,96 +5,119 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pop</title>
 <style>
-  :root { --bg:#bfe3f5; --bg2:#d9f0fa; --card:#ffffff; --ink:#2b3a44; --muted:#6b7f8c; --accent:#6cc070; --accent2:#f28bb3; --warn:#f5b84b; }
+  :root { --bg:#ffffff; --ink:#2f3b45; --muted:#6b7a86; --green:#6cc070; --pink:#f28bb3; --peach:#ffd3a8; --card:#f6f8fa; }
   * { box-sizing:border-box; }
-  body { margin:0; color:var(--ink); font:17px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; min-height:100dvh; display:flex; flex-direction:column;
-         background-color:var(--bg);
-         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cpath d='M48 70c-8-6-20-14-20-26a10 10 0 0 1 20-3 10 10 0 0 1 20 3c0 12-12 20-20 26z' fill='%23a9d8ee'/%3E%3C/svg%3E");
-         background-size:96px 96px; }
-  main { flex:1; display:flex; flex-direction:column; justify-content:center; padding:28px 22px; max-width:440px; margin:0 auto; width:100%; }
-  h1 { font-size:30px; line-height:1.15; margin:0 0 10px; font-weight:800; }
-  p { color:var(--muted); margin:0 0 18px; }
-  .alias { color:var(--ink); font-weight:800; }
-  .card { background:var(--card); border-radius:22px; padding:22px; margin:0 0 18px; box-shadow:0 10px 30px rgba(43,58,68,.10); }
-  .card h2 { margin:0 0 6px; font-size:22px; font-weight:800; }
-  .card .where { font-size:19px; font-weight:600; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; min-height:100dvh; display:flex; flex-direction:column; }
+  main { flex:1; display:flex; flex-direction:column; padding:28px 22px; max-width:440px; margin:0 auto; width:100%; }
+  .screen { display:none; } .screen.on { display:flex; flex-direction:column; min-height:calc(100dvh - 90px); }
+  .top { text-align:center; padding-top:36px; }
+  h1 { font-size:30px; line-height:1.15; margin:0 0 8px; font-weight:800; }
+  .sub { color:var(--muted); font-size:18px; margin:0 0 10px; }
+  .alias { font-weight:800; color:var(--ink); }
+  .stage { flex:1; display:grid; place-items:center; position:relative; min-height:260px; }
+  .bottom { padding-bottom:12px; }
+  input { width:100%; padding:15px 16px; border-radius:16px; border:2px solid #e6ebef; background:#fff; color:var(--ink); font-size:17px; margin:0 0 14px; text-align:center; }
+  input:focus { outline:none; border-color:var(--pink); }
+  button { width:100%; padding:17px; border:0; border-radius:18px; font-size:19px; font-weight:800; color:#fff; background:var(--green); margin:0 0 12px; box-shadow:0 5px 0 #57a35b; }
+  button.secondary { background:#fff; color:var(--muted); font-weight:700; box-shadow:none; border:2px solid #e6ebef; }
+  button.ok { background:var(--pink); box-shadow:0 5px 0 #d46f98; }
+  button:active { transform:translateY(3px); box-shadow:none; }
+  button:disabled { opacity:.45; box-shadow:none; transform:none; }
+  .status { font-size:15px; color:var(--muted); min-height:1.4em; text-align:center; }
+  .err { color:#d64a5a; font-size:14px; margin-top:8px; min-height:1.2em; text-align:center; }
+  footer { text-align:center; color:#9aa7b1; font-size:12px; padding:12px; }
+  /* welcome: eggs around a center */
+  .nest { position:relative; width:280px; height:280px; }
+  .nest .egg { position:absolute; font-size:44px; line-height:1; filter:saturate(.9); }
+  .nest .you { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:86px; line-height:1; filter:drop-shadow(0 10px 10px rgba(0,0,0,.12)); }
+  /* waiting: the egg wobbles and cracks */
+  .hatch { font-size:150px; line-height:1; animation:wobble 1.6s ease-in-out infinite; transform-origin:50% 90%; filter:drop-shadow(0 12px 12px rgba(0,0,0,.12)); }
+  @keyframes wobble { 0%,100% { transform:rotate(0); } 20% { transform:rotate(-7deg); } 40% { transform:rotate(6deg); } 60% { transform:rotate(-4deg); } 80% { transform:rotate(3deg); } }
+  /* match found: sunburst */
+  .burst { position:absolute; inset:-40% -60%; background:repeating-conic-gradient(from 0deg, #fff3e3 0deg 12deg, #ffffff 12deg 24deg); border-radius:50%; opacity:.9; animation:spin 40s linear infinite; z-index:0; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .hero { position:relative; z-index:1; font-size:110px; line-height:1; filter:drop-shadow(0 12px 12px rgba(0,0,0,.12)); }
+  .card { background:var(--card); border-radius:22px; padding:18px 20px; margin:0 0 14px; text-align:center; }
+  .card h2 { margin:0 0 4px; font-size:22px; font-weight:800; }
+  .card .where { font-size:19px; font-weight:700; }
   .card .loc { color:var(--muted); }
-  .bubble { background:var(--card); border-radius:22px; padding:18px 20px; box-shadow:0 10px 30px rgba(43,58,68,.10); position:relative; margin:0 0 18px; font-weight:600; }
-  .bubble:after { content:""; position:absolute; left:50%; bottom:-10px; width:20px; height:20px; background:var(--card); transform:translateX(-50%) rotate(45deg); border-radius:4px; }
-  input { width:100%; padding:15px 16px; border-radius:16px; border:2px solid #e3eef4; background:#fff; color:var(--ink); font-size:17px; margin:0 0 14px; }
-  input:focus { outline:none; border-color:var(--accent2); }
-  button { width:100%; padding:16px; border:0; border-radius:16px; font-size:18px; font-weight:800; color:#fff; background:var(--accent); margin:0 0 12px; box-shadow:0 6px 0 rgba(0,0,0,.08); }
-  button.secondary { background:#fff; color:var(--muted); font-weight:700; box-shadow:0 6px 0 rgba(0,0,0,.05); }
-  button.ok { background:var(--accent2); }
-  button:disabled { opacity:.5; box-shadow:none; }
-  button:active { transform:translateY(2px); box-shadow:none; }
-  .screen { display:none; } .screen.on { display:block; }
-  .status { font-size:15px; color:var(--muted); min-height:1.4em; }
-  .err { color:#d64a5a; font-size:14px; margin-top:10px; min-height:1.2em; }
-  footer { text-align:center; color:#7f98a6; font-size:12px; padding:12px; }
-  /* welcome mascot */
-  .mascot { font-size:84px; line-height:1; text-align:center; margin:0 0 10px; filter:drop-shadow(0 8px 10px rgba(43,58,68,.15)); }
-  /* waiting screen */
-  .screen.wait.on { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; }
-  .wait-mascot { font-size:120px; line-height:1; animation:bob 2.4s ease-in-out infinite; filter:drop-shadow(0 12px 14px rgba(43,58,68,.18)); margin-bottom:8px; }
-  @keyframes bob { 0%,100% { transform:translateY(0) rotate(-3deg); } 50% { transform:translateY(-14px) rotate(3deg); } }
-  .wait-text { text-align:center; max-width:420px; width:100%; }
-  .wait-title { font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); font-weight:700; }
-  .wait-sub { font-size:22px; font-weight:800; margin-top:4px; }
-  .wait-text .status { font-size:16px; color:var(--ink); margin-top:14px; }
 </style>
 </head>
 <body>
 <main>
   <!-- 1. Welcome -->
   <section id="s-welcome" class="screen">
-    <div class="mascot" id="w-mascot">🫧</div>
-    <h1>Meet a stranger<br>at a booth.</h1>
-    <p>We'll give you an animal name. Nothing is saved after tonight.</p>
-    <input id="w-name" placeholder="Your name (optional)" autocomplete="off">
-    <button id="w-go">Enter the mix →</button>
-    <div class="err" id="w-err"></div>
+    <div class="top">
+      <h1>Meet a stranger<br>at a booth!</h1>
+      <div class="sub">We'll give you an animal name. Nothing is saved after tonight.</div>
+    </div>
+    <div class="stage">
+      <div class="nest">
+        <div class="egg" style="left:118px;top:0">🥚</div>
+        <div class="egg" style="left:16px;top:60px;filter:hue-rotate(200deg)">🥚</div>
+        <div class="egg" style="left:220px;top:60px;filter:hue-rotate(320deg)">🥚</div>
+        <div class="egg" style="left:16px;top:170px;filter:hue-rotate(260deg)">🥚</div>
+        <div class="egg" style="left:220px;top:170px;filter:hue-rotate(120deg)">🥚</div>
+        <div class="egg" style="left:118px;top:232px;filter:hue-rotate(40deg)">🥚</div>
+        <div class="you" id="w-mascot">🐣</div>
+      </div>
+    </div>
+    <div class="bottom">
+      <input id="w-name" placeholder="Your name (optional)" autocomplete="off">
+      <button id="w-go">Enter the mix</button>
+      <div class="err" id="w-err"></div>
+    </div>
   </section>
 
-  <!-- 2. Waiting: your animal, bobbing, with the count -->
-  <section id="s-wait" class="screen wait">
-    <div class="wait-mascot" id="wt-mascot">🦦</div>
-    <div class="wait-text">
-      <div class="wait-title">Finding someone nearby</div>
-      <div class="wait-sub">You're <span class="alias" id="wt-alias"></span></div>
-      <div class="status" id="wt-status"></div>
+  <!-- 2. Waiting -->
+  <section id="s-wait" class="screen">
+    <div class="top">
+      <h1>Finding someone…</h1>
+      <div class="sub">You're <span class="alias" id="wt-alias"></span>. <span id="wt-status"></span></div>
+    </div>
+    <div class="stage"><div class="hatch">🥚</div></div>
+    <div class="bottom">
       <div class="status" id="wt-pool"></div>
       <div class="err" id="wt-err"></div>
     </div>
   </section>
 
-  <!-- 3. The card -->
+  <!-- 3. Match found -->
   <section id="s-card" class="screen">
-    <div class="mascot" id="c-mascot">🦊</div>
-    <div class="card">
-      <h2 id="c-title">Meet …</h2>
-      <div class="where" id="c-vendor"></div>
-      <div class="loc" id="c-loc"></div>
+    <div class="top">
+      <h1 id="c-title">You matched!</h1>
+      <div class="sub" id="c-status">Both of you have to say yes.</div>
     </div>
-    <div class="status" id="c-status"></div>
-    <button id="c-yes">I'm in — confirm</button>
-    <button id="c-pass" class="secondary">Pass, find another</button>
-    <div class="err" id="c-err"></div>
+    <div class="stage"><div class="burst"></div><div class="hero" id="c-mascot">🦊</div></div>
+    <div class="bottom">
+      <div class="card">
+        <div class="where" id="c-vendor"></div>
+        <div class="loc" id="c-loc"></div>
+      </div>
+      <button id="c-yes">I'm in!</button>
+      <button id="c-pass" class="secondary">Pass, find another</button>
+      <div class="err" id="c-err"></div>
+    </div>
   </section>
 
   <!-- 4. At the booth -->
   <section id="s-booth" class="screen">
-    <div class="mascot">🎉</div>
-    <div class="card">
-      <h2 id="b-title">It's on.</h2>
-      <div class="where" id="b-vendor"></div>
-      <div class="loc" id="b-loc"></div>
+    <div class="top">
+      <h1 id="b-title">It's on!</h1>
+      <div class="sub">Head over and say hi.</div>
     </div>
-    <button id="b-self" class="ok">I'm at the booth</button>
-    <button id="b-partner" class="ok">My match showed up</button>
-    <div class="status" id="b-status"></div>
-    <button id="b-again" class="secondary">Find someone new</button>
-    <div class="err" id="b-err"></div>
+    <div class="stage"><div class="burst"></div><div class="hero">🎉</div></div>
+    <div class="bottom">
+      <div class="card">
+        <div class="where" id="b-vendor"></div>
+        <div class="loc" id="b-loc"></div>
+      </div>
+      <button id="b-self" class="ok">I'm at the booth</button>
+      <button id="b-partner" class="ok">My match showed up</button>
+      <div class="status" id="b-status"></div>
+      <button id="b-again" class="secondary">Find someone new</button>
+      <div class="err" id="b-err"></div>
+    </div>
   </section>
 </main>
 <footer>Pop · anonymous · nothing persists after tonight</footer>
@@ -131,7 +154,6 @@
       // already joined on this device? then jump straight back in
       const { data: rows } = await sb.from('people').select('*').limit(1);
       if (rows && rows[0]) { me = rows[0]; return search(); }
-      $('w-alias').textContent = 'a stranger';
       show('welcome');
     } catch (e) { show('welcome'); err('w-err', e); }
   }
@@ -181,7 +203,7 @@
   }
   function renderCard(c) {
     $('c-mascot').textContent = c.partner_alias ? emojiFor(c.partner_alias) : '📍';
-    $('c-title').textContent = c.partner_alias ? ('Meet ' + c.partner_alias) : 'Head to the booth';
+    $('c-title').textContent = c.partner_alias ? ('You matched with ' + c.partner_alias + '!') : 'Head to the booth!';
     $('c-vendor').textContent = c.vendor_name; $('c-loc').textContent = c.vendor_location;
     $('c-status').textContent = c.partner_alias ? 'Both of you have to say yes.' : '';
   }
@@ -203,7 +225,7 @@
   // ---- 4. at the booth ----
   function booth(c) {
     stopPolls();
-    $('b-title').textContent = c.partner_alias ? ('It\'s on with ' + c.partner_alias + '.') : 'It\'s on.';
+    $('b-title').textContent = c.partner_alias ? ('It\'s on with ' + c.partner_alias + '!') : 'It\'s on!';
     $('b-vendor').textContent = c.vendor_name; $('b-loc').textContent = c.vendor_location;
     $('b-partner').style.display = c.partner_alias ? '' : 'none';
     $('b-self').disabled = !!c.self_at; $('b-partner').disabled = !!c.partner_at;

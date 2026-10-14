@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pop</title>
+<style>
+  :root { --bg:#0f0e17; --card:#1b1a2b; --ink:#fffffe; --muted:#a7a9be; --accent:#ff8906; --accent2:#e53170; --ok:#2cb67d; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; min-height:100dvh; display:flex; flex-direction:column; }
+  main { flex:1; display:flex; flex-direction:column; justify-content:center; padding:28px 22px; max-width:440px; margin:0 auto; width:100%; }
+  h1 { font-size:34px; line-height:1.1; margin:0 0 10px; }
+  p { color:var(--muted); margin:0 0 18px; }
+  .alias { color:var(--accent); font-weight:700; }
+  .card { background:var(--card); border-radius:18px; padding:22px; margin:0 0 18px; }
+  .card h2 { margin:0 0 6px; font-size:22px; }
+  .card .where { color:var(--ink); font-size:19px; }
+  .card .loc { color:var(--muted); }
+  input { width:100%; padding:14px; border-radius:12px; border:1px solid #2e2d44; background:#15142a; color:var(--ink); font-size:17px; margin:0 0 14px; }
+  button { width:100%; padding:16px; border:0; border-radius:14px; font-size:18px; font-weight:700; color:#0f0e17; background:var(--accent); margin:0 0 12px; }
+  button.secondary { background:#2e2d44; color:var(--ink); font-weight:600; }
+  button.ok { background:var(--ok); }
+  button:disabled { opacity:.45; }
+  .screen { display:none; } .screen.on { display:block; }
+  .status { font-size:15px; color:var(--muted); min-height:1.4em; }
+  .pulse { display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--accent2); margin-right:8px; animation:p 1.2s infinite; }
+  @keyframes p { 0%,100%{opacity:.3} 50%{opacity:1} }
+  .err { color:#ff6b6b; font-size:14px; margin-top:10px; min-height:1.2em; }
+  footer { text-align:center; color:#55546a; font-size:12px; padding:12px; }
+</style>
+</head>
+<body>
+<main>
+  <!-- 1. Welcome -->
+  <section id="s-welcome" class="screen">
+    <h1>Meet a stranger,<br>at a booth.</h1>
+    <p>You'll be <span class="alias" id="w-alias">…</span> tonight. Nothing is saved after the event.</p>
+    <input id="w-name" placeholder="Your name (optional)" autocomplete="off">
+    <button id="w-go">Enter the mix →</button>
+    <div class="err" id="w-err"></div>
+  </section>
+
+  <!-- 2. Waiting -->
+  <section id="s-wait" class="screen">
+    <h1>You're in the mix.</h1>
+    <p><span class="pulse"></span>Looking for someone near you, <span class="alias" id="wt-alias"></span>…</p>
+    <div class="status" id="wt-status"></div>
+    <div class="err" id="wt-err"></div>
+  </section>
+
+  <!-- 3. The card -->
+  <section id="s-card" class="screen">
+    <div class="card">
+      <h2 id="c-title">Meet …</h2>
+      <div class="where" id="c-vendor"></div>
+      <div class="loc" id="c-loc"></div>
+    </div>
+    <div class="status" id="c-status"></div>
+    <button id="c-yes">I'm in — confirm</button>
+    <button id="c-pass" class="secondary">Pass, find another</button>
+    <div class="err" id="c-err"></div>
+  </section>
+
+  <!-- 4. At the booth -->
+  <section id="s-booth" class="screen">
+    <div class="card">
+      <h2 id="b-title">It's on.</h2>
+      <div class="where" id="b-vendor"></div>
+      <div class="loc" id="b-loc"></div>
+    </div>
+    <button id="b-self" class="ok">I'm at the booth</button>
+    <button id="b-partner" class="ok">My match showed up</button>
+    <div class="status" id="b-status"></div>
+    <button id="b-again" class="secondary">Find someone new</button>
+    <div class="err" id="b-err"></div>
+  </section>
+</main>
+<footer>Pop · anonymous · nothing persists after tonight</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(() => {
+  const cfg = window.POP_CONFIG;
+  const sb = supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey);
+  const $ = id => document.getElementById(id);
+  const show = name => { document.querySelectorAll('.screen').forEach(s => s.classList.remove('on')); $('s-' + name).classList.add('on'); };
+  const TIMEOUT_MS = 10 * 60 * 1000, POLL_MS = 3000;
+  let me = null, match = null, pollTimer = null, cardTimer = null;
+
+  const rpc = async (fn, args) => { const { data, error } = await sb.rpc(fn, args || {}); if (error) throw new Error(error.message); return data; };
+  const stopPolls = () => { clearInterval(pollTimer); clearTimeout(cardTimer); pollTimer = cardTimer = null; };
+  const err = (id, e) => { $(id).textContent = e ? (e.message || String(e)) : ''; };
+
+  // ---- identity: anonymous session persisted in this browser ----
+  async function session() {
+    let { data: { session } } = await sb.auth.getSession();
+    if (!session) ({ data: { session } } = await sb.auth.signInAnonymously());
+    if (!session) throw new Error('could not sign in');
+    return session;
+  }
+
+  // ---- 1. welcome ----
+  async function boot() {
+    try {
+      await session();
+      // already joined on this device? then jump straight back in
+      const { data: rows } = await sb.from('people').select('*').limit(1);
+      if (rows && rows[0]) { me = rows[0]; return search(); }
+      $('w-alias').textContent = 'a stranger';
+      show('welcome');
+    } catch (e) { show('welcome'); err('w-err', e); }
+  }
+  $('w-go').onclick = async () => {
+    $('w-go').disabled = true; err('w-err');
+    try { me = await rpc('join_event', { p_name: $('w-name').value || null }); search(); }
+    catch (e) { err('w-err', e); $('w-go').disabled = false; }
+  };
+
+  // ---- 2. waiting / search ----
+  async function search() {
+    stopPolls(); match = null;
+    $('wt-alias').textContent = me.alias; $('wt-status').textContent = me.variant === 'A' ? 'Pairing you with someone else in the mix.' : 'Finding you a booth.';
+    show('wait');
+    const tick = async () => {
+      try {
+        const m = await rpc('find_match');
+        if (m && m.id) { stopPolls(); match = m; return card(); }
+      } catch (e) { err('wt-err', e); }
+    };
+    await tick();
+    if (!match) pollTimer = setInterval(tick, POLL_MS);
+  }
+
+  // ---- 3. the card ----
+  async function card() {
+    err('c-err'); $('c-yes').disabled = false;
+    const c = await rpc('match_card', { p_match: match.id });
+    renderCard(c);
+    show('card');
+    // if nobody acts in 10 minutes, time out and go back to the mix
+    cardTimer = setTimeout(async () => { try { await rpc('respond_to_match', { p_match: match.id, p_action: 'timed_out' }); } catch (_) {} search(); }, TIMEOUT_MS);
+    // watch the partner's answer
+    pollTimer = setInterval(async () => {
+      try {
+        const c2 = await rpc('match_card', { p_match: match.id });
+        const other = c2.my_slot === 1 ? c2.status_2 : c2.status_1;
+        const mine  = c2.my_slot === 1 ? c2.status_1 : c2.status_2;
+        if (other === 'passed' || other === 'timed_out') { $('c-status').textContent = 'They passed. Finding someone else…'; return setTimeout(search, 1200); }
+        if (mine === 'confirmed' && (other === 'confirmed' || c2.partner_alias == null)) { stopPolls(); return booth(c2); }
+        if (mine === 'confirmed') $('c-status').textContent = 'You\'re in. Waiting for ' + c2.partner_alias + '…';
+      } catch (e) { err('c-err', e); }
+    }, POLL_MS);
+  }
+  function renderCard(c) {
+    $('c-title').textContent = c.partner_alias ? ('Meet ' + c.partner_alias) : 'Head to the booth';
+    $('c-vendor').textContent = c.vendor_name; $('c-loc').textContent = c.vendor_location;
+    $('c-status').textContent = c.partner_alias ? 'Both of you have to say yes.' : '';
+  }
+  $('c-yes').onclick = async () => {
+    $('c-yes').disabled = true; err('c-err');
+    try {
+      const m = await rpc('respond_to_match', { p_match: match.id, p_action: 'confirmed' });
+      const solo = !m.person_2;
+      if (solo || (m.status_1 === 'confirmed' && m.status_2 === 'confirmed')) { stopPolls(); booth(await rpc('match_card', { p_match: match.id })); }
+      else $('c-status').textContent = 'You\'re in. Waiting for your match…';
+    } catch (e) { err('c-err', e); $('c-yes').disabled = false; }
+  };
+  $('c-pass').onclick = async () => {
+    err('c-err');
+    try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (e) { return err('c-err', e); }
+    search();
+  };
+
+  // ---- 4. at the booth ----
+  function booth(c) {
+    stopPolls();
+    $('b-title').textContent = c.partner_alias ? ('It\'s on with ' + c.partner_alias + '.') : 'It\'s on.';
+    $('b-vendor').textContent = c.vendor_name; $('b-loc').textContent = c.vendor_location;
+    $('b-partner').style.display = c.partner_alias ? '' : 'none';
+    $('b-self').disabled = !!c.self_at; $('b-partner').disabled = !!c.partner_at;
+    $('b-status').textContent = ''; err('b-err');
+    show('booth');
+  }
+  $('b-self').onclick = async () => { try { await rpc('check_in', { p_match: match.id, p_kind: 'self' }); $('b-self').disabled = true; $('b-status').textContent = 'Checked in. Have fun.'; } catch (e) { err('b-err', e); } };
+  $('b-partner').onclick = async () => { try { await rpc('check_in', { p_match: match.id, p_kind: 'partner' }); $('b-partner').disabled = true; $('b-status').textContent = 'Nice. Thanks for confirming.'; } catch (e) { err('b-err', e); } };
+  $('b-again').onclick = async () => { try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
+
+  boot();
+})();
+</script>
+</body>
+</html>

@@ -27,14 +27,19 @@
   @keyframes p { 0%,100%{opacity:.3} 50%{opacity:1} }
   .err { color:#ff6b6b; font-size:14px; margin-top:10px; min-height:1.2em; }
   footer { text-align:center; color:#55546a; font-size:12px; padding:12px; }
-  /* waiting screen: full-bleed grid */
-  .screen.wait.on { position:fixed; inset:0; display:block; }
-  #grid { position:absolute; inset:0; width:100%; height:100%; display:block; }
-  .wait-top { position:absolute; top:calc(env(safe-area-inset-top) + 22px); left:0; right:0; text-align:center; padding:0 22px; }
+  /* waiting screen: Orbit-style orb */
+  .screen.wait.on { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:radial-gradient(120% 80% at 50% 0%, #1a1630 0%, var(--bg) 60%); }
+  .orb-wrap { width:200px; height:200px; display:grid; place-items:center; margin-bottom:34px; }
+  .orb { width:180px; height:180px; border-radius:50%;
+         background: radial-gradient(circle at 30% 30%, #ffb347 0%, #ff8906 28%, #e53170 70%, #7a1f5c 100%);
+         box-shadow: 0 0 60px 10px rgba(229,49,112,.35), 0 0 120px 30px rgba(255,137,6,.18);
+         animation: breathe 3.2s ease-in-out infinite, drift 9s ease-in-out infinite; filter: saturate(1.1); }
+  @keyframes breathe { 0%,100% { transform:scale(1); } 50% { transform:scale(1.07); } }
+  @keyframes drift { 0%,100% { background-position:0 0; } 50% { background-position:30px 20px; } }
+  .wait-text { text-align:center; padding:0 28px; }
   .wait-title { font-size:22px; font-weight:700; }
   .wait-sub { color:var(--muted); font-size:15px; margin-top:6px; }
-  .wait-bottom { position:absolute; bottom:calc(env(safe-area-inset-bottom) + 28px); left:0; right:0; text-align:center; padding:0 22px; }
-  .wait-bottom .status { font-size:17px; color:var(--ink); }
+  .wait-text .status { font-size:16px; color:var(--ink); margin-top:14px; }
 </style>
 </head>
 <body>
@@ -48,14 +53,12 @@
     <div class="err" id="w-err"></div>
   </section>
 
-  <!-- 2. Waiting: dot grid, lit cluster = people in the mix -->
+  <!-- 2. Waiting: one breathing orb, text beneath -->
   <section id="s-wait" class="screen wait">
-    <canvas id="grid"></canvas>
-    <div class="wait-top">
-      <div class="wait-title">Looking for people nearby</div>
+    <div class="orb-wrap"><div class="orb"></div></div>
+    <div class="wait-text">
+      <div class="wait-title">Finding someone nearby</div>
       <div class="wait-sub">You're <span class="alias" id="wt-alias"></span>. <span id="wt-status"></span></div>
-    </div>
-    <div class="wait-bottom">
       <div class="status" id="wt-pool"></div>
       <div class="err" id="wt-err"></div>
     </div>
@@ -102,7 +105,7 @@
   let me = null, match = null, pollTimer = null, cardTimer = null;
 
   const rpc = async (fn, args) => { const { data, error } = await sb.rpc(fn, args || {}); if (error) throw new Error(error.message); return data; };
-  const stopPolls = () => { clearInterval(pollTimer); clearTimeout(cardTimer); pollTimer = cardTimer = null; if (window.gridStop) window.gridStop(); };
+  const stopPolls = () => { clearInterval(pollTimer); clearTimeout(cardTimer); pollTimer = cardTimer = null; };
   const err = (id, e) => { $(id).textContent = e ? (e.message || String(e)) : ''; };
 
   // ---- identity: anonymous session persisted in this browser ----
@@ -130,49 +133,17 @@
     catch (e) { err('w-err', e); $('w-go').disabled = false; }
   };
 
-  // ---- dot grid (Cash App style): a lit cluster near "you" sized by how many are in the mix ----
-  const grid = (() => {
-    const cv = $('grid'); let raf = null, others = 0, t0 = performance.now();
-    const seeded = n => { let s = 7; return Array.from({length:n}, () => (s = (s * 9301 + 49297) % 233280) / 233280); };
-    const rnd = seeded(400);
-    function draw() {
-      const dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
-      if (cv.width !== W * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
-      const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
-      const step = 22, cx = W / 2, cy = H * 0.55, t = (performance.now() - t0) / 1000;
-      // base grid
-      ctx.fillStyle = 'rgba(167,169,190,0.28)';
-      for (let y = step; y < H; y += step) for (let x = step; x < W; x += step) { ctx.beginPath(); ctx.arc(x, y, 1.4, 0, 7); ctx.fill(); }
-      // you: steady accent dot with a soft ring
-      ctx.fillStyle = '#ff8906'; ctx.beginPath(); ctx.arc(cx, cy, 4, 0, 7); ctx.fill();
-      ctx.strokeStyle = 'rgba(255,137,6,' + (0.35 + 0.25 * Math.sin(t * 2)) + ')'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.arc(cx, cy, 14 + 4 * Math.sin(t * 2), 0, 7); ctx.stroke();
-      // others: lit dots scattered near you, count = people in the mix (cap the drawing at 24)
-      const n = Math.min(others, 24);
-      for (let i = 0; i < n; i++) {
-        const a = rnd[i * 2] * Math.PI * 2, r = 30 + rnd[i * 2 + 1] * 90 + 10 * Math.sin(t * 1.3 + i);
-        const x = Math.round((cx + Math.cos(a) * r) / step) * step, y = Math.round((cy + Math.sin(a) * r) / step) * step;
-        const pulse = 0.55 + 0.45 * Math.sin(t * 2.2 + i * 0.9);
-        ctx.fillStyle = 'rgba(229,49,112,' + pulse + ')'; ctx.beginPath(); ctx.arc(x, y, 2.6, 0, 7); ctx.fill();
-      }
-      raf = requestAnimationFrame(draw);
-    }
-    const api = { start() { if (!raf) draw(); }, stop() { cancelAnimationFrame(raf); raf = null; }, set(n) { others = n; } };
-    window.gridStop = api.stop; return api;
-  })();
-
   // ---- 2. waiting / search ----
   async function search() {
     stopPolls(); match = null;
     $('wt-alias').textContent = (me.name || me.alias); $('wt-status').textContent = me.variant === 'A' ? 'We\'ll pair you with someone else in the mix.' : 'Finding you a booth.';
-    show('wait'); grid.set(0); grid.start();
+    show('wait');
     const tick = async () => {
       try {
         const m = await rpc('find_match');
         if (m && m.id) { stopPolls(); match = m; return card(); }
         const n = await rpc('pool_size');            // includes you
         const others = Math.max(0, (n || 1) - 1);
-        grid.set(others);
         $('wt-pool').textContent = others === 0 ? 'You\'re the first one here. Hang tight.' : (others === 1 ? '1 other person is nearby.' : others + ' other people are nearby.');
       } catch (e) { err('wt-err', e); }
     };

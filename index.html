@@ -44,8 +44,8 @@
   .crowd-field { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
   .crowd-track { position:absolute; top:0; left:0; height:100%; width:200%; animation:drift 60s linear infinite; will-change:transform; }
   @keyframes drift { from { transform:translateX(-50%); } to { transform:translateX(0); } }
-  .crowd-track img { position:absolute; width:58px; height:58px; border-radius:50%; background:#f1f3ff; opacity:.9; animation:floaty var(--d,8s) ease-in-out infinite; animation-delay:var(--delay,0s); filter:drop-shadow(0 6px 6px rgba(0,0,0,.08)); }
-  @keyframes floaty { 0%,100% { margin-top:0; } 50% { margin-top:-12px; } }
+  .crowd-track img { position:absolute; width:64px; height:64px; border-radius:50%; opacity:.9; animation:floaty var(--d,8s) ease-in-out infinite; animation-delay:var(--delay,0s); filter:drop-shadow(0 6px 6px rgba(0,0,0,.08)); will-change:transform; }
+  @keyframes floaty { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-14px); } }
   .over { position:relative; z-index:2; }
   .crowd .top, .crowd .bottom { background:rgba(255,255,255,.72); border-radius:18px; padding:12px; backdrop-filter:blur(2px); }
   .crowd .you { box-shadow:0 0 0 6px #fff, 0 0 0 9px var(--green); }
@@ -92,7 +92,7 @@
       <h1>Finding someone…</h1>
       <div class="sub">You're <span class="alias" id="wt-alias"></span>. <span id="wt-status"></span></div>
     </div>
-    <div class="stage over"><img class="avatar hero-img bob you" id="wt-mascot" alt=""></div>
+    <div class="stage"></div><img id="wt-mascot" alt="" style="display:none">
     <div class="bottom over">
       <div class="status" id="wt-pool"></div>
       <div class="err" id="wt-err"></div>
@@ -168,7 +168,7 @@
   const TIMEOUT_MS = 10 * 60 * 1000, POLL_MS = 3000;
   const ANIMAL = { Otter:'🦦', Heron:'🪶', Lynx:'🐱', Falcon:'🦅', Fox:'🦊', Badger:'🦡', Ibis:'🦩', Marten:'🐾', Puffin:'🐧', Stoat:'🐿️', Wren:'🐦', Yak:'🐂' };
   const emojiFor = alias => ANIMAL[(alias || '').split(' ').pop()] || '🫧';
-  const AV = 'https://api.dicebear.com/9.x/notionists/svg?backgroundColor=f1f3ff,e6e9ff,ffe3ec,e3f6ff&seed=';
+  const AV = 'https://api.dicebear.com/9.x/adventurer/svg?backgroundColor=ffb347,ff5c9a,7be07f,4fd8ff,b388ff,ffe066&backgroundType=solid&radius=50&seed=';
   const avatarFor = seed => AV + encodeURIComponent(seed || 'stranger');
   // the crowd: a jittered grid of generic faces, duplicated once so the drift wraps seamlessly
   (function buildCrowd() {

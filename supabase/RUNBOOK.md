@@ -31,5 +31,10 @@
    ```
 8. **Saturday night:** `select * from results;` and the raw tables, in the SQL editor.
 
+## Verified against the live project (2026-10-14)
+Anonymous sign-in, join_event (variants alternate), find_match (A pool + pairing across clients, B instant, vendor rotation, same match on re-search), respond_to_match (own column only; foreign match refused), check_in (self + partner), RLS (own rows only). Tested with curl from a laptop, four to seven anonymous phones.
+
+**API detail for the page:** when `find_match` returns NULL (waiting), PostgREST sends an object with every field null, not a bare `null`. Check `result.id == null` for "waiting".
+
 ## What the page will call (next step)
 `supabase.auth.signInAnonymously()` once → `rpc('join_event', {p_name})` → `rpc('find_match')` every 3 s until non-null → show card → `rpc('respond_to_match', ...)` → `rpc('check_in', ...)`.

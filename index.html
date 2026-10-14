@@ -166,7 +166,7 @@
   // ---- 2. waiting / search ----
   async function search() {
     stopPolls(); match = null;
-    $('wt-alias').textContent = (me.name || me.alias); $('wt-mascot').textContent = emojiFor(me.alias); $('wt-status').textContent = me.variant === 'A' ? 'We\'ll pair you with someone else in the mix.' : 'Finding you a booth.';
+    $('wt-alias').textContent = (me.name || me.alias); $('wt-status').textContent = me.variant === 'A' ? 'We\'ll pair you with someone else in the mix.' : 'Finding you a booth.';
     show('wait');
     const tick = async () => {
       try {

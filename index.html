@@ -52,6 +52,12 @@
   .panel { background:rgba(255,255,255,.86); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); border-radius:24px; padding:22px 20px; text-align:center; box-shadow:0 14px 40px rgba(47,59,69,.14); max-width:360px; }
   .panel h1 { margin-bottom:6px; }
 
+  /* welcome */
+  .w-logo { width:min(58vw, 260px); height:auto; margin-top:4px; }
+  .w-hero { width:200px; height:200px; }
+  .namebox { position:relative; margin:0 0 14px; }
+  .namebox input { margin:0; padding-right:52px; font-weight:800; font-size:19px; }
+  .namebox button { position:absolute; right:6px; top:50%; transform:translateY(-50%); }
   /* load screen */
   .splash { position:fixed; inset:0; z-index:100; background:#fff; display:grid; place-items:center; transition:opacity .45s ease; }
   .splash.out { opacity:0; pointer-events:none; }
@@ -96,17 +102,13 @@
 <div id="splash" class="splash"><img id="splash-v" alt="pop" src="media/pop-intro.gif"></div>
 <div id="toast" class="toast" hidden><img id="toast-av" alt=""><div><div class="toast-t" id="toast-t"></div><div class="toast-s" id="toast-s"></div></div></div>
 <main>
-  <!-- 1. Welcome -->
+  <!-- 1. Welcome: logo on top, avatar as the star, name pre-filled, one button -->
   <section id="s-welcome" class="screen">
-    <div class="top">
-      <h1>Meet someone new<br>at a booth!</h1>
-      <div class="sub">Tonight you're <span class="alias" id="w-alias">…</span> <button type="button" class="link inline" id="w-shuffle-name">↻</button></div>
-    </div>
-    <div class="stage"><div style="text-align:center"><img class="avatar hero-img" id="w-avatar" alt=""><div><button type="button" class="link" id="w-shuffle">↻ New look</button></div></div></div>
+    <div class="top"><img class="w-logo" src="media/pop-logo-header.png" alt="pop"></div>
+    <div class="stage"><div style="text-align:center"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><div><button type="button" class="link" id="w-shuffle">↻ New look</button></div></div></div>
     <div class="bottom">
-      <input id="w-name" placeholder="Your name (optional)" autocomplete="off">
-      <div class="status" style="margin:-6px 0 12px">If you add a name, your match sees it instead of your nickname.</div>
-      <button id="w-go">Enter the mix</button>
+      <div class="namebox"><input id="w-name" autocomplete="off" aria-label="Your name"><button type="button" class="link inline" id="w-shuffle-name" aria-label="New nickname">↻</button></div>
+      <button id="w-go">Meet someone new at a booth</button>
       <div class="err" id="w-err"></div>
     </div>
   </section>
@@ -247,11 +249,13 @@
   const ANIMALS = ['Otter','Heron','Lynx','Falcon','Fox','Badger','Ibis','Marten','Puffin','Stoat','Wren','Yak'];
   const pick = a => a[Math.floor(Math.random() * a.length)];
   function shuffle() { mySeed = 'av-' + Math.random().toString(36).slice(2, 10); $('w-avatar').src = avatarFor(mySeed); }
-  function shuffleName() { myAlias = pick(ADJ) + ' ' + pick(ANIMALS); $('w-alias').textContent = myAlias; }
+  function shuffleName() { myAlias = pick(ADJ) + ' ' + pick(ANIMALS); $('w-name').value = myAlias; }
   $('w-shuffle').onclick = shuffle; $('w-shuffle-name').onclick = shuffleName;
   $('w-go').onclick = async () => {
     $('w-go').disabled = true; err('w-err');
-    try { me = await rpc('join_event', { p_name: $('w-name').value || null, p_avatar: mySeed, p_alias: myAlias }); search(); }
+    const typed = $('w-name').value.trim();
+    const ownName = typed && typed !== myAlias ? typed : null;   // anything other than the suggested nickname is their name
+    try { me = await rpc('join_event', { p_name: ownName, p_avatar: mySeed, p_alias: myAlias }); search(); }
     catch (e) { err('w-err', e); $('w-go').disabled = false; }
   };
 

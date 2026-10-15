@@ -42,25 +42,60 @@ def ctext(y, t, f, fill):
     w = d.textlength(t, font=f); d.text(((W - w) / 2, y), t, font=f, fill=fill)
     return (W - w) / 2
 
-# headline as a search box with an autocomplete: "Make a friend" is typed, " at a booth." is the ghost suggestion
-head = F(250, "Black"); typed, ghost = "Make a friend", " at a booth."
-tw, gw = d.textlength(typed, font=head), d.textlength(ghost, font=head)
-icon, padx, ph = 430, 170, 440
-pw = icon + tw + 60 + gw + padx; px0 = (W - pw) / 2; py0 = 1640
+# headline as a search bar (modeled on the bar in Tyler's screenshot): "Make a friend" is typed,
+# " at a booth." is the gray autocomplete suggestion. "Pop Mode" stands in for the bar's mode button.
+def SF(size, weight):
+    f = ImageFont.truetype("/System/Library/Fonts/SFNS.ttf", size)
+    try: f.set_variation_by_axes([100, 28, 400, weight])  # width, optical size, grade, weight
+    except Exception: pass
+    return f
+BAR_INK, ICON = "#1f1f1f", "#444746"
+typed, ghost = "Make a friend", " at a booth."
+bw, bh = int(0.90 * W), 470
+bx0, by0 = (W - bw) // 2, 1640
+cy = by0 + bh / 2
 shadow = Image.new("L", (W, H), 0)
-ImageDraw.Draw(shadow).rounded_rectangle([px0, py0 + 30, px0 + pw, py0 + ph + 30], radius=ph // 2, fill=70)
-shade = Image.new("RGBA", (W, H), (20, 24, 60, 0)); shade.putalpha(shadow.filter(ImageFilter.GaussianBlur(40)))
+ImageDraw.Draw(shadow).rounded_rectangle([bx0, by0 + 22, bx0 + bw, by0 + bh + 22], radius=bh // 2, fill=60)
+shade = Image.new("RGBA", (W, H), (20, 24, 60, 0)); shade.putalpha(shadow.filter(ImageFilter.GaussianBlur(36)))
 im.alpha_composite(shade); d = ImageDraw.Draw(im)
-d.rounded_rectangle([px0, py0, px0 + pw, py0 + ph], radius=ph // 2, fill="white", outline="#e3e8ee", width=10)
-# magnifying glass
-cx, cy, r = px0 + 205, py0 + ph / 2 - 25, 70
-d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=MUTED, width=26)
-d.line([cx + r * 0.7, cy + r * 0.7, cx + r * 1.7, cy + r * 1.7], fill=MUTED, width=30)
-tx = px0 + icon; ty = py0 + (ph - 330) / 2
-d.text((tx, ty), typed, font=head, fill=INK)
-cur = tx + tw + 22
-d.rounded_rectangle([cur, py0 + 95, cur + 18, py0 + ph - 95], radius=9, fill=ACCENT)
-d.text((cur + 40, ty), ghost, font=head, fill="#b3bcc5")
+d.rounded_rectangle([bx0, by0, bx0 + bw, by0 + bh], radius=bh // 2, fill="white", outline="#dadce0", width=9)
+# plus
+px = bx0 + 230; L = 70
+d.line([px - L, cy, px + L, cy], fill=BAR_INK, width=22); d.line([px, cy - L, px, cy + L], fill=BAR_INK, width=22)
+# mode pill on the right
+pill_t = "Pop Mode"; pf = SF(125, 510); ptw = d.textlength(pill_t, font=pf)
+pw, ph = 230 + ptw + 90, 300
+pr = bx0 + bw - 85; pl = pr - pw
+d.rounded_rectangle([pl, cy - ph / 2, pr, cy + ph / 2], radius=ph // 2, fill="#f0f2f5")
+mx, my, r = pl + 135, cy - 8, 42
+d.ellipse([mx - r, my - r, mx + r, my + r], outline=BAR_INK, width=17)
+d.line([mx + r * 0.7, my + r * 0.7, mx + r * 1.6, my + r * 1.6], fill=BAR_INK, width=19)
+sx, sy, k = mx + 62, my - 58, 26   # small sparkle
+d.polygon([(sx, sy - k), (sx + k * 0.3, sy - k * 0.3), (sx + k, sy), (sx + k * 0.3, sy + k * 0.3), (sx, sy + k), (sx - k * 0.3, sy + k * 0.3), (sx - k, sy), (sx - k * 0.3, sy - k * 0.3)], fill=BAR_INK)
+d.text((pl + 230, cy - 82), pill_t, font=pf, fill=BAR_INK)
+# camera
+cx = pl - 210; s2 = 72
+d.rounded_rectangle([cx - s2, cy - s2, cx + s2, cy + s2], radius=34, outline=ICON, width=18)
+d.ellipse([cx - 28, cy - 28, cx + 28, cy + 28], fill=ICON)
+# microphone
+mx2 = cx - 270
+d.rounded_rectangle([mx2 - 30, cy - 85, mx2 + 30, cy + 25], radius=30, fill=ICON)
+d.arc([mx2 - 62, cy - 50, mx2 + 62, cy + 62], start=0, end=180, fill=ICON, width=16)
+d.line([mx2, cy + 62, mx2, cy + 98], fill=ICON, width=16)
+
+# typed text, cursor, ghost suggestion: largest size that fits between the plus and the mic
+tx = bx0 + 400; room = (mx2 - 140) - tx
+size = 230
+while size > 120:
+    head = SF(size, 480)
+    if d.textlength(typed + ghost, font=head) + 40 <= room: break
+    size -= 5
+asc = head.getbbox("Mk")[1]; hgt = head.getbbox("Mk")[3] - asc
+ty = cy - hgt / 2 - asc
+d.text((tx, ty), typed, font=head, fill=BAR_INK)
+cur = tx + d.textlength(typed, font=head) + 14
+d.rounded_rectangle([cur, cy - size * 0.55, cur + 14, cy + size * 0.55], radius=7, fill=ACCENT)
+d.text((cur + 26, ty), ghost, font=head, fill="#9aa0a6")
 
 qr_bottom = qcy + qr.height / 2
 ctext(qr_bottom - 20, "Scan to enter the mix.", F(170, "Bold"), INK)

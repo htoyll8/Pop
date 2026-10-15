@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 260" width="520" height="260">
+  <style>text{font-family:"Nunito",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:900;font-size:230px}</style>
+  <g transform="translate(20 210) rotate(9 60 -80)"><text fill="#ff6b8a">p</text></g>
+  <g transform="translate(165 185) rotate(-5 60 -80)"><text fill="#ffb347">o</text></g>
+  <g transform="translate(300 205) rotate(7 60 -80)"><text fill="#6a7be8">p</text></g>
+  <g stroke="#7be07f" stroke-width="9" stroke-linecap="round" transform="translate(270 30)">
+    <line x1="0" y1="-26" x2="0" y2="-12"/><line x1="0" y1="12" x2="0" y2="26"/>
+    <line x1="-22" y1="-13" x2="-10" y2="-6"/><line x1="10" y1="6" x2="22" y2="13"/>
+    <line x1="-22" y1="13" x2="-10" y2="6"/><line x1="10" y1="-6" x2="22" y2="-13"/>
+  </g>
+</svg>

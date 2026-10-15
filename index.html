@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#ffffff">
 <title>Pop</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -116,7 +115,8 @@
   .purple .arrived { background:#fff; color:var(--purple2); border-radius:20px; padding:16px; text-align:center; font-weight:900; font-size:20px; margin:0 0 14px; animation:popin .5s cubic-bezier(.2,.9,.3,1.3); }
   @keyframes popin { from { transform:scale(.6); opacity:0; } to { transform:scale(1); opacity:1; } }
   /* purple screens (match, booth) */
-  .screen.purple.on { position:fixed; inset:0; background:var(--purple); color:#fff; padding:20px 22px calc(env(safe-area-inset-bottom) + 16px); overflow-y:auto; display:flex; flex-direction:column; }
+  .screen.purple.on { position:fixed; top:-140px; bottom:-140px; left:0; right:0; background:var(--purple); color:#fff;
+    padding:calc(140px + 20px) 22px calc(140px + env(safe-area-inset-bottom) + 16px); overflow-y:auto; display:flex; flex-direction:column; }
   .purple .stage { min-height:150px; }
   .purple .top { padding-top:18px; }
   .purple button { padding:15px; margin-bottom:10px; }
@@ -259,13 +259,7 @@
   };
   // Safari picks its top/bottom bar color from the page and the theme-color tag; replacing the tag (not editing it) and a tiny scroll make it re-read
   let chromeColor = null;
-  function setChrome(col) {
-    if (chromeColor === col) return; chromeColor = col;
-    document.documentElement.style.background = document.body.style.background = col;
-    document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.remove());
-    const m = document.createElement('meta'); m.name = 'theme-color'; m.content = col; document.head.appendChild(m);
-    requestAnimationFrame(() => { window.scrollTo(0, 1); window.scrollTo(0, 0); });
-  }
+  function setChrome(col) { /* page stays white; purple screens extend under Safari's bars instead */ }
   const CONF = ['#7be07f', '#ff5c9a', '#ffb347', '#4fd8ff', '#ffe066', '#ffffff'];
   const SHAPES = ['sq', 'strip', 'strip', 'dot', 'tri', 'sq2'];
   function rain(box) {

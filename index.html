@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pop</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root { --ink:#2f3b45; --muted:#6b7a86; --green:#6cc070; --green2:#57a35b; --pink:#f28bb3; --purple:#6a7be8; --purple2:#5a6bd8; --blue:#318bcf; --blue2:#2873ab; --lav:#e6e9ff; --card:#f6f8fa; }
   * { box-sizing:border-box; }
@@ -63,11 +63,10 @@
   .namebox input::placeholder { color:#b3bcc4; font-weight:800; }
   .sticker { position:relative; display:inline-block; overflow:visible; padding:24px; margin:-24px; cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; }
   .sticker:active { transform:scale(.96); }
-  .tapme { position:absolute; z-index:3; top:76px; left:-58px; width:122px; height:85px; transition:opacity .35s, transform .35s; }
-  .tapme-svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
-  .tapme-t { position:absolute; left:6px; right:0; top:40%; transform:translateY(-50%) rotate(-4deg); text-align:center;
-             font-family:"Caveat","Nunito",cursive; font-weight:700; font-size:25px; color:var(--ink); white-space:nowrap; }
-  .tapme.gone { opacity:0; transform:translateY(-6px) scale(.9); pointer-events:none; }
+  .dice { position:absolute; z-index:3; right:34px; bottom:56px; width:48px; height:48px; border-radius:50%; background:#fff;
+          display:grid; place-items:center; font-size:26px; line-height:1; box-shadow:0 6px 14px rgba(47,59,69,.22); }
+  .dice.roll { animation:roll .5s cubic-bezier(.3,1.4,.5,1); }
+  @keyframes roll { from { transform:rotate(0) scale(.8); } to { transform:rotate(360deg) scale(1); } }
   .sticker.wiggle .w-hero { animation:wiggle .7s ease-in-out; }
   @keyframes wiggle { 0%,100% { transform:rotate(0); } 20% { transform:rotate(-7deg); } 40% { transform:rotate(6deg); } 60% { transform:rotate(-4deg); } 80% { transform:rotate(2deg); } }
   @media (prefers-reduced-motion: reduce) { .sticker.wiggle .w-hero { animation:none; } }
@@ -127,13 +126,7 @@
   <!-- 1. Welcome: logo on top, avatar as the star, name pre-filled, one button -->
   <section id="s-welcome" class="screen">
     <div class="brand" id="w-brand"><img class="w-logo" id="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
-    <div class="stage"><div class="sticker" id="w-shuffle" role="button" tabindex="0" aria-label="Change your look"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><span class="tapme" id="w-tapme" aria-hidden="true"><svg class="tapme-svg" viewBox="0 0 150 104" aria-hidden="true">
-  <defs><filter id="pencil" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.4"/></filter></defs>
-  <path filter="url(#pencil)" fill="#fff" stroke="#2f3b45" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
-        d="M18,40 C22,22 40,10 62,8 C86,5 104,6 120,14 C134,22 142,34 140,48 C139,60 132,66 116,70 C108,72 100,73 94,73 C102,82 114,90 132,94 C137,95 137,99 133,100 C118,103 100,99 86,93 C70,88 58,84 46,80 C30,74 18,66 14,55 C12,49 14,44 18,40 Z"/>
-  <path filter="url(#pencil)" fill="none" stroke="#2f3b45" stroke-opacity=".35" stroke-width="1.2" stroke-linecap="round"
-        d="M21,37 C27,24 44,13 64,11 M118,17 C130,24 137,34 137,46 M98,76 C106,84 116,89 128,92"/>
-</svg><span class="tapme-t">Tap me!</span></span></div></div>
+    <div class="stage"><div class="sticker" id="w-shuffle" role="button" tabindex="0" aria-label="Change your look"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><span class="dice" id="w-tapme" aria-hidden="true">🎲</span></div></div>
     <div class="bottom">
       <div class="hint">This is the name others will see.</div>
       <div class="namebox"><input id="w-name" autocomplete="off" aria-label="Your name"><span class="fakecaret" id="w-caret"></span><button type="button" class="link inline" id="w-shuffle-name" aria-label="New nickname">↻</button></div>
@@ -295,7 +288,8 @@
   let tapped = false, wiggleTimer = null;
   function wiggle() { const s = $('w-shuffle'); if (tapped || !s) return; s.classList.remove('wiggle'); void s.offsetWidth; s.classList.add('wiggle'); }
   function startNudge() { if (tapped) return; clearInterval(wiggleTimer); setTimeout(wiggle, 400); wiggleTimer = setInterval(wiggle, 4500); }
-  $('w-shuffle').onclick = () => { shuffle(); if (!tapped) { tapped = true; clearInterval(wiggleTimer); $('w-tapme').classList.add('gone'); } };
+  $('w-shuffle').onclick = () => { shuffle(); const d = $('w-tapme'); d.classList.remove('roll'); void d.offsetWidth; d.classList.add('roll');
+    if (!tapped) { tapped = true; clearInterval(wiggleTimer); } };
   $('w-shuffle').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('w-shuffle').onclick(); } };
   $('w-shuffle-name').onclick = shuffleName;
   $('wt-back').onclick = async () => {

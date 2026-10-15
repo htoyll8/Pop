@@ -56,10 +56,10 @@
   .splash { position:fixed; inset:0; z-index:100; background:#fff; display:grid; place-items:center; transition:opacity .45s ease; }
   .splash.out { opacity:0; pointer-events:none; }
   .splash { overflow:hidden; }
-  .splash img { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:150vw; max-width:none; height:auto;
+  .splash img { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:130vw; max-width:none; height:auto;
     -webkit-mask-image:linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%);
             mask-image:linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%); }
-  @media (min-width:700px) { .splash img { width:min(150vw, 930px); } }
+  @media (min-width:700px) { .splash img { width:min(130vw, 820px); } }
   /* faux push notification */
   .toast { position:fixed; top:calc(env(safe-area-inset-top) + 12px); left:12px; right:12px; z-index:50; display:flex; gap:14px; align-items:center;
            background:#fff; color:var(--ink); border-radius:20px; padding:14px 16px; box-shadow:0 18px 50px rgba(0,0,0,.28); transform:translateY(-140%); transition:transform .35s cubic-bezier(.2,.9,.3,1.2); }
@@ -355,7 +355,7 @@
     let done = false; const fin = () => { if (!done) { done = true; res(); } };
     // restart the GIF from frame one on every load, then give it time to finish
     const im = $('splash-v'); im.src = 'media/pop-intro.gif?t=' + Date.now();
-    const start = () => setTimeout(fin, 2300);
+    const start = () => setTimeout(fin, 2000);
     if (im.complete) start(); else { im.onload = start; im.onerror = fin; }
     setTimeout(fin, 4000); $('splash').addEventListener('click', fin);
   });

@@ -88,6 +88,22 @@
     -webkit-mask-image:linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%);
             mask-image:linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%); }
   @media (min-width:700px) { .splash img { width:min(130vw, 820px); } }
+  /* purple screens: logo + paired stickers */
+  .purple .brand .w-logo { filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff); }
+  .purple .brand .tm { color:rgba(255,255,255,.85); }
+  .purple .top { padding-top:64px; }
+  .duo { display:flex; align-items:flex-start; justify-content:center; gap:0; position:relative; }
+  .duo .who { display:flex; flex-direction:column; align-items:center; width:150px; animation:popin .55s cubic-bezier(.2,1.5,.4,1) both; }
+  .duo .who:nth-child(1) { transform-origin:bottom right; animation-delay:.05s; }
+  .duo .who:nth-child(3) { transform-origin:bottom left; animation-delay:.18s; }
+  .duo .who img { width:140px; height:140px;
+                  filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(20,24,60,.30)); }
+  .duo .who:nth-child(1) img { transform:rotate(-7deg); }
+  .duo .who:nth-child(3) img { transform:rotate(7deg); }
+  .duo .who span { margin-top:2px; font-weight:900; font-size:17px; color:#fff; text-align:center; line-height:1.15; }
+  .duo .shake { font-size:44px; line-height:1; align-self:center; margin:-30px -14px 0; z-index:2; transform:rotate(-12deg);
+                animation:popin .5s .32s cubic-bezier(.2,1.6,.4,1) both;
+                filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff) drop-shadow(0 5px 6px rgba(20,24,60,.30)); }
   /* faux push notification */
   .toast { position:fixed; top:calc(env(safe-area-inset-top) + 12px); left:12px; right:12px; z-index:50; display:flex; gap:14px; align-items:center;
            background:#fff; color:var(--ink); border-radius:20px; padding:14px 16px; box-shadow:0 18px 50px rgba(0,0,0,.28); transform:translateY(-140%); transition:transform .35s cubic-bezier(.2,.9,.3,1.2); }
@@ -153,6 +169,7 @@
 
   <!-- 3. Match found (purple) -->
   <section id="s-card" class="screen purple">
+    <div class="brand"><img class="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
     <div class="confetti">
       <i style="left:8%;top:9%;background:#7be07f"></i><i style="left:28%;top:6%;background:#ff5c9a"></i><i style="left:55%;top:11%;background:#ffb347"></i>
       <i style="left:80%;top:7%;background:#7be07f"></i><i style="left:93%;top:12%;background:#ffb347"></i><i style="left:42%;top:19%;background:#ffb347"></i>
@@ -165,9 +182,8 @@
     </div>
     <div class="stage">
       <div class="pair">
-        <div class="heart">✨</div>
-        <div class="names" id="c-names"></div>
-        <div class="faces" id="c-faces"></div>
+        <div class="duo" id="c-faces"></div>
+        <div class="names" id="c-names" hidden></div>
       </div>
     </div>
     <div class="bottom">
@@ -175,7 +191,7 @@
         <div class="where" id="c-vendor"></div>
         <div class="loc" id="c-loc"></div>
       </div>
-      <button id="c-yes">I'm in!</button>
+      <button id="c-yes">Accept</button>
       <button id="c-pass" class="secondary">Pass, find another</button>
       <div class="err" id="c-err"></div>
     </div>
@@ -183,6 +199,7 @@
 
   <!-- 4. At the booth (purple) -->
   <section id="s-booth" class="screen purple">
+    <div class="brand"><img class="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
     <div class="confetti">
       <i style="left:8%;top:9%;background:#7be07f"></i><i style="left:28%;top:6%;background:#ff5c9a"></i><i style="left:55%;top:11%;background:#ffb347"></i>
       <i style="left:80%;top:7%;background:#7be07f"></i><i style="left:93%;top:12%;background:#ffb347"></i><i style="left:42%;top:19%;background:#ffb347"></i>
@@ -195,8 +212,8 @@
     </div>
     <div class="stage">
       <div class="pair">
-        <div class="names" id="b-names"></div>
-        <div class="faces" id="b-faces"></div>
+        <div class="duo" id="b-faces"></div>
+        <div class="names" id="b-names" hidden></div>
       </div>
     </div>
     <div class="bottom">
@@ -229,6 +246,14 @@
   const HAIR = 'long01,long02,long03,long04,long05,long07,long08,long10,long11,long12,long13,long14,long15,long19,long20,long21,long23,long24,long25,long26,short01,short02,short03,short04,short05,short06,short07,short08,short09,short10,short11,short12,short13,short14,short17,short18,short19';
   const AV = 'https://api.dicebear.com/9.x/adventurer/svg?hair=' + HAIR + '&backgroundColor=cfe5f6,ffd4d0,fbd2e1,fff0b3&backgroundType=solid&radius=50&seed=';
   const avatarFor = seed => AV + encodeURIComponent(seed || 'stranger');
+  function renderDuo(el, c) {
+    const mine = me.name || me.alias, theirs = c.partner_alias;
+    const who = (seed, name) => { const d = document.createElement('div'); d.className = 'who';
+      const im = document.createElement('img'); im.alt = ''; im.src = avatarBare(seed); const s = document.createElement('span'); s.textContent = name;
+      d.append(im, s); return d; };
+    el.innerHTML = ''; el.append(who(me.avatar_seed || me.alias, mine));
+    if (theirs) { const hs = document.createElement('div'); hs.className = 'shake'; hs.textContent = '🤝'; el.append(hs, who(c.partner_avatar || theirs, theirs)); }
+  }
   const avatarBare = seed => 'https://api.dicebear.com/9.x/adventurer/svg?hair=' + HAIR + '&seed=' + encodeURIComponent(seed || 'stranger');   // no background, for the sticker look
   // the crowd: a jittered grid of generic faces, duplicated once so the drift wraps seamlessly
   (function buildCrowd() {
@@ -352,8 +377,7 @@
   function renderCard(c) {
     const mine = me.name || me.alias, theirs = c.partner_alias;
     $('c-title').textContent = theirs ? 'You matched!' : 'Head to the booth!';
-    $('c-names').textContent = theirs ? (mine + ' & ' + theirs) : mine;
-    $('c-faces').innerHTML = ''; [me.avatar_seed || me.alias].concat(theirs ? [c.partner_avatar || theirs] : []).forEach(s => { const im = document.createElement('img'); im.src = avatarFor(s); im.alt = ''; $('c-faces').appendChild(im); });
+    renderDuo($('c-faces'), c);
     $('c-vendor').textContent = c.vendor_name; $('c-loc').textContent = c.vendor_location;
     $('c-status').textContent = theirs ? 'Both of you have to say yes.' : '';
   }
@@ -389,8 +413,7 @@
     stopPolls(); arrivedShown = false;
     document.querySelectorAll('#s-booth .arrived').forEach(n => n.remove());
     const mine = me.name || me.alias, theirs = c.partner_alias;
-    $('b-names').textContent = theirs ? (mine + ' & ' + theirs) : mine;
-    $('b-faces').innerHTML = ''; [me.avatar_seed || me.alias].concat(theirs ? [c.partner_avatar || theirs] : []).forEach(s => { const im = document.createElement('img'); im.src = avatarFor(s); im.alt = ''; $('b-faces').appendChild(im); });
+    renderDuo($('b-faces'), c);
     if (theirs) {
       const note = () => rpc('match_card', { p_match: match.id }).then(c2 => { if (c2.partner_self_at) announceArrival(c2); }).catch(() => {});
       note(); pollTimer = setInterval(note, POLL_MS);

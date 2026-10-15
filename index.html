@@ -172,6 +172,11 @@
   #s-booth .card { padding:12px 16px; margin-bottom:10px; }
   #s-booth .arrived { padding:12px; font-size:17px; margin-bottom:10px; }
   #s-booth #b-status { min-height:0; margin:0 0 4px; }
+  /* both at the booth: celebrate + one icebreaker */
+  #s-both .ask { background:#fff; color:var(--ink); border-radius:22px; padding:16px 18px 10px; margin:0 0 14px; text-align:center; animation:popin .5s .25s both cubic-bezier(.2,.9,.3,1.3); }
+  #s-both .ask .lbl { font-size:14px; font-weight:900; color:var(--purple2); text-transform:uppercase; letter-spacing:.06em; }
+  #s-both .ask .q { font-size:21px; font-weight:900; line-height:1.3; margin:6px 0 2px; }
+  #s-both .ask button.link { color:var(--purple2); background:transparent; box-shadow:none; border:0; font-size:15px; margin:0; padding:8px 12px; }
   #s-booth #b-again { padding:8px; margin:0; font-size:16px; }
   .rain i { position:absolute; top:-30px; display:block; opacity:.95; animation:fall var(--dur) var(--delay) cubic-bezier(.3,.1,.6,1) forwards; }
   .rain i.sq { width:11px; height:11px; border-radius:2px; }
@@ -260,6 +265,22 @@
   </section>
 
   <!-- 4. At the booth (purple) -->
+  <!-- 5. Both at the booth: you found each other -->
+  <section id="s-both" class="screen purple">
+    <div class="brand"><img class="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
+    <div class="rain" aria-hidden="true"></div>
+    <div class="top">
+      <h1>You found each other!</h1>
+      <div class="sub" id="d-sub"></div>
+    </div>
+    <div class="stage">
+      <div class="pair"><div class="duo" id="d-faces"></div></div>
+    </div>
+    <div class="bottom">
+      <div class="ask"><div class="lbl">Try asking</div><div class="q" id="d-q"></div><button type="button" class="link" id="d-next">Another one ↻</button></div>
+      <button id="d-again">Meet someone new</button>
+    </div>
+  </section>
   <section id="s-booth" class="screen purple">
     <div class="brand"><img class="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
     <div class="rain" aria-hidden="true"></div>
@@ -574,7 +595,10 @@
     const mine = me.name || me.alias, theirs = c.partner_alias;
     renderDuo($('b-faces'), c);
     if (theirs) {
-      const note = () => rpc('match_card', { p_match: match.id }).then(c2 => { if (c2.partner_self_at) announceArrival(c2); }).catch(() => {});
+      const note = () => rpc('match_card', { p_match: match.id }).then(c2 => {
+        if (c2.self_at && c2.partner_self_at) return bothHere(c2);
+        if (c2.partner_self_at) announceArrival(c2);
+      }).catch(() => {});
       note(); pollTimer = setInterval(note, POLL_MS);
     }
     $('b-title').textContent = theirs ? ('It\'s on with ' + theirs + '!') : 'It\'s on!';
@@ -583,7 +607,36 @@
     $('b-status').textContent = ''; err('b-err'); $('b-sub').textContent = theirs ? 'Head over and say hi. We\'ll tell you when they arrive.' : 'Head over and say hi.';
     show('booth');
   }
-  $('b-self').onclick = async () => { try { await rpc('check_in', { p_match: match.id, p_kind: 'self' }); $('b-self').disabled = true; $('b-status').textContent = 'Checked in. Your match will see that you\'re here.'; } catch (e) { err('b-err', e); } };
+  $('b-self').onclick = async () => {
+    try {
+      await rpc('check_in', { p_match: match.id, p_kind: 'self' }); $('b-self').disabled = true;
+      const c2 = await rpc('match_card', { p_match: match.id });
+      if (c2.partner_alias && c2.partner_self_at) return bothHere(c2);
+      $('b-status').textContent = c2.partner_alias ? 'Checked in. Your match will see that you\'re here.' : 'Checked in.';
+    } catch (e) { err('b-err', e); }
+  };
+
+  // ---- 5. both at the booth ----
+  const ICEBREAKERS = [
+    'What brought you here today?', 'What\'s the best thing you\'ve seen here so far?', 'What would you buy from this booth?',
+    'What\'s something you\'re weirdly good at?', 'What\'s the last thing that made you laugh?', 'What\'s your go-to snack at events like this?',
+    'If you ran a booth here, what would you sell?', 'What are you into lately?', 'Best concert or show you\'ve been to?',
+    'What\'s a small thing that made your week?', 'Are you here with anyone, or flying solo?', 'What should I check out next?'];
+  let qIdx = 0;
+  function bothHere(c) {
+    if ($('s-both').classList.contains('on')) return;
+    stopPolls(); $('toast').classList.remove('show'); $('toast').hidden = true;
+    renderDuo($('d-faces'), c);
+    $('d-sub').textContent = 'Say hi to ' + c.partner_alias + ' at ' + c.vendor_name + '.';
+    // both people start on the same question: pick it from the match id
+    qIdx = [...String(match.id)].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7) % ICEBREAKERS.length;
+    $('d-q').textContent = ICEBREAKERS[qIdx];
+    try { navigator.vibrate && navigator.vibrate([80, 40, 80, 40, 160]); } catch (_) {}
+    show('both');
+  }
+  $('d-next').onclick = () => { qIdx = (qIdx + 1) % ICEBREAKERS.length; $('d-q').textContent = ICEBREAKERS[qIdx]; };
+  // no 'met' status in the database yet, so closing out reuses 'passed' (it frees both people for a new match)
+  $('d-again').onclick = async () => { try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
   $('b-again').onclick = async () => { try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
 
   // load screen: hide once the letters have landed (~2.2s) or the clip ends, and the app is ready; tap skips

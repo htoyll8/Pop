@@ -52,6 +52,10 @@
   .panel { background:rgba(255,255,255,.86); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); border-radius:24px; padding:22px 20px; text-align:center; box-shadow:0 14px 40px rgba(47,59,69,.14); max-width:360px; }
   .panel h1 { margin-bottom:6px; }
 
+  /* load screen */
+  .splash { position:fixed; inset:0; z-index:100; background:#fff; display:grid; place-items:center; transition:opacity .45s ease; }
+  .splash.out { opacity:0; pointer-events:none; }
+  .splash video { width:min(86vw, 420px); height:auto; }
   /* faux push notification */
   .toast { position:fixed; top:calc(env(safe-area-inset-top) + 12px); left:12px; right:12px; z-index:50; display:flex; gap:14px; align-items:center;
            background:#fff; color:var(--ink); border-radius:20px; padding:14px 16px; box-shadow:0 18px 50px rgba(0,0,0,.28); transform:translateY(-140%); transition:transform .35s cubic-bezier(.2,.9,.3,1.2); }
@@ -84,6 +88,7 @@
 </style>
 </head>
 <body>
+<div id="splash" class="splash"><video id="splash-v" src="media/pop-intro.mp4" poster="media/pop-intro-poster.png" muted playsinline autoplay preload="auto"></video></div>
 <div id="toast" class="toast" hidden><img id="toast-av" alt=""><div><div class="toast-t" id="toast-t"></div><div class="toast-s" id="toast-s"></div></div></div>
 <main>
   <!-- 1. Welcome -->
@@ -340,7 +345,13 @@
   $('b-partner').onclick = async () => { try { await rpc('check_in', { p_match: match.id, p_kind: 'partner' }); $('b-partner').disabled = true; $('b-status').textContent = 'Nice. Thanks for confirming.'; } catch (e) { err('b-err', e); } };
   $('b-again').onclick = async () => { try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
 
-  boot();
+  // load screen: hide once the letters have landed (~2.2s) or the clip ends, and the app is ready; tap skips
+  const splashDone = new Promise(res => {
+    const v = $('splash-v'); let done = false; const fin = () => { if (!done) { done = true; res(); } };
+    v.addEventListener('ended', fin); v.addEventListener('error', fin); setTimeout(fin, 2200); $('splash').addEventListener('click', fin);
+    const p = v.play && v.play(); if (p && p.catch) p.catch(fin);
+  });
+  Promise.all([splashDone, boot()]).finally(() => { $('splash').classList.add('out'); setTimeout(() => $('splash').remove(), 500); });
 })();
 </script>
 </body>

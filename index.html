@@ -52,6 +52,14 @@
   .panel { background:rgba(255,255,255,.86); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); border-radius:24px; padding:22px 20px; text-align:center; box-shadow:0 14px 40px rgba(47,59,69,.14); max-width:360px; }
   .panel h1 { margin-bottom:6px; }
 
+  /* faux push notification */
+  .toast { position:fixed; top:calc(env(safe-area-inset-top) + 12px); left:12px; right:12px; z-index:50; display:flex; gap:14px; align-items:center;
+           background:#fff; color:var(--ink); border-radius:20px; padding:14px 16px; box-shadow:0 18px 50px rgba(0,0,0,.28); transform:translateY(-140%); transition:transform .35s cubic-bezier(.2,.9,.3,1.2); }
+  .toast.show { transform:translateY(0); }
+  .toast img { width:56px; height:56px; border-radius:50%; flex:none; }
+  .toast-t { font-weight:900; font-size:18px; } .toast-s { color:var(--muted); font-size:15px; }
+  .purple .arrived { background:#fff; color:var(--purple2); border-radius:20px; padding:16px; text-align:center; font-weight:900; font-size:20px; margin:0 0 14px; animation:popin .5s cubic-bezier(.2,.9,.3,1.3); }
+  @keyframes popin { from { transform:scale(.6); opacity:0; } to { transform:scale(1); opacity:1; } }
   /* purple screens (match, booth) */
   .screen.purple.on { position:fixed; inset:0; background:var(--purple); color:#fff; padding:20px 22px calc(env(safe-area-inset-bottom) + 16px); overflow-y:auto; display:flex; flex-direction:column; }
   .purple .stage { min-height:150px; }
@@ -76,16 +84,18 @@
 </style>
 </head>
 <body>
+<div id="toast" class="toast" hidden><img id="toast-av" alt=""><div><div class="toast-t" id="toast-t"></div><div class="toast-s" id="toast-s"></div></div></div>
 <main>
   <!-- 1. Welcome -->
   <section id="s-welcome" class="screen">
     <div class="top">
-      <h1>Meet a stranger<br>at a booth!</h1>
+      <h1>Meet someone new<br>at a booth!</h1>
       <div class="sub">Tonight you're <span class="alias" id="w-alias">…</span> <button type="button" class="link inline" id="w-shuffle-name">↻</button></div>
     </div>
     <div class="stage"><div style="text-align:center"><img class="avatar hero-img" id="w-avatar" alt=""><div><button type="button" class="link" id="w-shuffle">↻ New look</button></div></div></div>
     <div class="bottom">
       <input id="w-name" placeholder="Your name (optional)" autocomplete="off">
+      <div class="status" style="margin:-6px 0 12px">If you add a name, your match sees it instead of your nickname.</div>
       <button id="w-go">Enter the mix</button>
       <div class="err" id="w-err"></div>
     </div>
@@ -147,7 +157,12 @@
       <h1 id="b-title">It's on!</h1>
       <div class="sub" id="b-sub">Head over and say hi.</div>
     </div>
-    <div class="stage"><div class="hero">🎉</div></div>
+    <div class="stage">
+      <div class="pair">
+        <div class="names" id="b-names"></div>
+        <div class="faces" id="b-faces"></div>
+      </div>
+    </div>
     <div class="bottom">
       <div class="card">
         <div class="where" id="b-vendor"></div>
@@ -292,19 +307,33 @@
   };
 
   // ---- 4. at the booth ----
+  let arrivedShown = false;
+  function announceArrival(c) {
+    if (arrivedShown) return; arrivedShown = true;
+    $('b-sub').textContent = c.partner_alias + ' is at the booth waiting for you!';
+    $('b-title').textContent = c.partner_alias + ' is here!';
+    const card = document.createElement('div'); card.className = 'arrived'; card.textContent = '📍 ' + c.partner_alias + ' is at ' + c.vendor_name + ' now';
+    $('s-booth').querySelector('.bottom').prepend(card);
+    $('toast-av').src = avatarFor(c.partner_avatar || c.partner_alias); $('toast-t').textContent = c.partner_alias + ' is at the booth';
+    $('toast-s').textContent = 'Waiting for you at ' + c.vendor_name; $('toast').hidden = false; requestAnimationFrame(() => $('toast').classList.add('show'));
+    try { navigator.vibrate && navigator.vibrate([120, 60, 120]); } catch (_) {}
+    setTimeout(() => { $('toast').classList.remove('show'); setTimeout(() => $('toast').hidden = true, 400); }, 8000);
+  }
   function booth(c) {
-    stopPolls();
-    if (c.partner_alias) {
-      const note = () => rpc('match_card', { p_match: match.id }).then(c2 => {
-        if (c2.partner_self_at) { $('b-sub').textContent = c2.partner_alias + ' is at the booth waiting for you!'; }
-      }).catch(() => {});
+    stopPolls(); arrivedShown = false;
+    document.querySelectorAll('#s-booth .arrived').forEach(n => n.remove());
+    const mine = me.name || me.alias, theirs = c.partner_alias;
+    $('b-names').textContent = theirs ? (mine + ' & ' + theirs) : mine;
+    $('b-faces').innerHTML = ''; [me.avatar_seed || me.alias].concat(theirs ? [c.partner_avatar || theirs] : []).forEach(s => { const im = document.createElement('img'); im.src = avatarFor(s); im.alt = ''; $('b-faces').appendChild(im); });
+    if (theirs) {
+      const note = () => rpc('match_card', { p_match: match.id }).then(c2 => { if (c2.partner_self_at) announceArrival(c2); }).catch(() => {});
       note(); pollTimer = setInterval(note, POLL_MS);
     }
-    $('b-title').textContent = c.partner_alias ? ('It\'s on with ' + c.partner_alias + '!') : 'It\'s on!';
+    $('b-title').textContent = theirs ? ('It\'s on with ' + theirs + '!') : 'It\'s on!';
     $('b-vendor').textContent = c.vendor_name; $('b-loc').textContent = c.vendor_location;
-    $('b-partner').style.display = c.partner_alias ? '' : 'none';
+    $('b-partner').style.display = theirs ? '' : 'none';
     $('b-self').disabled = !!c.self_at; $('b-partner').disabled = !!c.partner_at;
-    $('b-status').textContent = ''; err('b-err'); $('b-sub').textContent = c.partner_alias ? 'Head over and say hi. We\'ll tell you when they arrive.' : 'Head over and say hi.';
+    $('b-status').textContent = ''; err('b-err'); $('b-sub').textContent = theirs ? 'Head over and say hi. We\'ll tell you when they arrive.' : 'Head over and say hi.';
     show('booth');
   }
   $('b-self').onclick = async () => { try { await rpc('check_in', { p_match: match.id, p_kind: 'self' }); $('b-self').disabled = true; $('b-status').textContent = 'Checked in. Your match will see that you\'re here.'; } catch (e) { err('b-err', e); } };

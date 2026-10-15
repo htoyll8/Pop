@@ -61,7 +61,9 @@
   .fakecaret { position:absolute; top:50%; width:2px; height:24px; margin-top:-12px; background:var(--ink); animation:blink 1.05s steps(1) infinite; pointer-events:none; }
   @keyframes blink { 50% { opacity:0; } }
   .namebox input::placeholder { color:#b3bcc4; font-weight:800; }
-  .w-hero { width:200px; height:200px; }
+  .w-hero { width:230px; height:230px; background:none; border-radius:0;
+            filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff)
+                    drop-shadow(0 10px 12px rgba(47,59,69,.28)); }
   .namebox { position:relative; margin:0 0 14px; }
   .hint { font-size:14px; color:var(--muted); text-align:left; margin:0 0 6px 4px; }
   .namebox input { margin:0; padding-right:52px; font-weight:800; font-size:19px; text-align:left; }
@@ -116,7 +118,7 @@
     <div class="brand" id="w-brand"><img class="w-logo" id="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
     <div class="stage"><div style="text-align:center"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><div><button type="button" class="link" id="w-shuffle">↻ New look</button></div></div></div>
     <div class="bottom">
-      <div class="hint">This is the name you'll have tonight.</div>
+      <div class="hint">This is the name others will see.</div>
       <div class="namebox"><input id="w-name" autocomplete="off" aria-label="Your name"><span class="fakecaret" id="w-caret"></span><button type="button" class="link inline" id="w-shuffle-name" aria-label="New nickname">↻</button></div>
       <button id="w-go">Meet someone new at a booth</button>
       <div class="err" id="w-err"></div>
@@ -214,6 +216,7 @@
   const emojiFor = alias => ANIMAL[(alias || '').split(' ').pop()] || '🫧';
   const AV = 'https://api.dicebear.com/9.x/adventurer/svg?backgroundColor=cfe5f6,ffd4d0,fbd2e1,fff0b3&backgroundType=solid&radius=50&seed=';
   const avatarFor = seed => AV + encodeURIComponent(seed || 'stranger');
+  const avatarBare = seed => 'https://api.dicebear.com/9.x/adventurer/svg?seed=' + encodeURIComponent(seed || 'stranger');   // no background, for the sticker look
   // the crowd: a jittered grid of generic faces, duplicated once so the drift wraps seamlessly
   (function buildCrowd() {
     const track = $('crowd-track'); const cols = 5, rows = 7, N = cols * rows;
@@ -259,7 +262,7 @@
   const ADJ = ['Neon','Velvet','Copper','Lunar','Amber','Indigo','Mossy','Scarlet','Golden','Cobalt','Pearl','Ember'];
   const ANIMALS = ['Otter','Heron','Lynx','Falcon','Fox','Badger','Ibis','Marten','Puffin','Stoat','Wren','Yak'];
   const pick = a => a[Math.floor(Math.random() * a.length)];
-  function shuffle() { mySeed = 'av-' + Math.random().toString(36).slice(2, 10); $('w-avatar').src = avatarFor(mySeed); }
+  function shuffle() { mySeed = 'av-' + Math.random().toString(36).slice(2, 10); $('w-avatar').src = avatarBare(mySeed); }
   function shuffleName() { myAlias = pick(ADJ) + ' ' + pick(ANIMALS); $('w-name').placeholder = myAlias; placeCaret(); }
   // a blinking cursor at the start of the empty box, so it's clear you can type (phones won't focus a field until tapped)
   function placeCaret() {
@@ -272,7 +275,7 @@
   $('w-shuffle').onclick = shuffle; $('w-shuffle-name').onclick = shuffleName;
   $('wt-back').onclick = async () => {
     stopPolls(); try { await rpc('leave_pool'); } catch (_) {}
-    mySeed = me.avatar_seed || me.alias; $('w-avatar').src = avatarFor(mySeed);
+    mySeed = me.avatar_seed || me.alias; $('w-avatar').src = avatarBare(mySeed);
     myAlias = me.alias; $('w-name').placeholder = myAlias; $('w-name').value = me.name || '';
     $('w-go').disabled = false; err('w-err'); show('welcome'); placeCaret();
   };

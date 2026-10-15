@@ -51,7 +51,7 @@ def SF(size, weight):
     return f
 BAR_INK, ICON = "#1f1f1f", "#444746"
 typed, ghost = "Make a friend", " at a booth."
-bw, bh = int(0.90 * W), 470
+bw, bh = int(0.90 * W), 580
 bx0, by0 = (W - bw) // 2, 1640
 cy = by0 + bh / 2
 shadow = Image.new("L", (W, H), 0)
@@ -60,36 +60,37 @@ shade = Image.new("RGBA", (W, H), (20, 24, 60, 0)); shade.putalpha(shadow.filter
 im.alpha_composite(shade); d = ImageDraw.Draw(im)
 d.rounded_rectangle([bx0, by0, bx0 + bw, by0 + bh], radius=bh // 2, fill="white", outline="#dadce0", width=9)
 # plus
-px = bx0 + 230; L = 70
+px = bx0 + 200; L = 66
 d.line([px - L, cy, px + L, cy], fill=BAR_INK, width=22); d.line([px, cy - L, px, cy + L], fill=BAR_INK, width=22)
 # mode pill on the right
-pill_t = "Pop Mode"; pf = SF(125, 510); ptw = d.textlength(pill_t, font=pf)
-pw, ph = 230 + ptw + 90, 300
-pr = bx0 + bw - 85; pl = pr - pw
+pill_t = "Pop Mode"; pf = SF(112, 510); ptw = d.textlength(pill_t, font=pf)
+pw, ph = 215 + ptw + 80, 290
+pr = bx0 + bw - 70; pl = pr - pw
 d.rounded_rectangle([pl, cy - ph / 2, pr, cy + ph / 2], radius=ph // 2, fill="#f0f2f5")
-mx, my, r = pl + 135, cy - 8, 42
+mx, my, r = pl + 125, cy - 8, 40
 d.ellipse([mx - r, my - r, mx + r, my + r], outline=BAR_INK, width=17)
 d.line([mx + r * 0.7, my + r * 0.7, mx + r * 1.6, my + r * 1.6], fill=BAR_INK, width=19)
 sx, sy, k = mx + 62, my - 58, 26   # small sparkle
 d.polygon([(sx, sy - k), (sx + k * 0.3, sy - k * 0.3), (sx + k, sy), (sx + k * 0.3, sy + k * 0.3), (sx, sy + k), (sx - k * 0.3, sy + k * 0.3), (sx - k, sy), (sx - k * 0.3, sy - k * 0.3)], fill=BAR_INK)
-d.text((pl + 230, cy - 82), pill_t, font=pf, fill=BAR_INK)
+d.text((pl + 215, cy - 74), pill_t, font=pf, fill=BAR_INK)
 # camera
-cx = pl - 210; s2 = 72
+cx = pl - 165; s2 = 66
 d.rounded_rectangle([cx - s2, cy - s2, cx + s2, cy + s2], radius=34, outline=ICON, width=18)
 d.ellipse([cx - 28, cy - 28, cx + 28, cy + 28], fill=ICON)
 # microphone
-mx2 = cx - 270
+mx2 = cx - 205
 d.rounded_rectangle([mx2 - 30, cy - 85, mx2 + 30, cy + 25], radius=30, fill=ICON)
 d.arc([mx2 - 62, cy - 50, mx2 + 62, cy + 62], start=0, end=180, fill=ICON, width=16)
 d.line([mx2, cy + 62, mx2, cy + 98], fill=ICON, width=16)
 
 # typed text, cursor, ghost suggestion: largest size that fits between the plus and the mic
-tx = bx0 + 400; room = (mx2 - 140) - tx
-size = 230
+tx = bx0 + 370; room = (mx2 - 170) - tx
+size = 420
 while size > 120:
     head = SF(size, 480)
     if d.textlength(typed + ghost, font=head) + 40 <= room: break
     size -= 5
+print('bar text size', size)
 asc = head.getbbox("Mk")[1]; hgt = head.getbbox("Mk")[3] - asc
 ty = cy - hgt / 2 - asc
 d.text((tx, ty), typed, font=head, fill=BAR_INK)

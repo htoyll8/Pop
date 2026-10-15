@@ -63,9 +63,9 @@
   .namebox input::placeholder { color:#b3bcc4; font-weight:800; }
   .sticker { position:relative; display:inline-block; overflow:visible; padding:24px; margin:-24px; cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; }
   .sticker:active { transform:scale(.96); }
-  .tapme { position:absolute; z-index:3; top:56%; left:-46px; width:118px; height:56px; transition:opacity .35s, transform .35s; }
+  .tapme { position:absolute; z-index:3; top:76px; left:-58px; width:122px; height:85px; transition:opacity .35s, transform .35s; }
   .tapme-svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
-  .tapme-t { position:absolute; left:0; right:10px; top:50%; transform:translateY(-52%) rotate(-3deg); text-align:center;
+  .tapme-t { position:absolute; left:6px; right:0; top:40%; transform:translateY(-50%) rotate(-4deg); text-align:center;
              font-family:"Caveat","Nunito",cursive; font-weight:700; font-size:25px; color:var(--ink); white-space:nowrap; }
   .tapme.gone { opacity:0; transform:translateY(-6px) scale(.9); pointer-events:none; }
   .sticker.wiggle .w-hero { animation:wiggle .7s ease-in-out; }
@@ -127,12 +127,12 @@
   <!-- 1. Welcome: logo on top, avatar as the star, name pre-filled, one button -->
   <section id="s-welcome" class="screen">
     <div class="brand" id="w-brand"><img class="w-logo" id="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
-    <div class="stage"><div class="sticker" id="w-shuffle" role="button" tabindex="0" aria-label="Change your look"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><span class="tapme" id="w-tapme" aria-hidden="true"><svg class="tapme-svg" viewBox="0 0 132 62" aria-hidden="true">
-  <defs><filter id="pencil" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="2.6"/></filter></defs>
+    <div class="stage"><div class="sticker" id="w-shuffle" role="button" tabindex="0" aria-label="Change your look"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><span class="tapme" id="w-tapme" aria-hidden="true"><svg class="tapme-svg" viewBox="0 0 150 104" aria-hidden="true">
+  <defs><filter id="pencil" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.4"/></filter></defs>
   <path filter="url(#pencil)" fill="#fff" stroke="#2f3b45" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
-        d="M11,9 C40,3 86,5 111,8 C119,9 122,15 121,24 L129,30 L120,35 C119,46 116,53 107,54 C80,57 40,56 14,54 C6,53 4,45 5,31 C6,18 4,11 11,9 Z"/>
+        d="M18,40 C22,22 40,10 62,8 C86,5 104,6 120,14 C134,22 142,34 140,48 C139,60 132,66 116,70 C108,72 100,73 94,73 C102,82 114,90 132,94 C137,95 137,99 133,100 C118,103 100,99 86,93 C70,88 58,84 46,80 C30,74 18,66 14,55 C12,49 14,44 18,40 Z"/>
   <path filter="url(#pencil)" fill="none" stroke="#2f3b45" stroke-opacity=".35" stroke-width="1.2" stroke-linecap="round"
-        d="M13,11 C42,6 84,7 110,10 M122,26 L127,30 M15,52 C40,54 78,55 105,52"/>
+        d="M21,37 C27,24 44,13 64,11 M118,17 C130,24 137,34 137,46 M98,76 C106,84 116,89 128,92"/>
 </svg><span class="tapme-t">Tap me!</span></span></div></div>
     <div class="bottom">
       <div class="hint">This is the name others will see.</div>

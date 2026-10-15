@@ -89,9 +89,9 @@
             mask-image:linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%); }
   @media (min-width:700px) { .splash img { width:min(130vw, 820px); } }
   /* purple screens: logo + paired stickers */
-  .purple .brand .w-logo { filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff); }
   .purple .brand .tm { color:rgba(255,255,255,.85); }
   .screen.purple .top { padding-top:calc(env(safe-area-inset-top) + 70px); }
+  .screen.purple .stage { flex:1 0 auto; min-height:230px; }
   .duo { display:flex; align-items:flex-start; justify-content:center; gap:0; position:relative; }
   .duo .who { display:flex; flex-direction:column; align-items:center; width:150px; animation:popin .55s cubic-bezier(.2,1.5,.4,1) both; }
   .duo .who:nth-child(1) { transform-origin:bottom right; animation-delay:.05s; }
@@ -222,7 +222,6 @@
         <div class="loc" id="b-loc"></div>
       </div>
       <button id="b-self">I'm at the booth</button>
-      <button id="b-partner">My match showed up</button>
       <div class="status" id="b-status"></div>
       <button id="b-again" class="secondary">Find someone new</button>
       <div class="err" id="b-err"></div>
@@ -420,13 +419,11 @@
     }
     $('b-title').textContent = theirs ? ('It\'s on with ' + theirs + '!') : 'It\'s on!';
     $('b-vendor').textContent = c.vendor_name; $('b-loc').textContent = c.vendor_location;
-    $('b-partner').style.display = theirs ? '' : 'none';
-    $('b-self').disabled = !!c.self_at; $('b-partner').disabled = !!c.partner_at;
+    $('b-self').disabled = !!c.self_at;
     $('b-status').textContent = ''; err('b-err'); $('b-sub').textContent = theirs ? 'Head over and say hi. We\'ll tell you when they arrive.' : 'Head over and say hi.';
     show('booth');
   }
   $('b-self').onclick = async () => { try { await rpc('check_in', { p_match: match.id, p_kind: 'self' }); $('b-self').disabled = true; $('b-status').textContent = 'Checked in. Your match will see that you\'re here.'; } catch (e) { err('b-err', e); } };
-  $('b-partner').onclick = async () => { try { await rpc('check_in', { p_match: match.id, p_kind: 'partner' }); $('b-partner').disabled = true; $('b-status').textContent = 'Nice. Thanks for confirming.'; } catch (e) { err('b-err', e); } };
   $('b-again').onclick = async () => { try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
 
   // load screen: hide once the letters have landed (~2.2s) or the clip ends, and the app is ready; tap skips

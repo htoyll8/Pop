@@ -81,7 +81,13 @@
   .namebox button { position:absolute; right:6px; top:50%; transform:translateY(-50%); }
   .back { position:absolute; top:calc(env(safe-area-inset-top) + 14px); left:14px; z-index:4; width:auto; padding:10px 16px; margin:0; font-size:16px; background:rgba(255,255,255,.9); color:var(--ink); box-shadow:0 4px 14px rgba(0,0,0,.10); border-radius:999px; }
   /* waitlist */
-  button.link#w-bring { display:block; margin:6px auto 0; color:var(--muted); font-weight:800; font-size:15px; }
+  /* front door: big logo, one line, one button */
+  #s-intro.on { min-height:calc(100dvh - 56px); }
+  #s-intro .mid { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  #s-intro .i-logo { width:78%; max-width:340px; height:auto; display:block; }
+  #s-intro .tag { color:var(--muted); font-size:19px; font-weight:800; margin-top:14px; text-align:center; }
+  #s-intro .bottom { text-align:center; }
+  button.link#i-bring { display:block; margin:6px auto 0; color:var(--muted); font-weight:800; font-size:15px; }
   .sheet-bg { position:fixed; inset:0; background:rgba(20,24,40,.35); z-index:60; }
   .sheet { position:fixed; left:0; right:0; bottom:0; z-index:61; background:#fff; border-radius:24px 24px 0 0; padding:10px 22px calc(env(safe-area-inset-bottom) + 20px);
            max-width:480px; margin:0 auto; box-shadow:0 -10px 40px rgba(0,0,0,.18); animation:sheetup .3s cubic-bezier(.2,.9,.3,1); }
@@ -178,6 +184,15 @@
 <div id="splash" class="splash"><img id="splash-v" alt="pop" src="media/pop-intro.gif"></div>
 <div id="toast" class="toast" hidden><img id="toast-av" alt=""><div><div class="toast-t" id="toast-t"></div><div class="toast-s" id="toast-s"></div></div></div>
 <main>
+  <!-- 0. Front door: logo, tagline, Join the mix; organizers find the waitlist here -->
+  <section id="s-intro" class="screen">
+    <div class="mid"><img class="i-logo" id="i-logo" src="media/pop-logo-header.png" alt="pop"><div class="tag">Meet someone new at a booth.</div></div>
+    <div class="bottom">
+      <button id="i-go">Join the mix</button>
+      <button type="button" class="link bring" id="i-bring">Running an event? Bring Pop</button>
+    </div>
+  </section>
+
   <!-- 1. Welcome: logo on top, avatar as the star, name pre-filled, one button -->
   <section id="s-welcome" class="screen">
     <div class="brand" id="w-brand"><img class="w-logo" id="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
@@ -185,9 +200,8 @@
     <div class="bottom">
       <div class="hint">This is the name others will see.</div>
       <div class="namebox"><input id="w-name" autocomplete="off" aria-label="Your name"><span class="fakecaret" id="w-caret"></span><button type="button" class="link inline" id="w-shuffle-name" aria-label="New nickname">↻</button></div>
-      <button id="w-go">Meet someone new at a booth</button>
+      <button id="w-go">Find my match</button>
       <div class="err" id="w-err"></div>
-      <button type="button" class="link bring" id="w-bring">Running an event? Bring Pop</button>
     </div>
   </section>
 
@@ -360,8 +374,8 @@
       const { data: rows } = await sb.from('people').select('*').limit(1);
       if (rows && rows[0]) { me = rows[0]; return search(); }
       shuffle(); shuffleName();
-      show('welcome');
-    } catch (e) { show('welcome'); err('w-err', e); }
+      show('intro');
+    } catch (e) { shuffle(); shuffleName(); show('intro'); err('w-err', e); }
   }
   let mySeed = null, myAlias = null;
   const ADJ = ['Neon','Velvet','Copper','Lunar','Amber','Indigo','Mossy','Scarlet','Golden','Cobalt','Pearl','Ember'];
@@ -394,7 +408,13 @@
     $('wl-form').hidden = false; $('wl-done').hidden = true; $('wl-bg').hidden = false; $('wl').hidden = false;
   }
   function closeWaitlist() { $('wl').hidden = true; $('wl-bg').hidden = true; }
-  $('w-bring').onclick = () => openWaitlist('organizer', 'welcome');
+  $('i-bring').onclick = () => openWaitlist('organizer', 'welcome');
+  // Join the mix: the big logo shrinks into the corner as the avatar screen comes in
+  $('i-go').onclick = () => {
+    const from = $('i-logo').getBoundingClientRect();
+    show('welcome'); placeCaret();
+    flyLogo(from, $('w-logo'), () => setTimeout(startNudge, 300));
+  };
   $('wl-bg').onclick = closeWaitlist; $('wl-close').onclick = closeWaitlist;
   document.querySelectorAll('#wl-roles button').forEach(b => b.onclick = () => openWaitlist(b.dataset.role, wlSource));
   $('wl-go').onclick = async () => {
@@ -524,29 +544,29 @@
     if (im.complete) start(); else { im.onload = start; im.onerror = fin; }
     setTimeout(fin, 4000); $('splash').addEventListener('click', fin);
   });
+  // move a copy of the logo from one box to where `target` sits, then reveal target (and its ™ if it has one)
+  function flyLogo(from, target, done) {
+    const to = target.getBoundingClientRect(), tm = target.parentElement.querySelector('.tm');
+    const fly = document.createElement('img'); fly.src = 'media/pop-logo-header.png'; fly.alt = '';
+    Object.assign(fly.style, { position:'fixed', left: from.left + 'px', top: from.top + 'px', width: from.width + 'px', height:'auto', margin:0,
+      zIndex: 101, transformOrigin: '0 0', transition: 'transform .7s cubic-bezier(.65,0,.25,1)' });
+    document.body.appendChild(fly); target.style.visibility = 'hidden'; if (tm) { tm.style.transition = ''; tm.style.opacity = 0; }
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      fly.style.transform = `translate(${to.left - from.left}px, ${to.top - from.top}px) scale(${to.width / from.width})`;
+    }));
+    setTimeout(() => { target.style.visibility = ''; if (tm) { tm.style.transition = 'opacity .3s'; tm.style.opacity = 1; } fly.remove(); if (done) done(); }, 760);
+  }
   function endSplash() {
-    const sp = $('splash'), gif = $('splash-v'), target = $('w-logo');
-    const onWelcome = $('s-welcome').classList.contains('on') && target;
-    if (!onWelcome) { sp.classList.add('out'); setTimeout(() => sp.remove(), 500); return; }
+    const sp = $('splash'), gif = $('splash-v');
+    const target = $('s-intro').classList.contains('on') ? $('i-logo') : $('s-welcome').classList.contains('on') ? $('w-logo') : null;
+    if (!target) { sp.classList.add('out'); setTimeout(() => sp.remove(), 500); return; }
     // where the landed logo sits inside the animation's square (measured from the clip)
     const g = gif.getBoundingClientRect();
     const from = { left: g.left + g.width * 0.1872, top: g.top + g.height * 0.2962, width: g.width * 0.6372 };
-    const to = target.getBoundingClientRect();
-    const fly = document.createElement('img'); fly.src = 'media/pop-logo-header.png'; fly.alt = '';
-    Object.assign(fly.style, { position:'fixed', left: from.left + 'px', top: from.top + 'px', width: from.width + 'px', height:'auto',
-      zIndex: 101, transformOrigin: '0 0', transition: 'transform .7s cubic-bezier(.65,0,.25,1)' });
-    document.body.appendChild(fly); target.style.visibility = 'hidden'; document.querySelector('.tm').style.opacity = 0;
     gif.style.visibility = 'hidden'; sp.classList.add('out');
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      const s = to.width / from.width;
-      fly.style.transform = `translate(${to.left - from.left}px, ${to.top - from.top}px) scale(${s})`;
-    }));
-    setTimeout(() => {
-      target.style.visibility = ''; const tm = document.querySelector('.tm'); tm.style.transition = 'opacity .3s'; tm.style.opacity = 1;
-      fly.remove(); sp.remove();
-    }, 760);
+    flyLogo(from, target, () => sp.remove());
   }
-  Promise.all([splashDone, boot()]).finally(() => { placeCaret(); endSplash(); setTimeout(startNudge, 700); });
+  Promise.all([splashDone, boot()]).finally(() => { placeCaret(); endSplash(); if ($('s-welcome').classList.contains('on')) setTimeout(startNudge, 700); });
 })();
 </script>
 </body>

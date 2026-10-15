@@ -142,14 +142,15 @@
   #s-booth .arrived { padding:12px; font-size:17px; margin-bottom:10px; }
   #s-booth #b-status { min-height:0; margin:0 0 4px; }
   #s-booth #b-again { padding:8px; margin:0; font-size:16px; }
-  .rain i { position:absolute; top:-30px; display:block; opacity:.95; animation:fall var(--dur) var(--delay) cubic-bezier(.3,.1,.6,1) forwards; }
+  .rain i { position:absolute; top:110px; display:block; opacity:.95; animation:fall var(--dur) var(--delay) cubic-bezier(.3,.1,.6,1) forwards; }
   .rain i.sq { width:11px; height:11px; border-radius:2px; }
   .rain i.strip { width:6px; height:16px; border-radius:2px; }
   .rain i.dot { width:10px; height:10px; border-radius:50%; }
   .rain i.tri { width:14px; height:12px; clip-path:polygon(50% 0, 100% 100%, 0 100%); }
   .rain i.sq2 { width:20px; height:10px; background:none !important; border:3px solid var(--c); border-radius:10px 10px 0 0; border-bottom:0; }
   @keyframes fall { 0% { transform:translate(0,0) rotate(0); opacity:1; }
-                    100% { transform:translate(var(--dx), 110vh) rotate(var(--rot)); opacity:.9; } }
+                    85% { opacity:.9; }
+                    100% { transform:translate(var(--dx), calc(100vh + 360px)) rotate(var(--rot)); opacity:0; } }
   @media (prefers-reduced-motion: reduce) { .rain i { animation:none; display:none; } }
   .confetti i { position:absolute; width:12px; height:12px; transform:rotate(45deg); border-radius:2px; opacity:.95; }
   .pair { display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; z-index:1; }

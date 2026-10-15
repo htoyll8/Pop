@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root { --ink:#2f3b45; --muted:#6b7a86; --green:#6cc070; --green2:#57a35b; --pink:#f28bb3; --purple:#6a7be8; --purple2:#5a6bd8; --lav:#e6e9ff; --card:#f6f8fa; }
+  :root { --ink:#2f3b45; --muted:#6b7a86; --green:#6cc070; --green2:#57a35b; --pink:#f28bb3; --purple:#6a7be8; --purple2:#5a6bd8; --blue:#318bcf; --blue2:#2873ab; --lav:#e6e9ff; --card:#f6f8fa; }
   * { box-sizing:border-box; }
   body { margin:0; background:#fff; color:var(--ink); font:17px/1.45 "Nunito",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; font-weight:600; min-height:100dvh; display:flex; flex-direction:column; }
   main { flex:1; display:flex; flex-direction:column; padding:28px 22px; max-width:440px; margin:0 auto; width:100%; }
@@ -19,10 +19,10 @@
   .stage { flex:1; display:grid; place-items:center; position:relative; min-height:240px; }
   .bottom { padding-bottom:12px; }
   input { width:100%; padding:15px 16px; border-radius:16px; border:2px solid #e6ebef; background:#fff; color:var(--ink); font:inherit; font-size:17px; margin:0 0 14px; text-align:center; }
-  input:focus { outline:none; border-color:var(--purple); }
-  button { width:100%; padding:17px; border:0; border-radius:18px; font:inherit; font-size:19px; font-weight:900; color:#fff; background:var(--purple); margin:0 0 12px; box-shadow:0 5px 0 var(--purple2); letter-spacing:.01em; }
+  input:focus { outline:none; border-color:var(--blue); }
+  button { width:100%; padding:17px; border:0; border-radius:18px; font:inherit; font-size:19px; font-weight:900; color:#fff; background:var(--blue); margin:0 0 12px; box-shadow:0 5px 0 var(--blue2); letter-spacing:.01em; }
   button.link.inline { padding:2px 8px; margin:0; font-size:18px; vertical-align:baseline; }
-  button.link { width:auto; display:inline-block; background:transparent; color:var(--purple2); box-shadow:none; padding:10px 14px; font-size:16px; margin-top:8px; }
+  button.link { width:auto; display:inline-block; background:transparent; color:var(--blue2); box-shadow:none; padding:10px 14px; font-size:16px; margin-top:8px; }
   button.secondary { background:#fff; color:var(--muted); box-shadow:0 5px 0 #e6ebef; border:2px solid #e6ebef; }
   button:active { transform:translateY(3px); box-shadow:none; }
   button:disabled { opacity:.45; box-shadow:none; transform:none; }
@@ -35,7 +35,7 @@
   .bob { animation:bob 2.2s ease-in-out infinite; }
   @keyframes bob { 0%,100% { transform:translateY(0) rotate(-4deg); } 50% { transform:translateY(-16px) rotate(4deg); } }
   .dots { display:flex; gap:10px; justify-content:center; margin-top:18px; }
-  .dots i { width:12px; height:12px; border-radius:50%; background:var(--purple); animation:bounce 1.2s ease-in-out infinite; }
+  .dots i { width:12px; height:12px; border-radius:50%; background:var(--blue); animation:bounce 1.2s ease-in-out infinite; }
   .dots i:nth-child(2) { animation-delay:.15s; } .dots i:nth-child(3) { animation-delay:.3s; }
   @keyframes bounce { 0%,100% { transform:translateY(0); opacity:.5; } 50% { transform:translateY(-10px); opacity:1; } }
   .avatar { width:150px; height:150px; border-radius:50%; background:#f1f3ff; object-fit:cover; }
@@ -62,9 +62,11 @@
   @keyframes blink { 50% { opacity:0; } }
   .namebox input::placeholder { color:#b3bcc4; font-weight:800; }
   .w-hero { width:200px; height:200px; }
-  .namebox { position:relative; margin:0 0 14px; }
+  .namebox { position:relative; margin:0 0 8px; }
+  .hint { font-size:14px; color:var(--muted); text-align:center; margin:0 0 14px; }
   .namebox input { margin:0; padding-right:52px; font-weight:800; font-size:19px; text-align:left; }
   .namebox button { position:absolute; right:6px; top:50%; transform:translateY(-50%); }
+  .back { position:absolute; top:calc(env(safe-area-inset-top) + 14px); left:14px; z-index:4; width:auto; padding:10px 16px; margin:0; font-size:16px; background:rgba(255,255,255,.9); color:var(--ink); box-shadow:0 4px 14px rgba(0,0,0,.10); border-radius:999px; }
   /* load screen */
   .splash { position:fixed; inset:0; z-index:100; background:#fff; display:grid; place-items:center; transition:opacity .45s ease; }
   .splash.out { opacity:0; pointer-events:none; }
@@ -115,6 +117,7 @@
     <div class="stage"><div style="text-align:center"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><div><button type="button" class="link" id="w-shuffle">↻ New look</button></div></div></div>
     <div class="bottom">
       <div class="namebox"><input id="w-name" autocomplete="off" aria-label="Your name"><span class="fakecaret" id="w-caret"></span><button type="button" class="link inline" id="w-shuffle-name" aria-label="New nickname">↻</button></div>
+      <div class="hint">This is the name you'll have tonight.</div>
       <button id="w-go">Meet someone new at a booth</button>
       <div class="err" id="w-err"></div>
     </div>
@@ -123,6 +126,7 @@
   <!-- 2. Waiting: a full-screen crowd drifting left to right, you in the middle -->
   <section id="s-wait" class="screen crowd">
     <div class="crowd-field" id="crowd"><div class="crowd-track" id="crowd-track"></div></div>
+    <button type="button" class="back" id="wt-back" aria-label="Back">‹ Back</button>
     <div class="stage over">
       <div class="panel">
         <h1>Finding someone…</h1>
@@ -266,11 +270,21 @@
   ['input','focus','blur'].forEach(ev => $('w-name').addEventListener(ev, placeCaret));
   window.addEventListener('resize', placeCaret);
   $('w-shuffle').onclick = shuffle; $('w-shuffle-name').onclick = shuffleName;
+  $('wt-back').onclick = async () => {
+    stopPolls(); try { await rpc('leave_pool'); } catch (_) {}
+    mySeed = me.avatar_seed || me.alias; $('w-avatar').src = avatarFor(mySeed);
+    myAlias = me.alias; $('w-name').placeholder = myAlias; $('w-name').value = me.name || '';
+    $('w-go').disabled = false; err('w-err'); show('welcome'); placeCaret();
+  };
   $('w-go').onclick = async () => {
     $('w-go').disabled = true; err('w-err');
     const typed = $('w-name').value.trim();
     const ownName = typed && typed !== myAlias ? typed : null;   // empty box = keep the nickname; anything typed is their name
-    try { me = await rpc('join_event', { p_name: ownName, p_avatar: mySeed, p_alias: myAlias }); search(); }
+    try {
+      me = me ? await rpc('update_profile', { p_name: ownName, p_avatar: mySeed, p_alias: myAlias })
+              : await rpc('join_event', { p_name: ownName, p_avatar: mySeed, p_alias: myAlias });
+      search();
+    }
     catch (e) { err('w-err', e); $('w-go').disabled = false; }
   };
 

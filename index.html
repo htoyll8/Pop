@@ -63,8 +63,13 @@
   .namebox input::placeholder { color:#b3bcc4; font-weight:800; }
   .sticker { position:relative; display:inline-block; overflow:visible; padding:24px; margin:-24px; cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; }
   .sticker:active { transform:scale(.96); }
-  .sticker .badge { position:absolute; z-index:3; right:30px; bottom:54px; width:46px; height:46px; border-radius:50%; background:#fff; color:var(--ink);
-                    display:grid; place-items:center; font-size:22px; font-weight:900; box-shadow:0 6px 14px rgba(47,59,69,.25); }
+  .tapme { position:absolute; z-index:3; top:10px; right:-6px; background:#fff; color:var(--ink); font-weight:900; font-size:16px;
+            padding:8px 14px; border-radius:16px; box-shadow:0 6px 16px rgba(47,59,69,.20); transition:opacity .35s, transform .35s; white-space:nowrap; }
+  .tapme:after { content:""; position:absolute; left:16px; bottom:-7px; width:14px; height:14px; background:#fff; transform:rotate(45deg); border-radius:3px; }
+  .tapme.gone { opacity:0; transform:translateY(-6px) scale(.9); pointer-events:none; }
+  .sticker.wiggle .w-hero { animation:wiggle .7s ease-in-out; }
+  @keyframes wiggle { 0%,100% { transform:rotate(0); } 20% { transform:rotate(-7deg); } 40% { transform:rotate(6deg); } 60% { transform:rotate(-4deg); } 80% { transform:rotate(2deg); } }
+  @media (prefers-reduced-motion: reduce) { .sticker.wiggle .w-hero { animation:none; } }
   .w-hero { display:block; margin:0 auto; width:230px; height:230px; background:none; border-radius:0;
             filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff)
                     drop-shadow(0 10px 12px rgba(47,59,69,.28)); }
@@ -120,7 +125,7 @@
   <!-- 1. Welcome: logo on top, avatar as the star, name pre-filled, one button -->
   <section id="s-welcome" class="screen">
     <div class="brand" id="w-brand"><img class="w-logo" id="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
-    <div class="stage"><div class="sticker" id="w-shuffle" role="button" tabindex="0" aria-label="Change your look"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><span class="badge" aria-hidden="true">↻</span></div></div>
+    <div class="stage"><div class="sticker" id="w-shuffle" role="button" tabindex="0" aria-label="Change your look"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><span class="tapme" id="w-tapme" aria-hidden="true">Tap me!</span></div></div>
     <div class="bottom">
       <div class="hint">This is the name others will see.</div>
       <div class="namebox"><input id="w-name" autocomplete="off" aria-label="Your name"><span class="fakecaret" id="w-caret"></span><button type="button" class="link inline" id="w-shuffle-name" aria-label="New nickname">↻</button></div>
@@ -276,7 +281,13 @@
   }
   ['input','focus','blur'].forEach(ev => $('w-name').addEventListener(ev, placeCaret));
   window.addEventListener('resize', placeCaret);
-  $('w-shuffle').onclick = shuffle; $('w-shuffle-name').onclick = shuffleName;
+  // nudge: wiggle the sticker now and then until it's tapped once; the bubble goes away after the first tap
+  let tapped = false, wiggleTimer = null;
+  function wiggle() { const s = $('w-shuffle'); if (tapped || !s) return; s.classList.remove('wiggle'); void s.offsetWidth; s.classList.add('wiggle'); }
+  function startNudge() { if (tapped) return; clearInterval(wiggleTimer); setTimeout(wiggle, 400); wiggleTimer = setInterval(wiggle, 4500); }
+  $('w-shuffle').onclick = () => { shuffle(); if (!tapped) { tapped = true; clearInterval(wiggleTimer); $('w-tapme').classList.add('gone'); } };
+  $('w-shuffle').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('w-shuffle').onclick(); } };
+  $('w-shuffle-name').onclick = shuffleName;
   $('wt-back').onclick = async () => {
     stopPolls(); try { await rpc('leave_pool'); } catch (_) {}
     mySeed = me.avatar_seed || me.alias; $('w-avatar').src = avatarBare(mySeed);
@@ -421,7 +432,7 @@
       fly.remove(); sp.remove();
     }, 760);
   }
-  Promise.all([splashDone, boot()]).finally(() => { placeCaret(); endSplash(); });
+  Promise.all([splashDone, boot()]).finally(() => { placeCaret(); endSplash(); setTimeout(startNudge, 700); });
 })();
 </script>
 </body>

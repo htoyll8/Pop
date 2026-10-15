@@ -62,8 +62,8 @@
   @keyframes blink { 50% { opacity:0; } }
   .namebox input::placeholder { color:#b3bcc4; font-weight:800; }
   .w-hero { width:200px; height:200px; }
-  .namebox { position:relative; margin:0 0 8px; }
-  .hint { font-size:14px; color:var(--muted); text-align:center; margin:0 0 14px; }
+  .namebox { position:relative; margin:0 0 14px; }
+  .hint { font-size:14px; color:var(--muted); text-align:left; margin:0 0 6px 4px; }
   .namebox input { margin:0; padding-right:52px; font-weight:800; font-size:19px; text-align:left; }
   .namebox button { position:absolute; right:6px; top:50%; transform:translateY(-50%); }
   .back { position:absolute; top:calc(env(safe-area-inset-top) + 14px); left:14px; z-index:4; width:auto; padding:10px 16px; margin:0; font-size:16px; background:rgba(255,255,255,.9); color:var(--ink); box-shadow:0 4px 14px rgba(0,0,0,.10); border-radius:999px; }
@@ -116,8 +116,8 @@
     <div class="brand" id="w-brand"><img class="w-logo" id="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
     <div class="stage"><div style="text-align:center"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><div><button type="button" class="link" id="w-shuffle">↻ New look</button></div></div></div>
     <div class="bottom">
-      <div class="namebox"><input id="w-name" autocomplete="off" aria-label="Your name"><span class="fakecaret" id="w-caret"></span><button type="button" class="link inline" id="w-shuffle-name" aria-label="New nickname">↻</button></div>
       <div class="hint">This is the name you'll have tonight.</div>
+      <div class="namebox"><input id="w-name" autocomplete="off" aria-label="Your name"><span class="fakecaret" id="w-caret"></span><button type="button" class="link inline" id="w-shuffle-name" aria-label="New nickname">↻</button></div>
       <button id="w-go">Meet someone new at a booth</button>
       <div class="err" id="w-err"></div>
     </div>

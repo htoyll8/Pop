@@ -208,7 +208,7 @@
   const TIMEOUT_MS = 10 * 60 * 1000, POLL_MS = 3000;
   const ANIMAL = { Otter:'🦦', Heron:'🪶', Lynx:'🐱', Falcon:'🦅', Fox:'🦊', Badger:'🦡', Ibis:'🦩', Marten:'🐾', Puffin:'🐧', Stoat:'🐿️', Wren:'🐦', Yak:'🐂' };
   const emojiFor = alias => ANIMAL[(alias || '').split(' ').pop()] || '🫧';
-  const AV = 'https://api.dicebear.com/9.x/adventurer/svg?backgroundColor=eef0f3&backgroundType=solid&radius=50&seed=';
+  const AV = 'https://api.dicebear.com/9.x/adventurer/svg?backgroundColor=cfe5f6,ffd4d0,fbd2e1,fff0b3&backgroundType=solid&radius=50&seed=';
   const avatarFor = seed => AV + encodeURIComponent(seed || 'stranger');
   // the crowd: a jittered grid of generic faces, duplicated once so the drift wraps seamlessly
   (function buildCrowd() {

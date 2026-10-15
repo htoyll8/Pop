@@ -80,6 +80,19 @@
   .namebox input { margin:0; padding-right:52px; font-weight:800; font-size:19px; text-align:left; }
   .namebox button { position:absolute; right:6px; top:50%; transform:translateY(-50%); }
   .back { position:absolute; top:calc(env(safe-area-inset-top) + 14px); left:14px; z-index:4; width:auto; padding:10px 16px; margin:0; font-size:16px; background:rgba(255,255,255,.9); color:var(--ink); box-shadow:0 4px 14px rgba(0,0,0,.10); border-radius:999px; }
+  /* waitlist */
+  .bring { display:block; margin:6px auto 0; color:var(--muted); font-weight:800; font-size:15px; }
+  .sheet-bg { position:fixed; inset:0; background:rgba(20,24,40,.35); z-index:60; }
+  .sheet { position:fixed; left:0; right:0; bottom:0; z-index:61; background:#fff; border-radius:24px 24px 0 0; padding:10px 22px calc(env(safe-area-inset-bottom) + 20px);
+           max-width:480px; margin:0 auto; box-shadow:0 -10px 40px rgba(0,0,0,.18); animation:sheetup .3s cubic-bezier(.2,.9,.3,1); }
+  @keyframes sheetup { from { transform:translateY(100%); } to { transform:translateY(0); } }
+  .sheet .grab { width:40px; height:5px; border-radius:3px; background:#d9dee3; margin:0 auto 14px; }
+  .sheet h2 { font-size:24px; font-weight:900; margin:0 0 14px; text-align:center; }
+  .roles { display:flex; gap:8px; margin:0 0 12px; }
+  .roles button { flex:1; margin:0; padding:11px 4px; font-size:15px; background:#fff; color:var(--ink); border:2px solid #e6ebef; box-shadow:none; }
+  .roles button.on { border-color:var(--blue); color:var(--blue2); background:#eef6fc; }
+  .sheet textarea { width:100%; padding:14px 16px; border-radius:16px; border:2px solid #e6ebef; font:inherit; font-size:16px; margin:0 0 14px; resize:none; color:var(--ink); }
+  .sheet textarea:focus { outline:none; border-color:var(--blue); }
   /* load screen */
   .splash { position:fixed; inset:0; z-index:100; background:#fff; display:grid; place-items:center; transition:opacity .45s ease; }
   .splash.out { opacity:0; pointer-events:none; }
@@ -174,6 +187,7 @@
       <div class="namebox"><input id="w-name" autocomplete="off" aria-label="Your name"><span class="fakecaret" id="w-caret"></span><button type="button" class="link inline" id="w-shuffle-name" aria-label="New nickname">↻</button></div>
       <button id="w-go">Meet someone new at a booth</button>
       <div class="err" id="w-err"></div>
+      <button type="button" class="link bring" id="w-bring">Running an event? Bring Pop</button>
     </div>
   </section>
 
@@ -243,6 +257,21 @@
     </div>
   </section>
 </main>
+<div class="sheet-bg" id="wl-bg" hidden></div>
+<div class="sheet" id="wl" hidden role="dialog" aria-modal="true" aria-labelledby="wl-title">
+  <div class="grab"></div>
+  <div id="wl-form">
+    <h2 id="wl-title">Bring Pop to your event</h2>
+    <div class="roles" id="wl-roles">
+      <button type="button" data-role="organizer" class="on">Organizer</button><button type="button" data-role="vendor">Vendor</button><button type="button" data-role="attendee">Attendee</button>
+    </div>
+    <input id="wl-email" type="email" inputmode="email" autocomplete="email" placeholder="Your email">
+    <textarea id="wl-note" rows="3" placeholder="Tell us about your event (optional)"></textarea>
+    <button id="wl-go">Join the waitlist</button>
+    <div class="err" id="wl-err"></div>
+  </div>
+  <div id="wl-done" hidden><h2>Thanks!</h2><p class="sub">We'll be in touch.</p><button id="wl-close">Done</button></div>
+</div>
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -356,6 +385,27 @@
     if (!tapped) { tapped = true; clearInterval(wiggleTimer); } };
   $('w-shuffle').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('w-shuffle').onclick(); } };
   $('w-shuffle-name').onclick = shuffleName;
+  // waitlist sheet
+  let wlRole = 'organizer', wlSource = 'welcome';
+  function openWaitlist(role, source) {
+    wlRole = role; wlSource = source; err('wl-err');
+    document.querySelectorAll('#wl-roles button').forEach(b => b.classList.toggle('on', b.dataset.role === role));
+    $('wl-note').placeholder = role === 'organizer' ? 'Tell us about your event (optional)' : 'Anything you want us to know (optional)';
+    $('wl-form').hidden = false; $('wl-done').hidden = true; $('wl-bg').hidden = false; $('wl').hidden = false;
+  }
+  function closeWaitlist() { $('wl').hidden = true; $('wl-bg').hidden = true; }
+  $('w-bring').onclick = () => openWaitlist('organizer', 'welcome');
+  $('wl-bg').onclick = closeWaitlist; $('wl-close').onclick = closeWaitlist;
+  document.querySelectorAll('#wl-roles button').forEach(b => b.onclick = () => openWaitlist(b.dataset.role, wlSource));
+  $('wl-go').onclick = async () => {
+    const email = $('wl-email').value.trim(); err('wl-err');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err('wl-err', 'Please enter a valid email.');
+    $('wl-go').disabled = true;
+    try { await session(); await rpc('join_waitlist', { p_email: email, p_role: wlRole, p_note: $('wl-note').value || null, p_source: wlSource });
+          $('wl-form').hidden = true; $('wl-done').hidden = false; }
+    catch (e) { err('wl-err', e); }
+    finally { $('wl-go').disabled = false; }
+  };
   $('wt-back').onclick = async () => {
     stopPolls(); try { await rpc('leave_pool'); } catch (_) {}
     mySeed = me.avatar_seed || me.alias; $('w-avatar').src = avatarBare(mySeed);

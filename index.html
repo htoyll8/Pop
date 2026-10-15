@@ -130,6 +130,18 @@
   .rain { position:absolute; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
   .screen.purple .top, .screen.purple .stage, .screen.purple .bottom, .screen.purple .brand { position:relative; z-index:1; }
   .screen.purple .brand { position:absolute; }
+  /* booth screen: fit on one phone screen without scrolling */
+  #s-booth .top { padding-top:calc(env(safe-area-inset-top) + 56px); }
+  #s-booth h1 { font-size:27px; margin-bottom:4px; }
+  #s-booth .sub { font-size:16px; margin-bottom:0; }
+  #s-booth .stage { min-height:175px; }
+  #s-booth .duo .who { width:124px; }
+  #s-booth .duo .who img { width:112px; height:112px; }
+  #s-booth .duo .shake { font-size:36px; margin-top:-24px; }
+  #s-booth .card { padding:12px 16px; margin-bottom:10px; }
+  #s-booth .arrived { padding:12px; font-size:17px; margin-bottom:10px; }
+  #s-booth #b-status { min-height:0; margin:0 0 4px; }
+  #s-booth #b-again { padding:8px; margin:0; font-size:16px; }
   .rain i { position:absolute; top:-30px; display:block; opacity:.95; animation:fall var(--dur) var(--delay) cubic-bezier(.3,.1,.6,1) forwards; }
   .rain i.sq { width:11px; height:11px; border-radius:2px; }
   .rain i.strip { width:6px; height:16px; border-radius:2px; }

@@ -43,7 +43,7 @@ def ctext(y, t, f, fill):
     return (W - w) / 2
 
 # headline as a search bar (modeled on the bar in Tyler's screenshot): "Make a friend" is typed,
-# " at a booth." is the gray autocomplete suggestion. "Pop Mode" stands in for the bar's mode button.
+# " at a booth." is the gray autocomplete suggestion.
 def SF(size, weight):
     f = ImageFont.truetype("/System/Library/Fonts/SFNS.ttf", size)
     try: f.set_variation_by_axes([100, 28, 400, weight])  # width, optical size, grade, weight
@@ -62,17 +62,7 @@ d.rounded_rectangle([bx0, by0, bx0 + bw, by0 + bh], radius=bh // 2, fill="white"
 # plus
 px = bx0 + 200; L = 66
 d.line([px - L, cy, px + L, cy], fill=BAR_INK, width=22); d.line([px, cy - L, px, cy + L], fill=BAR_INK, width=22)
-# mode pill on the right
-pill_t = "Pop Mode"; pf = SF(112, 510); ptw = d.textlength(pill_t, font=pf)
-pw, ph = 215 + ptw + 80, 290
-pr = bx0 + bw - 70; pl = pr - pw
-d.rounded_rectangle([pl, cy - ph / 2, pr, cy + ph / 2], radius=ph // 2, fill="#f0f2f5")
-mx, my, r = pl + 125, cy - 8, 40
-d.ellipse([mx - r, my - r, mx + r, my + r], outline=BAR_INK, width=17)
-d.line([mx + r * 0.7, my + r * 0.7, mx + r * 1.6, my + r * 1.6], fill=BAR_INK, width=19)
-sx, sy, k = mx + 62, my - 58, 26   # small sparkle
-d.polygon([(sx, sy - k), (sx + k * 0.3, sy - k * 0.3), (sx + k, sy), (sx + k * 0.3, sy + k * 0.3), (sx, sy + k), (sx - k * 0.3, sy + k * 0.3), (sx - k, sy), (sx - k * 0.3, sy - k * 0.3)], fill=BAR_INK)
-d.text((pl + 215, cy - 74), pill_t, font=pf, fill=BAR_INK)
+pl = bx0 + bw - 110   # right edge for the icons (the mode pill was removed)
 # camera
 cx = pl - 165; s2 = 66
 d.rounded_rectangle([cx - s2, cy - s2, cx + s2, cy + s2], radius=34, outline=ICON, width=18)
@@ -85,7 +75,7 @@ d.line([mx2, cy + 62, mx2, cy + 98], fill=ICON, width=16)
 
 # typed text, cursor, ghost suggestion: largest size that fits between the plus and the mic
 tx = bx0 + 370; room = (mx2 - 170) - tx
-size = 420
+size = 290   # fixed; the space freed by the pill goes between the text and the icons
 while size > 120:
     head = SF(size, 480)
     if d.textlength(typed + ghost, font=head) + 40 <= room: break

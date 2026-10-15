@@ -83,16 +83,29 @@
   /* waitlist */
   /* front door: big logo, one line, one button */
   #s-intro.on { min-height:calc(100dvh - 56px); }
-  #s-intro .mid { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-  #s-intro .i-logo { width:78%; max-width:340px; height:auto; display:block; }
-  #s-intro .tag { color:var(--muted); font-size:19px; font-weight:800; margin-top:14px; text-align:center; }
-  #s-intro .bottom { text-align:center; }
+  #s-intro .mid { flex:1; }
+  /* the logo sits exactly where the intro animation leaves it (placed by placeIntro) */
+  #s-intro .i-logo { position:fixed; height:auto; display:block; z-index:2; }
+  #s-intro .tag { position:fixed; left:0; right:0; padding:0 24px; color:var(--muted); font-size:19px; font-weight:800; text-align:center; z-index:2; }
+  #s-intro .bottom { text-align:center; position:relative; z-index:3; }
+  /* Join the mix: words + a bouncing arrow, not a second big button */
+  button.cta-down { width:auto; display:inline-flex; flex-direction:column; align-items:center; gap:8px; background:transparent; box-shadow:none; color:var(--blue2); font-size:21px; padding:8px 24px; margin:0 0 10px; }
+  button.cta-down:active { transform:none; }
+  .cta-down .chev { width:46px; height:46px; border-radius:50%; background:var(--blue); display:grid; place-items:center; box-shadow:0 4px 0 var(--blue2); animation:nudge 1.6s ease-in-out infinite; }
+  .cta-down .chev svg { width:22px; height:22px; }
+  @keyframes nudge { 0%,100% { transform:translateY(0); } 50% { transform:translateY(7px); } }
+  #s-welcome.rise { animation:rise .45s cubic-bezier(.2,.8,.2,1); }
+  @keyframes rise { from { transform:translateY(60px); opacity:0; } to { transform:none; opacity:1; } }
   button.link#i-bring { display:block; margin:6px auto 0; color:var(--muted); font-weight:800; font-size:15px; }
   .sheet-bg { position:fixed; inset:0; background:rgba(20,24,40,.35); z-index:60; }
   .sheet { position:fixed; left:0; right:0; bottom:0; z-index:61; background:#fff; border-radius:24px 24px 0 0; padding:10px 22px calc(env(safe-area-inset-bottom) + 20px);
            max-width:480px; margin:0 auto; box-shadow:0 -10px 40px rgba(0,0,0,.18); animation:sheetup .3s cubic-bezier(.2,.9,.3,1); }
   @keyframes sheetup { from { transform:translateY(100%); } to { transform:translateY(0); } }
   .sheet .grab { width:40px; height:5px; border-radius:3px; background:#d9dee3; margin:0 auto 14px; }
+  .sheet .x { position:absolute; top:12px; right:12px; width:36px; height:36px; padding:0; margin:0; border-radius:50%; background:#f0f3f6; color:var(--muted); box-shadow:none; font-size:22px; line-height:36px; font-weight:800; }
+  .sheet .x:active { transform:none; background:#e4e9ee; }
+  .sheet.dragging { transition:none; }
+  .sheet.leaving { transition:transform .22s ease-in; }
   .sheet h2 { font-size:24px; font-weight:900; margin:0 0 14px; text-align:center; }
   .roles { display:flex; gap:8px; margin:0 0 12px; }
   .roles button { flex:1; margin:0; padding:11px 4px; font-size:15px; background:#fff; color:var(--ink); border:2px solid #e6ebef; box-shadow:none; }
@@ -186,10 +199,10 @@
 <main>
   <!-- 0. Front door: logo, tagline, Join the mix; organizers find the waitlist here -->
   <section id="s-intro" class="screen">
-    <div class="mid"><img class="i-logo" id="i-logo" src="media/pop-logo-header.png" alt="pop"><div class="tag">Meet someone new at a booth.</div></div>
+    <div class="mid"><img class="i-logo" id="i-logo" src="media/pop-logo-header.png" alt="pop"><div class="tag" id="i-tag">Meet someone new at a booth.</div></div>
     <div class="bottom">
-      <button id="i-go">Join the mix</button>
-      <button type="button" class="link bring" id="i-bring">Running an event? Bring Pop</button>
+      <button type="button" class="cta-down" id="i-go">Join the mix<span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg></span></button>
+      <button type="button" class="link bring" id="i-bring">Running an event? Bring Pop!</button>
     </div>
   </section>
 
@@ -273,7 +286,7 @@
 </main>
 <div class="sheet-bg" id="wl-bg" hidden></div>
 <div class="sheet" id="wl" hidden role="dialog" aria-modal="true" aria-labelledby="wl-title">
-  <div class="grab"></div>
+  <div class="grab"></div><button type="button" class="x" id="wl-x" aria-label="Close">×</button>
   <div id="wl-form">
     <h2 id="wl-title">Bring Pop to your event</h2>
     <div class="roles" id="wl-roles">
@@ -407,15 +420,52 @@
     $('wl-note').placeholder = role === 'organizer' ? 'Tell us about your event (optional)' : 'Anything you want us to know (optional)';
     $('wl-form').hidden = false; $('wl-done').hidden = true; $('wl-bg').hidden = false; $('wl').hidden = false;
   }
-  function closeWaitlist() { $('wl').hidden = true; $('wl-bg').hidden = true; }
+  function closeWaitlist() {
+    const sh = $('wl'); if (sh.hidden) return;
+    sh.classList.remove('dragging'); sh.classList.add('leaving'); sh.style.transform = 'translateY(100%)';
+    setTimeout(() => { sh.hidden = true; $('wl-bg').hidden = true; sh.classList.remove('leaving'); sh.style.transform = ''; }, 220);
+  }
+  // pull the sheet down to close it (from anywhere except while typing in a field)
+  (() => {
+    const sh = $('wl'); let y0 = null, dy = 0, t0 = 0;
+    sh.addEventListener('touchstart', e => {
+      if (e.target.closest('input, textarea')) return;
+      y0 = e.touches[0].clientY; dy = 0; t0 = Date.now(); sh.classList.add('dragging');
+    }, { passive: true });
+    sh.addEventListener('touchmove', e => {
+      if (y0 === null) return;
+      dy = Math.max(0, e.touches[0].clientY - y0); sh.style.transform = `translateY(${dy}px)`;
+      if (dy > 0) e.preventDefault();
+    }, { passive: false });
+    sh.addEventListener('touchend', () => {
+      if (y0 === null) return; y0 = null; sh.classList.remove('dragging');
+      const fast = dy > 30 && dy / Math.max(1, Date.now() - t0) > 0.5;
+      if (dy > sh.offsetHeight * 0.25 || fast) closeWaitlist();
+      else { sh.classList.add('leaving'); sh.style.transform = ''; setTimeout(() => sh.classList.remove('leaving'), 220); }
+    });
+  })();
   $('i-bring').onclick = () => openWaitlist('organizer', 'welcome');
   // Join the mix: the big logo shrinks into the corner as the avatar screen comes in
+  // the intro animation is a square, 130vw wide (max 820px on big screens), centered; the logo lands at these fractions of it
+  function placeIntro() {
+    const W = innerWidth, H = innerHeight, g = W >= 700 ? Math.min(1.3 * W, 820) : 1.3 * W;
+    const left = W / 2 - g / 2 + g * 0.1872, top = H / 2 - g / 2 + g * 0.2962, width = g * 0.6372;
+    const L = $('i-logo'); Object.assign(L.style, { left: left + 'px', top: top + 'px', width: width + 'px' });
+    $('i-tag').style.top = (top + width * 584 / 900 + 14) + 'px';
+  }
+  placeIntro(); window.addEventListener('resize', placeIntro);
+  // swipe up on the front screen does the same as tapping Join the mix
+  let swipeY = null;
+  $('s-intro').addEventListener('touchstart', e => { swipeY = e.touches[0].clientY; }, { passive: true });
+  $('s-intro').addEventListener('touchend', e => { if (swipeY !== null && swipeY - e.changedTouches[0].clientY > 50) $('i-go').onclick(); swipeY = null; });
   $('i-go').onclick = () => {
+    if (!$('s-intro').classList.contains('on')) return;
     const from = $('i-logo').getBoundingClientRect();
     show('welcome'); placeCaret();
+    const w = $('s-welcome'); w.classList.remove('rise'); void w.offsetWidth; w.classList.add('rise');
     flyLogo(from, $('w-logo'), () => setTimeout(startNudge, 300));
   };
-  $('wl-bg').onclick = closeWaitlist; $('wl-close').onclick = closeWaitlist;
+  $('wl-bg').onclick = closeWaitlist; $('wl-close').onclick = closeWaitlist; $('wl-x').onclick = closeWaitlist;
   document.querySelectorAll('#wl-roles button').forEach(b => b.onclick = () => openWaitlist(b.dataset.role, wlSource));
   $('wl-go').onclick = async () => {
     const email = $('wl-email').value.trim(); err('wl-err');

@@ -1,7 +1,7 @@
 # "Make a friend at a booth." wall poster, 18 x 24 in at 300 dpi.
 # Layout follows Tyler's Canva draft (Image Layout with Text Space.png), widened to 3:4.
 # Run from this folder: python3 make_friend_18x24.py
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 W, H = 5400, 7200
 INK, MUTED, ACCENT = "#2f3b45", "#6b7a86", "#ff6b8a"
@@ -29,8 +29,8 @@ front = [("excited-5", 0.80, 0.10, 0.30, 8), ("excited-7", 0.17, 0.885, 0.36, -7
 for name, x, y, w, a in behind:
     put(load(name, int(w * W), a), x * W, y * H)
 
-qr = load("qr-sticker", int(0.66 * W))
-qcx, qcy = 0.5 * W, 0.50 * H
+qr = load("qr-sticker", int(0.60 * W))
+qcx, qcy = 0.5 * W, 0.52 * H
 put(qr, qcx, qcy)
 
 for name, x, y, w, a in front:
@@ -42,11 +42,25 @@ def ctext(y, t, f, fill):
     w = d.textlength(t, font=f); d.text(((W - w) / 2, y), t, font=f, fill=fill)
     return (W - w) / 2
 
-# headline in the gap between the logo row and the QR card, with the accent under "Make a friend"
-head = F(330, "Black"); verb, rest = "Make a friend", " at a booth."
-vw = d.textlength(verb, font=head); x0 = (W - vw - d.textlength(rest, font=head)) / 2; y0 = 1330
-d.text((x0, y0), verb, font=head, fill=INK); d.text((x0 + vw, y0), rest, font=head, fill=INK)
-d.rounded_rectangle([x0 - 20, y0 + 440, x0 + vw + 20, y0 + 490], radius=25, fill=ACCENT)
+# headline as a search box with an autocomplete: "Make a friend" is typed, " at a booth." is the ghost suggestion
+head = F(250, "Black"); typed, ghost = "Make a friend", " at a booth."
+tw, gw = d.textlength(typed, font=head), d.textlength(ghost, font=head)
+icon, padx, ph = 430, 170, 440
+pw = icon + tw + 60 + gw + padx; px0 = (W - pw) / 2; py0 = 1640
+shadow = Image.new("L", (W, H), 0)
+ImageDraw.Draw(shadow).rounded_rectangle([px0, py0 + 30, px0 + pw, py0 + ph + 30], radius=ph // 2, fill=70)
+shade = Image.new("RGBA", (W, H), (20, 24, 60, 0)); shade.putalpha(shadow.filter(ImageFilter.GaussianBlur(40)))
+im.alpha_composite(shade); d = ImageDraw.Draw(im)
+d.rounded_rectangle([px0, py0, px0 + pw, py0 + ph], radius=ph // 2, fill="white", outline="#e3e8ee", width=10)
+# magnifying glass
+cx, cy, r = px0 + 205, py0 + ph / 2 - 25, 70
+d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=MUTED, width=26)
+d.line([cx + r * 0.7, cy + r * 0.7, cx + r * 1.7, cy + r * 1.7], fill=MUTED, width=30)
+tx = px0 + icon; ty = py0 + (ph - 330) / 2
+d.text((tx, ty), typed, font=head, fill=INK)
+cur = tx + tw + 22
+d.rounded_rectangle([cur, py0 + 95, cur + 18, py0 + ph - 95], radius=9, fill=ACCENT)
+d.text((cur + 40, ty), ghost, font=head, fill="#b3bcc5")
 
 qr_bottom = qcy + qr.height / 2
 ctext(qr_bottom - 20, "Scan to enter the mix.", F(170, "Bold"), INK)

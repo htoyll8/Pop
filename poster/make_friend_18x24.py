@@ -89,7 +89,7 @@ d.rounded_rectangle([cur, cy - size * 0.55, cur + 14, cy + size * 0.55], radius=
 d.text((cur + 26, ty), ghost, font=head, fill="#9aa0a6")
 
 qr_bottom = qcy + qr.height / 2
-ctext(qr_bottom - 20, "Scan to enter the mix.", F(170, "Bold"), INK)
+ctext(qr_bottom - 20, "Scan to find your match.", F(170, "Bold"), INK)
 ctext(qr_bottom + 210, "htoyll8.github.io/Pop", F(120, "SemiBold"), MUTED)
 
 rgb = im.convert("RGB")

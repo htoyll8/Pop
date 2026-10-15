@@ -223,9 +223,11 @@
   const TIMEOUT_MS = 10 * 60 * 1000, POLL_MS = 3000;
   const ANIMAL = { Otter:'🦦', Heron:'🪶', Lynx:'🐱', Falcon:'🦅', Fox:'🦊', Badger:'🦡', Ibis:'🦩', Marten:'🐾', Puffin:'🐧', Stoat:'🐿️', Wren:'🐦', Yak:'🐂' };
   const emojiFor = alias => ANIMAL[(alias || '').split(' ').pop()] || '🫧';
-  const AV = 'https://api.dicebear.com/9.x/adventurer/svg?backgroundColor=cfe5f6,ffd4d0,fbd2e1,fff0b3&backgroundType=solid&radius=50&seed=';
+  // hairstyles whose artwork stays inside the frame (8 of 45 run off the edge and look boxed as stickers)
+  const HAIR = 'long01,long02,long03,long04,long05,long07,long08,long10,long11,long12,long13,long14,long15,long19,long20,long21,long23,long24,long25,long26,short01,short02,short03,short04,short05,short06,short07,short08,short09,short10,short11,short12,short13,short14,short17,short18,short19';
+  const AV = 'https://api.dicebear.com/9.x/adventurer/svg?hair=' + HAIR + '&backgroundColor=cfe5f6,ffd4d0,fbd2e1,fff0b3&backgroundType=solid&radius=50&seed=';
   const avatarFor = seed => AV + encodeURIComponent(seed || 'stranger');
-  const avatarBare = seed => 'https://api.dicebear.com/9.x/adventurer/svg?seed=' + encodeURIComponent(seed || 'stranger');   // no background, for the sticker look
+  const avatarBare = seed => 'https://api.dicebear.com/9.x/adventurer/svg?hair=' + HAIR + '&seed=' + encodeURIComponent(seed || 'stranger');   // no background, for the sticker look
   // the crowd: a jittered grid of generic faces, duplicated once so the drift wraps seamlessly
   (function buildCrowd() {
     const track = $('crowd-track'); const cols = 5, rows = 7, N = cols * rows;

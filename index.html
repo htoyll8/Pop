@@ -63,10 +63,11 @@
   .namebox input::placeholder { color:#b3bcc4; font-weight:800; }
   .sticker { position:relative; display:inline-block; overflow:visible; padding:24px; margin:-24px; cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; }
   .sticker:active { transform:scale(.96); }
-  .dice { position:absolute; z-index:3; right:34px; bottom:56px; width:48px; height:48px; border-radius:50%; background:#fff;
-          display:grid; place-items:center; font-size:26px; line-height:1; box-shadow:0 6px 14px rgba(47,59,69,.22); }
+  .dice { position:absolute; z-index:3; right:60px; bottom:66px; font-size:40px; line-height:1; transform:rotate(-14deg);
+          filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff)
+                  drop-shadow(0 5px 6px rgba(47,59,69,.30)); }
   .dice.roll { animation:roll .5s cubic-bezier(.3,1.4,.5,1); }
-  @keyframes roll { from { transform:rotate(0) scale(.8); } to { transform:rotate(360deg) scale(1); } }
+  @keyframes roll { from { transform:rotate(-14deg) scale(.8); } to { transform:rotate(346deg) scale(1); } }
   .sticker.wiggle .w-hero { animation:wiggle .7s ease-in-out; }
   @keyframes wiggle { 0%,100% { transform:rotate(0); } 20% { transform:rotate(-7deg); } 40% { transform:rotate(6deg); } 60% { transform:rotate(-4deg); } 80% { transform:rotate(2deg); } }
   @media (prefers-reduced-motion: reduce) { .sticker.wiggle .w-hero { animation:none; } }

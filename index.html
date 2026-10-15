@@ -127,7 +127,18 @@
   .purple button { background:var(--lav); color:var(--purple2); box-shadow:0 5px 0 #b9c0f0; }
   .purple button.secondary { background:transparent; color:#fff; border:0; box-shadow:none; font-weight:800; }
   .purple .err { color:#ffd3d8; }
-  .confetti { position:absolute; inset:0; pointer-events:none; z-index:0; }
+  .rain { position:absolute; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .screen.purple .top, .screen.purple .stage, .screen.purple .bottom, .screen.purple .brand { position:relative; z-index:1; }
+  .screen.purple .brand { position:absolute; }
+  .rain i { position:absolute; top:-30px; display:block; opacity:.95; animation:fall var(--dur) var(--delay) cubic-bezier(.3,.1,.6,1) forwards; }
+  .rain i.sq { width:11px; height:11px; border-radius:2px; }
+  .rain i.strip { width:6px; height:16px; border-radius:2px; }
+  .rain i.dot { width:10px; height:10px; border-radius:50%; }
+  .rain i.tri { width:14px; height:12px; clip-path:polygon(50% 0, 100% 100%, 0 100%); }
+  .rain i.sq2 { width:20px; height:10px; background:none !important; border:3px solid var(--c); border-radius:10px 10px 0 0; border-bottom:0; }
+  @keyframes fall { 0% { transform:translate(0,0) rotate(0); opacity:1; }
+                    100% { transform:translate(var(--dx), 110vh) rotate(var(--rot)); opacity:.9; } }
+  @media (prefers-reduced-motion: reduce) { .rain i { animation:none; display:none; } }
   .confetti i { position:absolute; width:12px; height:12px; transform:rotate(45deg); border-radius:2px; opacity:.95; }
   .pair { display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; z-index:1; }
   .pair .heart { font-size:44px; line-height:1; }
@@ -172,9 +183,7 @@
   <!-- 3. Match found (purple) -->
   <section id="s-card" class="screen purple">
     <div class="brand"><img class="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
-    <div class="confetti">
-      <i style="left:3%;top:34%;background:#7be07f"></i><i style="left:9%;top:44%;background:#ff5c9a"></i><i style="left:4%;top:55%;background:#ffb347"></i><i style="left:12%;top:40%;background:#4fd8ff"></i><i style="left:2%;top:47%;background:#ff5c9a"></i><i style="left:90%;top:36%;background:#ffb347"></i><i style="left:84%;top:46%;background:#4fd8ff"></i><i style="left:92%;top:54%;background:#7be07f"></i><i style="left:95%;top:43%;background:#ff5c9a"></i><i style="left:85%;top:56%;background:#ffb347"></i><i style="left:88%;top:28%;background:#7be07f"></i>
-    </div>
+    <div class="rain" aria-hidden="true"></div>
     <div class="top">
       <h1 id="c-title">You matched!</h1>
       <div class="sub" id="c-status">Both of you have to say yes.</div>
@@ -199,9 +208,7 @@
   <!-- 4. At the booth (purple) -->
   <section id="s-booth" class="screen purple">
     <div class="brand"><img class="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
-    <div class="confetti">
-      <i style="left:3%;top:34%;background:#7be07f"></i><i style="left:9%;top:44%;background:#ff5c9a"></i><i style="left:4%;top:55%;background:#ffb347"></i><i style="left:12%;top:40%;background:#4fd8ff"></i><i style="left:2%;top:47%;background:#ff5c9a"></i><i style="left:90%;top:36%;background:#ffb347"></i><i style="left:84%;top:46%;background:#4fd8ff"></i><i style="left:92%;top:54%;background:#7be07f"></i><i style="left:95%;top:43%;background:#ff5c9a"></i><i style="left:85%;top:56%;background:#ffb347"></i><i style="left:88%;top:28%;background:#7be07f"></i>
-    </div>
+    <div class="rain" aria-hidden="true"></div>
     <div class="top">
       <h1 id="b-title">It's on!</h1>
       <div class="sub" id="b-sub">Head over and say hi.</div>
@@ -235,9 +242,35 @@
   const $ = id => document.getElementById(id);
   const show = name => { document.querySelectorAll('.screen').forEach(s => s.classList.remove('on')); $('s-' + name).classList.add('on'); 
     const purple = $('s-' + name).classList.contains('purple');
-    document.documentElement.style.background = document.body.style.background = purple ? '#6a7be8' : '#fff';
-    const tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.setAttribute('content', purple ? '#6a7be8' : '#ffffff');
+    setChrome(purple ? '#6a7be8' : '#ffffff');
+    if (purple) rain($('s-' + name).querySelector('.rain'));
   };
+  // Safari picks its top/bottom bar color from the page and the theme-color tag; replacing the tag (not editing it) and a tiny scroll make it re-read
+  let chromeColor = null;
+  function setChrome(col) {
+    if (chromeColor === col) return; chromeColor = col;
+    document.documentElement.style.background = document.body.style.background = col;
+    document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.remove());
+    const m = document.createElement('meta'); m.name = 'theme-color'; m.content = col; document.head.appendChild(m);
+    requestAnimationFrame(() => { window.scrollTo(0, 1); window.scrollTo(0, 0); });
+  }
+  const CONF = ['#7be07f', '#ff5c9a', '#ffb347', '#4fd8ff', '#ffe066', '#ffffff'];
+  const SHAPES = ['sq', 'strip', 'strip', 'dot', 'tri', 'sq2'];
+  function rain(box) {
+    if (!box) return; box.innerHTML = '';
+    for (let i = 0; i < 42; i++) {
+      const p = document.createElement('i'); const c = CONF[i % CONF.length];
+      p.className = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+      p.style.background = c; p.style.setProperty('--c', c);
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.setProperty('--dx', ((Math.random() - .5) * 80).toFixed(0) + 'px');
+      p.style.setProperty('--rot', ((Math.random() < .5 ? -1 : 1) * (360 + Math.random() * 540)).toFixed(0) + 'deg');
+      p.style.setProperty('--dur', (2.4 + Math.random() * 1.8).toFixed(2) + 's');
+      p.style.setProperty('--delay', (Math.random() * 1.2).toFixed(2) + 's');
+      box.appendChild(p);
+    }
+    setTimeout(() => { if (box) box.innerHTML = ''; }, 5500);
+  }
   const TIMEOUT_MS = 10 * 60 * 1000, POLL_MS = 3000;
   const ANIMAL = { Otter:'🦦', Heron:'🪶', Lynx:'🐱', Falcon:'🦅', Fox:'🦊', Badger:'🦡', Ibis:'🦩', Marten:'🐾', Puffin:'🐧', Stoat:'🐿️', Wren:'🐦', Yak:'🐂' };
   const emojiFor = alias => ANIMAL[(alias || '').split(' ').pop()] || '🫧';

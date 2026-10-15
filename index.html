@@ -56,7 +56,9 @@
   .splash { position:fixed; inset:0; z-index:100; background:#fff; display:grid; place-items:center; transition:opacity .45s ease; }
   .splash.out { opacity:0; pointer-events:none; }
   .splash { overflow:hidden; }
-  .splash img { width:150vw; max-width:none; height:auto; }
+  .splash img { width:150vw; max-width:none; height:auto;
+    -webkit-mask-image:linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%);
+            mask-image:linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%); }
   @media (min-width:700px) { .splash img { width:min(150vw, 930px); } }
   /* faux push notification */
   .toast { position:fixed; top:calc(env(safe-area-inset-top) + 12px); left:12px; right:12px; z-index:50; display:flex; gap:14px; align-items:center;

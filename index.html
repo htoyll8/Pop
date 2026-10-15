@@ -115,8 +115,7 @@
   .purple .arrived { background:#fff; color:var(--purple2); border-radius:20px; padding:16px; text-align:center; font-weight:900; font-size:20px; margin:0 0 14px; animation:popin .5s cubic-bezier(.2,.9,.3,1.3); }
   @keyframes popin { from { transform:scale(.6); opacity:0; } to { transform:scale(1); opacity:1; } }
   /* purple screens (match, booth) */
-  .screen.purple.on { position:fixed; top:-140px; bottom:-140px; left:0; right:0; background:var(--purple); color:#fff;
-    padding:calc(140px + 20px) 22px calc(140px + env(safe-area-inset-bottom) + 16px); overflow-y:auto; display:flex; flex-direction:column; }
+  .screen.purple.on { position:fixed; inset:0; background:var(--purple); color:#fff; padding:20px 22px calc(env(safe-area-inset-bottom) + 16px); overflow-y:auto; display:flex; flex-direction:column; }
   .purple .stage { min-height:150px; }
   .purple .top { padding-top:18px; }
   .purple button { padding:15px; margin-bottom:10px; }
@@ -142,7 +141,7 @@
   #s-booth .arrived { padding:12px; font-size:17px; margin-bottom:10px; }
   #s-booth #b-status { min-height:0; margin:0 0 4px; }
   #s-booth #b-again { padding:8px; margin:0; font-size:16px; }
-  .rain i { position:absolute; top:110px; display:block; opacity:.95; animation:fall var(--dur) var(--delay) cubic-bezier(.3,.1,.6,1) forwards; }
+  .rain i { position:absolute; top:-30px; display:block; opacity:.95; animation:fall var(--dur) var(--delay) cubic-bezier(.3,.1,.6,1) forwards; }
   .rain i.sq { width:11px; height:11px; border-radius:2px; }
   .rain i.strip { width:6px; height:16px; border-radius:2px; }
   .rain i.dot { width:10px; height:10px; border-radius:50%; }
@@ -150,7 +149,7 @@
   .rain i.sq2 { width:20px; height:10px; background:none !important; border:3px solid var(--c); border-radius:10px 10px 0 0; border-bottom:0; }
   @keyframes fall { 0% { transform:translate(0,0) rotate(0); opacity:1; }
                     85% { opacity:.9; }
-                    100% { transform:translate(var(--dx), calc(100vh + 360px)) rotate(var(--rot)); opacity:0; } }
+                    100% { transform:translate(var(--dx), calc(100vh + 60px)) rotate(var(--rot)); opacity:0; } }
   @media (prefers-reduced-motion: reduce) { .rain i { animation:none; display:none; } }
   .confetti i { position:absolute; width:12px; height:12px; transform:rotate(45deg); border-radius:2px; opacity:.95; }
   .pair { display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; z-index:1; }

@@ -63,9 +63,9 @@
   .namebox input::placeholder { color:#b3bcc4; font-weight:800; }
   .sticker { position:relative; display:inline-block; overflow:visible; padding:24px; margin:-24px; cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; }
   .sticker:active { transform:scale(.96); }
-  .tapme { position:absolute; z-index:3; top:10px; right:-6px; background:#fff; color:var(--ink); font-weight:900; font-size:16px;
+  .tapme { position:absolute; z-index:3; top:58%; left:-58px; background:#fff; color:var(--ink); font-weight:900; font-size:16px;
             padding:8px 14px; border-radius:16px; box-shadow:0 6px 16px rgba(47,59,69,.20); transition:opacity .35s, transform .35s; white-space:nowrap; }
-  .tapme:after { content:""; position:absolute; left:16px; bottom:-7px; width:14px; height:14px; background:#fff; transform:rotate(45deg); border-radius:3px; }
+  .tapme:after { content:""; position:absolute; right:-6px; top:50%; margin-top:-7px; width:14px; height:14px; background:#fff; transform:rotate(45deg); border-radius:3px; }
   .tapme.gone { opacity:0; transform:translateY(-6px) scale(.9); pointer-events:none; }
   .sticker.wiggle .w-hero { animation:wiggle .7s ease-in-out; }
   @keyframes wiggle { 0%,100% { transform:rotate(0); } 20% { transform:rotate(-7deg); } 40% { transform:rotate(6deg); } 60% { transform:rotate(-4deg); } 80% { transform:rotate(2deg); } }

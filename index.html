@@ -53,10 +53,17 @@
   .panel h1 { margin-bottom:6px; }
 
   /* welcome */
-  .w-logo { width:min(58vw, 260px); height:auto; margin-top:4px; }
+  .brand { position:absolute; top:calc(env(safe-area-inset-top) + 16px); left:18px; display:flex; align-items:flex-start; gap:2px; z-index:3; }
+  .w-logo { width:88px; height:auto; display:block; }
+  .tm { font-size:11px; font-weight:800; color:var(--muted); line-height:1; margin-top:2px; }
+  #s-welcome { position:relative; padding-top:40px; }
+  #s-welcome .stage { padding-top:20px; }
+  .fakecaret { position:absolute; top:50%; width:2px; height:24px; margin-top:-12px; background:var(--ink); animation:blink 1.05s steps(1) infinite; pointer-events:none; }
+  @keyframes blink { 50% { opacity:0; } }
+  .namebox input::placeholder { color:#b3bcc4; font-weight:800; }
   .w-hero { width:200px; height:200px; }
   .namebox { position:relative; margin:0 0 14px; }
-  .namebox input { margin:0; padding-right:52px; font-weight:800; font-size:19px; }
+  .namebox input { margin:0; padding-right:52px; font-weight:800; font-size:19px; text-align:left; }
   .namebox button { position:absolute; right:6px; top:50%; transform:translateY(-50%); }
   /* load screen */
   .splash { position:fixed; inset:0; z-index:100; background:#fff; display:grid; place-items:center; transition:opacity .45s ease; }
@@ -104,10 +111,10 @@
 <main>
   <!-- 1. Welcome: logo on top, avatar as the star, name pre-filled, one button -->
   <section id="s-welcome" class="screen">
-    <div class="top"><img class="w-logo" src="media/pop-logo-header.png" alt="pop"></div>
+    <div class="brand" id="w-brand"><img class="w-logo" id="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
     <div class="stage"><div style="text-align:center"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><div><button type="button" class="link" id="w-shuffle">↻ New look</button></div></div></div>
     <div class="bottom">
-      <div class="namebox"><input id="w-name" autocomplete="off" aria-label="Your name"><button type="button" class="link inline" id="w-shuffle-name" aria-label="New nickname">↻</button></div>
+      <div class="namebox"><input id="w-name" autocomplete="off" aria-label="Your name"><span class="fakecaret" id="w-caret"></span><button type="button" class="link inline" id="w-shuffle-name" aria-label="New nickname">↻</button></div>
       <button id="w-go">Meet someone new at a booth</button>
       <div class="err" id="w-err"></div>
     </div>
@@ -201,7 +208,7 @@
   const TIMEOUT_MS = 10 * 60 * 1000, POLL_MS = 3000;
   const ANIMAL = { Otter:'🦦', Heron:'🪶', Lynx:'🐱', Falcon:'🦅', Fox:'🦊', Badger:'🦡', Ibis:'🦩', Marten:'🐾', Puffin:'🐧', Stoat:'🐿️', Wren:'🐦', Yak:'🐂' };
   const emojiFor = alias => ANIMAL[(alias || '').split(' ').pop()] || '🫧';
-  const AV = 'https://api.dicebear.com/9.x/adventurer/svg?backgroundColor=ffb347,ff5c9a,7be07f,4fd8ff,b388ff,ffe066&backgroundType=solid&radius=50&seed=';
+  const AV = 'https://api.dicebear.com/9.x/adventurer/svg?backgroundColor=eef0f3&backgroundType=solid&radius=50&seed=';
   const avatarFor = seed => AV + encodeURIComponent(seed || 'stranger');
   // the crowd: a jittered grid of generic faces, duplicated once so the drift wraps seamlessly
   (function buildCrowd() {
@@ -249,12 +256,20 @@
   const ANIMALS = ['Otter','Heron','Lynx','Falcon','Fox','Badger','Ibis','Marten','Puffin','Stoat','Wren','Yak'];
   const pick = a => a[Math.floor(Math.random() * a.length)];
   function shuffle() { mySeed = 'av-' + Math.random().toString(36).slice(2, 10); $('w-avatar').src = avatarFor(mySeed); }
-  function shuffleName() { myAlias = pick(ADJ) + ' ' + pick(ANIMALS); $('w-name').value = myAlias; }
+  function shuffleName() { myAlias = pick(ADJ) + ' ' + pick(ANIMALS); $('w-name').placeholder = myAlias; placeCaret(); }
+  // a blinking cursor at the start of the empty box, so it's clear you can type (phones won't focus a field until tapped)
+  function placeCaret() {
+    const inp = $('w-name'), c = $('w-caret'); if (!inp || !c) return;
+    const cs = getComputedStyle(inp); c.style.left = (parseFloat(cs.paddingLeft) + inp.offsetLeft + 1) + 'px';
+    c.style.display = (inp.value || document.activeElement === inp) ? 'none' : 'block';
+  }
+  ['input','focus','blur'].forEach(ev => $('w-name').addEventListener(ev, placeCaret));
+  window.addEventListener('resize', placeCaret);
   $('w-shuffle').onclick = shuffle; $('w-shuffle-name').onclick = shuffleName;
   $('w-go').onclick = async () => {
     $('w-go').disabled = true; err('w-err');
     const typed = $('w-name').value.trim();
-    const ownName = typed && typed !== myAlias ? typed : null;   // anything other than the suggested nickname is their name
+    const ownName = typed && typed !== myAlias ? typed : null;   // empty box = keep the nickname; anything typed is their name
     try { me = await rpc('join_event', { p_name: ownName, p_avatar: mySeed, p_alias: myAlias }); search(); }
     catch (e) { err('w-err', e); $('w-go').disabled = false; }
   };
@@ -363,7 +378,29 @@
     if (im.complete) start(); else { im.onload = start; im.onerror = fin; }
     setTimeout(fin, 4000); $('splash').addEventListener('click', fin);
   });
-  Promise.all([splashDone, boot()]).finally(() => { $('splash').classList.add('out'); setTimeout(() => $('splash').remove(), 500); });
+  function endSplash() {
+    const sp = $('splash'), gif = $('splash-v'), target = $('w-logo');
+    const onWelcome = $('s-welcome').classList.contains('on') && target;
+    if (!onWelcome) { sp.classList.add('out'); setTimeout(() => sp.remove(), 500); return; }
+    // where the landed logo sits inside the animation's square (measured from the clip)
+    const g = gif.getBoundingClientRect();
+    const from = { left: g.left + g.width * 0.1872, top: g.top + g.height * 0.2962, width: g.width * 0.6372 };
+    const to = target.getBoundingClientRect();
+    const fly = document.createElement('img'); fly.src = 'media/pop-logo-header.png'; fly.alt = '';
+    Object.assign(fly.style, { position:'fixed', left: from.left + 'px', top: from.top + 'px', width: from.width + 'px', height:'auto',
+      zIndex: 101, transformOrigin: '0 0', transition: 'transform .7s cubic-bezier(.65,0,.25,1)' });
+    document.body.appendChild(fly); target.style.visibility = 'hidden'; document.querySelector('.tm').style.opacity = 0;
+    gif.style.visibility = 'hidden'; sp.classList.add('out');
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const s = to.width / from.width;
+      fly.style.transform = `translate(${to.left - from.left}px, ${to.top - from.top}px) scale(${s})`;
+    }));
+    setTimeout(() => {
+      target.style.visibility = ''; const tm = document.querySelector('.tm'); tm.style.transition = 'opacity .3s'; tm.style.opacity = 1;
+      fly.remove(); sp.remove();
+    }, 760);
+  }
+  Promise.all([splashDone, boot()]).finally(() => { placeCaret(); endSplash(); });
 })();
 </script>
 </body>

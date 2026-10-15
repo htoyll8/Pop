@@ -91,7 +91,7 @@
   /* purple screens: logo + paired stickers */
   .purple .brand .w-logo { filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff); }
   .purple .brand .tm { color:rgba(255,255,255,.85); }
-  .purple .top { padding-top:64px; }
+  .screen.purple .top { padding-top:calc(env(safe-area-inset-top) + 70px); }
   .duo { display:flex; align-items:flex-start; justify-content:center; gap:0; position:relative; }
   .duo .who { display:flex; flex-direction:column; align-items:center; width:150px; animation:popin .55s cubic-bezier(.2,1.5,.4,1) both; }
   .duo .who:nth-child(1) { transform-origin:bottom right; animation-delay:.05s; }

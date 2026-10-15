@@ -71,7 +71,8 @@
   .sticker.wiggle .w-hero { animation:wiggle .7s ease-in-out; }
   @keyframes wiggle { 0%,100% { transform:rotate(0); } 20% { transform:rotate(-7deg); } 40% { transform:rotate(6deg); } 60% { transform:rotate(-4deg); } 80% { transform:rotate(2deg); } }
   @media (prefers-reduced-motion: reduce) { .sticker.wiggle .w-hero { animation:none; } }
-  .w-hero { display:block; margin:0 auto; width:230px; height:230px; background:none; border-radius:0;
+  .w-hero { display:block; margin:-24px auto; padding:24px; box-sizing:content-box; width:230px; height:230px; background:none; border-radius:0;
+            will-change:transform; transform:translateZ(0);
             filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff)
                     drop-shadow(0 10px 12px rgba(47,59,69,.28)); }
   .namebox { position:relative; margin:0 0 14px; }

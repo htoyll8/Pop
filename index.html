@@ -61,9 +61,9 @@
   .fakecaret { position:absolute; top:50%; width:2px; height:24px; margin-top:-12px; background:var(--ink); animation:blink 1.05s steps(1) infinite; pointer-events:none; }
   @keyframes blink { 50% { opacity:0; } }
   .namebox input::placeholder { color:#b3bcc4; font-weight:800; }
-  .sticker { position:relative; width:auto; padding:0; margin:0; background:none; box-shadow:none; border-radius:0; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .sticker { position:relative; display:inline-block; overflow:visible; padding:24px; margin:-24px; cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; }
   .sticker:active { transform:scale(.96); }
-  .sticker .badge { position:absolute; z-index:3; right:6px; bottom:30px; width:46px; height:46px; border-radius:50%; background:#fff; color:var(--ink);
+  .sticker .badge { position:absolute; z-index:3; right:30px; bottom:54px; width:46px; height:46px; border-radius:50%; background:#fff; color:var(--ink);
                     display:grid; place-items:center; font-size:22px; font-weight:900; box-shadow:0 6px 14px rgba(47,59,69,.25); }
   .w-hero { display:block; margin:0 auto; width:230px; height:230px; background:none; border-radius:0;
             filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff)
@@ -120,7 +120,7 @@
   <!-- 1. Welcome: logo on top, avatar as the star, name pre-filled, one button -->
   <section id="s-welcome" class="screen">
     <div class="brand" id="w-brand"><img class="w-logo" id="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
-    <div class="stage"><button type="button" class="sticker" id="w-shuffle" aria-label="Change your look"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><span class="badge" aria-hidden="true">↻</span></button></div>
+    <div class="stage"><div class="sticker" id="w-shuffle" role="button" tabindex="0" aria-label="Change your look"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><span class="badge" aria-hidden="true">↻</span></div></div>
     <div class="bottom">
       <div class="hint">This is the name others will see.</div>
       <div class="namebox"><input id="w-name" autocomplete="off" aria-label="Your name"><span class="fakecaret" id="w-caret"></span><button type="button" class="link inline" id="w-shuffle-name" aria-label="New nickname">↻</button></div>

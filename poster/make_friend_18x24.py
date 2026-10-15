@@ -5,6 +5,12 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 W, H = 5400, 7200
 INK, MUTED, ACCENT = "#2f3b45", "#6b7a86", "#ff6b8a"
+import sys
+# python3 make_friend_18x24.py periwinkle  -> the app's match-screen purple (#6a7be8) with white text
+PERI = len(sys.argv) > 1 and sys.argv[1] == "periwinkle"
+BG = "#6a7be8" if PERI else "white"
+SCAN_INK, URL_INK = ("#ffffff", "#e6e9ff") if PERI else ("#1f1f1f", MUTED)
+SUFFIX = "-periwinkle" if PERI else ""
 
 def F(size, name):
     f = ImageFont.truetype("Nunito-Black.ttf", size)
@@ -17,7 +23,7 @@ def load(name, width, angle=0):
     im = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
     return im.rotate(angle, resample=Image.BICUBIC, expand=True) if angle else im
 
-im = Image.new("RGBA", (W, H), "white"); d = ImageDraw.Draw(im)
+im = Image.new("RGBA", (W, H), BG); d = ImageDraw.Draw(im)
 
 def put(st, cx, cy):
     im.alpha_composite(st, (int(cx - st.width / 2), int(cy - st.height / 2)))
@@ -36,7 +42,15 @@ put(qr, qcx, qcy)
 for name, x, y, w, a in front:
     put(load(name, int(w * W), a), x * W, y * H)
 
-put(load("pop-logo", int(0.24 * W), -4), 0.17 * W, 0.085 * H)
+logo = load("pop-logo", int(0.24 * W))
+if PERI:   # die-cut white edge and soft shadow so the blue "p" doesn't sink into the background
+    pad = 140; c = Image.new("RGBA", (logo.width + 2 * pad, logo.height + 2 * pad), (0, 0, 0, 0)); c.alpha_composite(logo, (pad, pad))
+    cut = c.split()[3].filter(ImageFilter.GaussianBlur(22)).point(lambda v: 255 if v > 6 else 0).filter(ImageFilter.GaussianBlur(2))
+    out = Image.new("RGBA", (c.width + 18, c.height + 30), (0, 0, 0, 0))
+    sh = Image.new("RGBA", c.size, (20, 24, 60, 0)); sh.putalpha(cut.point(lambda v: v * 0.32).filter(ImageFilter.GaussianBlur(30))); out.alpha_composite(sh, (18, 30))
+    wh = Image.new("RGBA", c.size, (255, 255, 255, 255)); wh.putalpha(cut); out.alpha_composite(wh); out.alpha_composite(c)
+    logo = out
+put(logo.rotate(-4, resample=Image.BICUBIC, expand=True), 0.17 * W, 0.085 * H)
 
 def ctext(y, t, f, fill):
     w = d.textlength(t, font=f); d.text(((W - w) / 2, y), t, font=f, fill=fill)
@@ -89,10 +103,10 @@ d.rounded_rectangle([cur, cy - size * 0.55, cur + 14, cy + size * 0.55], radius=
 d.text((cur + 26, ty), ghost, font=head, fill="#9aa0a6")
 
 qr_bottom = qcy + qr.height / 2
-ctext(qr_bottom - 20, "Scan to find your match.", F(170, "Bold"), INK)
-ctext(qr_bottom + 210, "htoyll8.github.io/Pop", F(120, "SemiBold"), MUTED)
+ctext(qr_bottom - 20, "Scan to find your match.", F(170, "Bold"), SCAN_INK)
+ctext(qr_bottom + 210, "htoyll8.github.io/Pop", F(120, "SemiBold"), URL_INK)
 
 rgb = im.convert("RGB")
-rgb.save("pop-make-a-friend-18x24.png", dpi=(300, 300))
-rgb.save("pop-make-a-friend-18x24.pdf", "PDF", resolution=300.0)
+rgb.save(f"pop-make-a-friend-18x24{SUFFIX}.png", dpi=(300, 300))
+rgb.save(f"pop-make-a-friend-18x24{SUFFIX}.pdf", "PDF", resolution=300.0)
 print("written", rgb.size)

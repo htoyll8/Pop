@@ -90,6 +90,7 @@
             mask-image:linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%); }
   @media (min-width:700px) { .splash img { width:min(130vw, 820px); } }
   /* purple screens: logo + paired stickers */
+  .purple .brand .w-logo { filter: drop-shadow(0 4px 6px rgba(20,24,60,.35)); }
   .purple .brand .tm { color:rgba(255,255,255,.85); }
   .screen.purple .top { padding-top:calc(env(safe-area-inset-top) + 70px); }
   .screen.purple .stage { flex:1 0 auto; min-height:230px; }
@@ -126,7 +127,7 @@
   .purple button { background:var(--lav); color:var(--purple2); box-shadow:0 5px 0 #b9c0f0; }
   .purple button.secondary { background:transparent; color:#fff; border:0; box-shadow:none; font-weight:800; }
   .purple .err { color:#ffd3d8; }
-  .confetti { position:absolute; inset:0; pointer-events:none; }
+  .confetti { position:absolute; inset:0; pointer-events:none; z-index:0; }
   .confetti i { position:absolute; width:12px; height:12px; transform:rotate(45deg); border-radius:2px; opacity:.95; }
   .pair { display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; z-index:1; }
   .pair .heart { font-size:44px; line-height:1; }
@@ -172,10 +173,7 @@
   <section id="s-card" class="screen purple">
     <div class="brand"><img class="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
     <div class="confetti">
-      <i style="left:8%;top:9%;background:#7be07f"></i><i style="left:28%;top:6%;background:#ff5c9a"></i><i style="left:55%;top:11%;background:#ffb347"></i>
-      <i style="left:80%;top:7%;background:#7be07f"></i><i style="left:93%;top:12%;background:#ffb347"></i><i style="left:42%;top:19%;background:#ffb347"></i>
-      <i style="left:68%;top:14%;background:#ff5c9a"></i><i style="left:24%;top:22%;background:#ff5c9a"></i><i style="left:64%;top:23%;background:#4fd8ff"></i>
-      <i style="left:12%;top:30%;background:#4fd8ff"></i><i style="left:88%;top:28%;background:#7be07f"></i>
+      <i style="left:3%;top:34%;background:#7be07f"></i><i style="left:9%;top:44%;background:#ff5c9a"></i><i style="left:4%;top:55%;background:#ffb347"></i><i style="left:11%;top:63%;background:#4fd8ff"></i><i style="left:6%;top:72%;background:#ff5c9a"></i><i style="left:90%;top:36%;background:#ffb347"></i><i style="left:84%;top:46%;background:#4fd8ff"></i><i style="left:92%;top:54%;background:#7be07f"></i><i style="left:86%;top:64%;background:#ff5c9a"></i><i style="left:91%;top:73%;background:#ffb347"></i><i style="left:88%;top:28%;background:#7be07f"></i>
     </div>
     <div class="top">
       <h1 id="c-title">You matched!</h1>
@@ -202,10 +200,7 @@
   <section id="s-booth" class="screen purple">
     <div class="brand"><img class="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
     <div class="confetti">
-      <i style="left:8%;top:9%;background:#7be07f"></i><i style="left:28%;top:6%;background:#ff5c9a"></i><i style="left:55%;top:11%;background:#ffb347"></i>
-      <i style="left:80%;top:7%;background:#7be07f"></i><i style="left:93%;top:12%;background:#ffb347"></i><i style="left:42%;top:19%;background:#ffb347"></i>
-      <i style="left:68%;top:14%;background:#ff5c9a"></i><i style="left:24%;top:22%;background:#ff5c9a"></i><i style="left:64%;top:23%;background:#4fd8ff"></i>
-      <i style="left:12%;top:30%;background:#4fd8ff"></i><i style="left:88%;top:28%;background:#7be07f"></i>
+      <i style="left:3%;top:34%;background:#7be07f"></i><i style="left:9%;top:44%;background:#ff5c9a"></i><i style="left:4%;top:55%;background:#ffb347"></i><i style="left:11%;top:63%;background:#4fd8ff"></i><i style="left:6%;top:72%;background:#ff5c9a"></i><i style="left:90%;top:36%;background:#ffb347"></i><i style="left:84%;top:46%;background:#4fd8ff"></i><i style="left:92%;top:54%;background:#7be07f"></i><i style="left:86%;top:64%;background:#ff5c9a"></i><i style="left:91%;top:73%;background:#ffb347"></i><i style="left:88%;top:28%;background:#7be07f"></i>
     </div>
     <div class="top">
       <h1 id="b-title">It's on!</h1>

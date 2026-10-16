@@ -310,8 +310,27 @@ html,body{height:100%} body{display:block;overflow:hidden}
 .tbtn .lbl{position:relative;display:flex;justify-content:space-between;align-items:center;height:100%;padding:0 22px;color:#fff;font-size:20px;font-weight:900}
 .tbtn .lbl small{font-size:17px;font-weight:800;opacity:.85;font-variant-numeric:tabular-nums}
 .go .under{display:block;margin:6px auto 0;background:none;border:0;box-shadow:none;color:var(--muted);font-weight:800;font-size:16px;padding:8px;width:auto}
+
+#s-on{position:fixed;inset:0;z-index:30;background:#fff;display:flex;flex-direction:column;text-align:center;padding:calc(env(safe-area-inset-top) + 64px) 16px calc(env(safe-area-inset-bottom) + 10px);
+  opacity:0;pointer-events:none;transition:opacity .35s}
+#s-on.on{opacity:1;pointer-events:auto}
+#s-on h1{font-size:31px;font-weight:800;margin:0}
+#s-on .pair2{display:flex;justify-content:center;align-items:flex-end;margin:26px 0 0}
+#s-on .pair2 img{width:140px;filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25));animation:popin .5s cubic-bezier(.2,1.6,.4,1) both}
+#s-on .pair2 img:first-child{rotate:-7deg;margin-right:-12px} #s-on .pair2 img:last-child{rotate:7deg;margin-left:-12px;animation-delay:.12s}
+#s-on .names{display:flex;justify-content:center;gap:70px;font-weight:900;font-size:17px;margin-top:2px}
+#s-on .booth{margin:22px auto 0;padding:16px 18px;border-radius:20px;background:#f4f6f8;width:100%;max-width:340px;animation:popin .5s .25s cubic-bezier(.2,1.4,.4,1) both}
+#s-on .booth small{display:block;font-size:13px;font-weight:900;color:#e8463c;text-transform:uppercase;letter-spacing:.06em}
+#s-on .booth b{display:block;font-size:24px;font-weight:900;color:var(--ink);margin-top:2px} #s-on .booth span{color:var(--muted);font-size:15px}
+#s-on .grow{flex:1}
 .found .who b{display:block;font-size:24px;font-weight:900;color:var(--ink)}
-</style></head><body><section id="s-wait" class="screen on"><div class="wt-top"><h1>Finding your match…</h1><div class="status" id="cnt-top" style="margin-top:6px"></div></div><button type="button" class="back" aria-label="Back"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="status cnt-bot" id="cnt-bot"></div><div class="go" id="go"><button class="tbtn" id="go-btn"><i class="fill" id="go-fill"></i><span class="lbl"><span id="go-t">Let's go</span><small id="go-c">2:00</small></span></button><button class="under" id="go-no">Not this time</button></div><div class="sky"></div><div class="me"><div class="fig"><div class="shirt"></div><img class="face" src="https://api.dicebear.com/9.x/adventurer/svg?hair=long01,long02,long03,long04,long05,long07,long08,long10,long11,long12,long13,long14,long15,long19,long20,long21,long23,long24,long25,long26,short01,short02,short03,short04,short05,short06,short07,short08,short09,short10,short11,short12,short13,short14,short17,short18,short19&seed=me1"><img class="face pk" src="https://api.dicebear.com/9.x/adventurer/svg?hair=long01,long02,long03,long04,long05,long07,long08,long10,long11,long12,long13,long14,long15,long19,long20,long21,long23,long24,long25,long26,short01,short02,short03,short04,short05,short06,short07,short08,short09,short10,short11,short12,short13,short14,short17,short18,short19&seed=me1&mouth=variant18" style="position:absolute;left:0;top:0;opacity:0;z-index:2"></div><div class="name-tag small"><div class="nt-band"><b>HELLO</b><small>my name is</small></div><div class="nt-name">Velvet Ibis</div></div><div class="gum"></div></div><div style="flex:1"></div></section><script>const HAIR = 'long01,long02,long03,long04,long05,long07,long08,long10,long11,long12,long13,long14,long15,long19,long20,long21,long23,long24,long25,long26,short01,short02,short03,short04,short05,short06,short07,short08,short09,short10,short11,short12,short13,short14,short17,short18,short19';
+</style></head><body><section id="s-wait" class="screen on"><div class="wt-top"><h1>Finding your match…</h1><div class="status" id="cnt-top" style="margin-top:6px"></div></div><button type="button" class="back" aria-label="Back"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="status cnt-bot" id="cnt-bot"></div><section id="s-on"><h1>It's on!</h1>
+  <div class="pair2"><img id="on-me"><img id="on-them"></div><div class="names"><span>You</span><span>Sam</span></div>
+  <div class="booth"><small>Meet at</small><b>Taco Stand</b><span>Food row, next to the stage</span></div>
+  <div class="grow"></div>
+  <button class="tbtn" id="here-btn"><i class="fill" id="here-fill"></i><span class="lbl"><span id="here-t">I'm here</span><small id="here-c">7:00</small></span></button>
+  <button class="under" id="here-no" style="display:block;margin:6px auto 0;background:none;border:0;box-shadow:none;color:var(--muted);font-weight:800;font-size:16px;padding:8px;width:auto">Can't make it</button>
+</section><div class="go" id="go"><button class="tbtn" id="go-btn"><i class="fill" id="go-fill"></i><span class="lbl"><span id="go-t">Let's go</span><small id="go-c">2:00</small></span></button><button class="under" id="go-no">Not this time</button></div><div class="sky"></div><div class="me"><div class="fig"><div class="shirt"></div><img class="face" src="https://api.dicebear.com/9.x/adventurer/svg?hair=long01,long02,long03,long04,long05,long07,long08,long10,long11,long12,long13,long14,long15,long19,long20,long21,long23,long24,long25,long26,short01,short02,short03,short04,short05,short06,short07,short08,short09,short10,short11,short12,short13,short14,short17,short18,short19&seed=me1"><img class="face pk" src="https://api.dicebear.com/9.x/adventurer/svg?hair=long01,long02,long03,long04,long05,long07,long08,long10,long11,long12,long13,long14,long15,long19,long20,long21,long23,long24,long25,long26,short01,short02,short03,short04,short05,short06,short07,short08,short09,short10,short11,short12,short13,short14,short17,short18,short19&seed=me1&mouth=variant18" style="position:absolute;left:0;top:0;opacity:0;z-index:2"></div><div class="name-tag small"><div class="nt-band"><b>HELLO</b><small>my name is</small></div><div class="nt-name">Velvet Ibis</div></div><div class="gum"></div></div><div style="flex:1"></div></section><script>const HAIR = 'long01,long02,long03,long04,long05,long07,long08,long10,long11,long12,long13,long14,long15,long19,long20,long21,long23,long24,long25,long26,short01,short02,short03,short04,short05,short06,short07,short08,short09,short10,short11,short12,short13,short14,short17,short18,short19';
 const POOL=Array.from({length:30},(_,i)=>'https://api.dicebear.com/9.x/adventurer/svg?hair='+HAIR+'&seed=pool'+i); POOL.forEach(u=>{const im=new Image(); im.src=u;});
 const QS=new URLSearchParams(location.search), PEOPLE=+(QS.get('people')??7), COUNT=QS.get('count')||'none';
 let fi=0; const face=()=>POOL[(fi++)%Math.max(1,PEOPLE)];
@@ -340,7 +359,7 @@ function match(){
     b.style.left=(sx+(tx-sx)*e)+'px'; b.style.top=(sy+(ty-sy)*e)+'px'; b.style.transform=`scale(${1+e*1.6})`;
     if(k<1) return setTimeout(()=>step(performance.now()),16);
     burst(tx,ty,b._s*2.6); const src=b.querySelector('img').src; b.remove();
-    const f=document.createElement('div'); f.className='found'; f.innerHTML='<div class="who"><img src="'+src+'"><b>Found them!</b><span class="where">Meet Sam at <em>Taco Stand</em></span></div>';
+    const f=document.createElement('div'); f.className='found'; f.innerHTML='<div class="who"><img src="'+src+'"><b>Found them!</b><span class="where">Say yes to meet Sam</span></div>';
     // sit in the space between the heading and your head (shrinks on short phones)
     f.style.cssText='display:block;inset:auto;left:0;right:0;top:'+(sk.top-document.getElementById('s-wait').getBoundingClientRect().top+ty)+'px;height:0';
     f.firstChild.style.cssText='position:absolute;left:0;right:0;top:0;translate:0 -50%;scale:'+fit;
@@ -358,7 +377,17 @@ function startTimer(){ const secs=120, t0=Date.now(), f=document.getElementById(
 function reset(){ clearInterval(tm); const sw=document.getElementById('s-wait'); sw.classList.remove('matched'); document.querySelectorAll('.found').forEach(n=>n.remove());
   document.getElementById('go-t').textContent="Let's go"; document.getElementById('go-fill').style.transform='scaleX(0)'; matching=false; setTimeout(match,6000); }
 document.getElementById('go-no').onclick=reset;
-document.getElementById('go-btn').onclick=()=>{ document.getElementById('go-t').textContent='Waiting for Sam…'; };
+// one timer helper: fills the button left to right, calls onEnd when full
+function fillTimer(fillEl, clockEl, secs, onEnd){ const t0=Date.now(); const id=setInterval(()=>{ const k=Math.min(1,(Date.now()-t0)/1000/secs), left=Math.ceil(secs*(1-k));
+  fillEl.style.transform='scaleX('+k+')'; clockEl.textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0'); if(k>=1){ clearInterval(id); onEnd(); } },250); return id; }
+let hereTm=null;
+document.getElementById('go-btn').onclick=()=>{ document.getElementById('go-t').textContent='Waiting for Sam…';
+  setTimeout(()=>{ clearInterval(tm); const me=document.querySelector('.face:not(.pk)').src, them=document.querySelector('.found img').src;
+    document.getElementById('on-me').src=me; document.getElementById('on-them').src=them; document.getElementById('s-on').classList.add('on');
+    hereTm=fillTimer(document.getElementById('here-fill'), document.getElementById('here-c'), 420, backToBubbles); }, 1600); };
+function backToBubbles(){ clearInterval(hereTm); document.getElementById('s-on').classList.remove('on'); document.getElementById('here-t').textContent="I'm here"; document.getElementById('here-fill').style.transform='scaleX(0)'; reset(); }
+document.getElementById('here-no').onclick=backToBubbles;
+document.getElementById('here-btn').onclick=()=>{ document.getElementById('here-t').textContent='You\'re here. Waiting for Sam…'; };
 
 const gum=document.querySelector('.gum');
 function chew(){

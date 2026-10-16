@@ -43,12 +43,13 @@
   .faces img { width:64px; height:64px; border-radius:50%; background:#fff; margin:0 6px; }
   /* waiting: white, one sticker, faces orbiting on a faint ring */
   #s-wait { text-align:center; padding-top:calc(env(safe-area-inset-top) + 56px); }
-  #s-wait h1 { font-size:26px; font-weight:800; margin:0; }
+  #s-wait h1 { font-size:31px; font-weight:800; margin:0; }
   /* your name as a little tag stuck on the bottom of your sticker */
-  .name-tag { position:absolute; left:50%; top:50%; transform:translate(-50%, 50px) rotate(-3deg); z-index:2; white-space:nowrap;
+  .name-tag { position:absolute; left:50%; top:50%; transform:translate(-50%, 34px) rotate(-3deg); z-index:2; white-space:nowrap;
               background:#fff; border:1.5px solid #e3e8ee; border-radius:999px; padding:4px 12px; font-size:14px; font-weight:800; color:var(--ink);
               box-shadow:0 4px 10px rgba(47,59,69,.12); }
-  #wt-pool { font-size:15px; font-weight:700; }
+  #wt-pool { font-size:18px; font-weight:700; }
+  #wt-back { font-size:18px; }
   .orbit { position:relative; width:280px; height:280px; margin:auto; flex:0 0 auto; }
   .orbit .ring { position:absolute; inset:28px; border:2px dashed #dfe4ea; border-radius:50%; }
   .orbit .spin { position:absolute; inset:0; animation:orbit 16s linear infinite; }
@@ -58,7 +59,7 @@
                           filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 5px 6px rgba(47,59,69,.22)); }
   @keyframes orbit { to { transform:rotate(360deg); } }
   @keyframes counter { from { transform:rotate(calc(-1 * var(--a))); } to { transform:rotate(calc(-1 * var(--a) - 360deg)); } }
-  .orbit-me { position:absolute; left:50%; top:50%; width:132px; height:132px; margin:-66px 0 0 -66px;
+  .orbit-me { position:absolute; left:50%; top:50%; width:132px; height:132px; margin:-82px 0 0 -66px;
               filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
   .wt-foot { padding-bottom:12px; }
   @media (prefers-reduced-motion: reduce) { .orbit .spin, .orbit .spin span img { animation:none; } }

@@ -45,7 +45,7 @@
   #s-wait { text-align:center; padding-top:calc(env(safe-area-inset-top) + 56px); }
   #s-wait h1 { font-size:31px; font-weight:800; margin:0; }
   /* your name on a "HELLO my name is" sticker, stuck on the bottom of your face */
-  .name-tag { position:absolute; left:50%; top:50%; transform:translate(-50%, calc(var(--o) * .09)) rotate(-4deg); z-index:2;
+  .name-tag { position:absolute; left:50%; top:50%; transform:translate(-50%, calc(var(--o) * .045)) rotate(-4deg); z-index:2;
               min-width:80px; background:#fff; border:2px solid #e8463c; border-radius:8px; overflow:hidden; text-align:center;
               box-shadow:0 6px 14px rgba(47,59,69,.18); }
   .nt-band { background:#e8463c; color:#fff; padding:2px 8px 3px; line-height:1; }
@@ -56,19 +56,36 @@
   #wt-back { font-size:18px; }
   /* --o is the orbit's size; everything inside scales with it, capped so it fits small phones */
   .orbit { --o:min(350px, calc(100vw - 24px)); position:relative; width:var(--o); height:var(--o); margin:auto; flex:0 0 auto; }
-  .orbit .ring { position:absolute; inset:calc(var(--o) * .1); border:2px dashed #dfe4ea; border-radius:50%; }
-  .orbit .spin { position:absolute; inset:0; animation:orbit 16s linear infinite; }
-  .orbit .spin span { position:absolute; left:50%; top:50%; width:calc(var(--o) * .21); height:calc(var(--o) * .21); margin:calc(var(--o) * -.105) 0 0 calc(var(--o) * -.105);
-                      transform:rotate(var(--a)) translateY(calc(var(--o) * -.4)); }
-  .orbit .spin span img { width:100%; height:100%; }
-  .orbit .spin span img { position:static; margin:0; transform:none; animation:counter 16s linear infinite;
-                          filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 5px 6px rgba(47,59,69,.22)); }
+  /* two rings: outer turns clockwise, inner counter-clockwise; --r ring radius, --f face size, --t lap time */
+  .orbit .ring { position:absolute; left:50%; top:50%; width:calc(var(--o) * var(--r) * 2); height:calc(var(--o) * var(--r) * 2);
+                 margin:calc(var(--o) * var(--r) * -1) 0 0 calc(var(--o) * var(--r) * -1); border:2px dashed #dfe4ea; border-radius:50%; }
+  .orbit .outer { --r:.43; --f:.16; --t:18s; --dir:1; }
+  .orbit .inner { --r:.32; --f:.12; --t:24s; --dir:-1; }
+  .orbit .spin { position:absolute; inset:0; animation:orbit var(--t) linear infinite; }
+  .orbit .spin.inner { animation-direction:reverse; }
+  .orbit .slot { position:absolute; left:50%; top:50%; width:calc(var(--o) * var(--f)); height:calc(var(--o) * var(--f));
+                 margin:calc(var(--o) * var(--f) / -2) 0 0 calc(var(--o) * var(--f) / -2);
+                 transform:rotate(var(--a)) translateY(calc(var(--o) * var(--r) * -1)); }
+  /* .up keeps the face upright as the ring turns; the img inside does the flip */
+  .orbit .up { display:block; width:100%; height:100%; animation:counter var(--t) linear infinite; }
+  .orbit .inner .up { animation-direction:reverse; }
+  .orbit .up img { display:block; width:100%; height:100%;
+                   filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 5px 6px rgba(47,59,69,.22)); }
+  .orbit .up img.flip { animation:flip .36s ease-in-out; }
   @keyframes orbit { to { transform:rotate(360deg); } }
   @keyframes counter { from { transform:rotate(calc(-1 * var(--a))); } to { transform:rotate(calc(-1 * var(--a) - 360deg)); } }
+  @keyframes flip { 0%,100% { transform:scaleX(1); } 50% { transform:scaleX(0); } }
+  @media (prefers-reduced-motion: reduce) { .orbit .spin, .orbit .up, .orbit .up img.flip { animation:none; } }
   .orbit-me { position:absolute; left:50%; top:50%; width:calc(var(--o) * .47); height:calc(var(--o) * .47); margin:calc(var(--o) * -.31) 0 0 calc(var(--o) * -.235);
               filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
   .wt-foot { padding-bottom:12px; }
-  @media (prefers-reduced-motion: reduce) { .orbit .spin, .orbit .spin span img { animation:none; } }
+  #wt-pool:has(.odo) { display:flex; justify-content:center; align-items:center; gap:.28em; line-height:1; }
+  .odo { display:inline-flex; }
+  .odo .wheel { display:inline-block; height:1em; line-height:1em; overflow:hidden; }
+  .odo .strip { display:flex; flex-direction:column; transition:transform .9s cubic-bezier(.2,.9,.25,1.15); }
+  .odo .strip span { height:1em; }
+  @media (prefers-reduced-motion: reduce) { .odo .strip { transition:none; } }
+
   .over { position:relative; z-index:2; }
   .panel { background:rgba(255,255,255,.86); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); border-radius:24px; padding:22px 20px; text-align:center; box-shadow:0 14px 40px rgba(47,59,69,.14); max-width:360px; }
   .panel h1 { margin-bottom:6px; }
@@ -256,8 +273,8 @@
   <section id="s-wait" class="screen">
     <div class="wt-top"><h1>Finding your match…</h1></div>
     <div class="orbit" aria-hidden="true">
-      <div class="ring"></div>
-      <div class="spin" id="wt-spin"></div>
+      <div class="ring outer"></div><div class="ring inner"></div>
+      <div class="spin outer" id="wt-spin"></div><div class="spin inner" id="wt-spin2"></div>
       <img class="orbit-me" id="wt-me" alt="">
       <div class="name-tag"><div class="nt-band"><b>HELLO</b><small>my name is</small></div><div class="nt-name" id="wt-alias"></div></div>
     </div>
@@ -400,16 +417,38 @@
     if (theirs) { const hs = document.createElement('div'); hs.className = 'shake'; hs.textContent = '🤝'; el.append(hs, who(c.partner_avatar || theirs, theirs)); }
   }
   const avatarBare = seed => 'https://api.dicebear.com/9.x/adventurer/svg?hair=' + HAIR + '&seed=' + encodeURIComponent(seed || 'stranger');   // no background, for the sticker look
-  // the orbit: three faces spaced around the ring; each one counter-rotates so it stays upright
+  // the orbit: two rings of faces (outer clockwise, inner counter-clockwise). Each face stays upright,
+  // and flips to a new person whenever it passes the top of its ring, so it feels like the crowd keeps changing.
+  const newFace = () => avatarBare('orbit-' + Math.random().toString(36).slice(2, 9));
+  const orbitFaces = [];
   (function buildOrbit() {
-    const spin = $('wt-spin');
-    [0, 120, 240].forEach((a, i) => {
-      const slot = document.createElement('span'); slot.style.setProperty('--a', a + 'deg');
-      const im = document.createElement('img'); im.alt = ''; im.style.setProperty('--a', a + 'deg');
-      im.src = avatarBare('orbit-' + i + '-' + Math.random().toString(36).slice(2, 7));
-      slot.appendChild(im); spin.appendChild(slot);
+    [['wt-spin', [0, 120, 240]], ['wt-spin2', [60, 180, 300]]].forEach(([id, angles]) => {
+      angles.forEach(a => {
+        const slot = document.createElement('span'); slot.className = 'slot'; slot.style.setProperty('--a', a + 'deg');
+        const up = document.createElement('span'); up.className = 'up'; up.style.setProperty('--a', a + 'deg');
+        const im = document.createElement('img'); im.alt = ''; im.src = newFace();
+        const next = new Image(); next.src = newFace();   // preloaded, so the flip is instant
+        up.appendChild(im); slot.appendChild(up); $(id).appendChild(slot);
+        orbitFaces.push({ spin: $(id), a, im, next, prev: null });
+      });
     });
   })();
+  // the ring's current rotation in degrees, read from its animated transform
+  const spinAngle = el => { const m = new DOMMatrix(getComputedStyle(el).transform); return Math.atan2(m.b, m.a) * 180 / Math.PI; };
+  setInterval(() => {
+    if (!$('s-wait').classList.contains('on')) return;
+    orbitFaces.forEach(f => {
+      const now = f.a + spinAngle(f.spin);
+      if (f.prev !== null) {
+        const d = ((now - f.prev + 540) % 360) - 180;              // short signed step since last check
+        if (Math.floor(f.prev / 360) !== Math.floor((f.prev + d) / 360)) {   // passed the top (a multiple of 360)
+          f.im.classList.remove('flip'); void f.im.offsetWidth; f.im.classList.add('flip');
+          setTimeout(() => { f.im.src = f.next.src; f.next = new Image(); f.next.src = newFace(); }, 180);
+        }
+        f.prev = f.prev + d;
+      } else f.prev = ((now % 360) + 360) % 360;
+    });
+  }, 120);
   let me = null, match = null, pollTimer = null, cardTimer = null;
 
   const rpc = async (fn, args) => { const { data, error } = await sb.rpc(fn, args || {}); if (error) throw new Error(error.message); return data; };
@@ -558,6 +597,22 @@
     catch (e) { err('w-err', e); $('w-go').disabled = false; }
   };
 
+  // "N people nearby" with an odometer: each digit rolls up or down to its new value, like a combination lock
+  function setPool(n) {
+    const el = $('wt-pool');
+    if (n === 0) { el.textContent = 'You\'re the first one here'; return; }
+    let odo = el.querySelector('.odo');
+    if (!odo) { el.innerHTML = '<span class="odo"></span> <span class="odo-word"></span>'; odo = el.querySelector('.odo'); }
+    const digits = String(n).split('');
+    while (odo.children.length < digits.length) {   // add a wheel (0-9) for each new digit, starting at 0
+      const w = document.createElement('span'); w.className = 'wheel';
+      w.innerHTML = '<span class="strip">' + [...'0123456789'].map(d => '<span>' + d + '</span>').join('') + '</span>';
+      odo.prepend(w);
+    }
+    while (odo.children.length > digits.length) odo.firstChild.remove();
+    requestAnimationFrame(() => digits.forEach((d, i) => { odo.children[i].firstChild.style.transform = 'translateY(' + (-d) + 'em)'; }));
+    el.querySelector('.odo-word').textContent = n === 1 ? 'person nearby' : 'people nearby';
+  }
   // ---- 2. waiting / search ----
   async function search() {
     stopPolls(); match = null;
@@ -569,7 +624,7 @@
         if (m && m.id) { stopPolls(); match = m; return card(); }
         const n = await rpc('pool_size');            // includes you
         const others = Math.max(0, (n || 1) - 1);
-        $('wt-pool').textContent = others === 0 ? 'You\'re the first one here' : (others === 1 ? '1 person nearby' : others + ' people nearby');
+        setPool(others);
       } catch (e) { err('wt-err', e); }
     };
     await tick();

@@ -286,7 +286,7 @@ html,body{height:100%} body{display:block;overflow:hidden}
 .gum img{position:absolute;inset:16%;width:68%;opacity:.55;mix-blend-mode:multiply}
 .found{position:absolute;inset:0;z-index:8;display:grid;place-items:center;pointer-events:none}
 .found .who{text-align:center;animation:popin .5s cubic-bezier(.2,1.6,.4,1) both}
-.found .who img{width:150px;filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25))}
+.found .who img{width:180px;filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25))}
 .me.puck .face:not(.pk){opacity:0} .me.puck .face.pk{opacity:1 !important}
 .me .nm{display:block;margin-top:-12px;font-size:22px;font-weight:900;color:var(--ink)}
 .name-tag .clip{position:absolute;left:50%;top:-11px;width:20px;height:13px;margin-left:-10px;border-radius:3px;background:linear-gradient(#e6eaee,#b9c1c9);border:2px solid #111;box-sizing:border-box;z-index:2}
@@ -316,7 +316,7 @@ let matching=false;
 function match(){
   matching=true; const gm=document.querySelector('.gum'); if(gm){ gm.style.transform='scale(0)'; } me.classList.remove('puck'); const b=[...live][0]; if(!b){matching=false;return;}
   b._taken=true; live.delete(b); const sx=b._x, sy=b._y, m=pos(me.querySelector('.face')), sk=sky.getBoundingClientRect(), hd=document.querySelector('.wt-top').getBoundingClientRect(), fc=me.querySelector('.face').getBoundingClientRect(),
-    gTop=hd.bottom-sk.top+6, gBot=fc.top-sk.top+fc.height*.12, fit=Math.max(.7,Math.min(1,(gBot-gTop)/220)), tx=m.x, ty=gTop+(gBot-gTop)*.42, t0=performance.now(), d=1300;
+    gTop=hd.bottom-sk.top+6, gBot=fc.top-sk.top+fc.height*.12, fit=Math.max(.75,Math.min(1,(gBot-gTop)/250)), tx=m.x, ty=gTop+(gBot-gTop)*.5, t0=performance.now(), d=1300;
   (function step(t){ const k=Math.min(1,(t-t0)/d), e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
     b.style.left=(sx+(tx-sx)*e)+'px'; b.style.top=(sy+(ty-sy)*e)+'px'; b.style.transform=`scale(${1+e*1.6})`;
     if(k<1) return setTimeout(()=>step(performance.now()),16);

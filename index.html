@@ -41,47 +41,50 @@
   .avatar { width:150px; height:150px; border-radius:50%; background:#f1f3ff; object-fit:cover; }
   .hero-img { position:relative; z-index:1; filter:drop-shadow(0 12px 12px rgba(0,0,0,.12)); }
   .faces img { width:64px; height:64px; border-radius:50%; background:#fff; margin:0 6px; }
-  /* waiting: white, one sticker, faces orbiting on a faint ring */
-  #s-wait { text-align:center; padding-top:calc(env(safe-area-inset-top) + 56px); }
+  /* waiting: you (big, at the bottom) blow bubble gum; each pop sends people up in pink bubbles */
+  #s-wait.on { position:fixed; inset:0; background:#fff; overflow:hidden; text-align:center; min-height:0; padding-top:calc(env(safe-area-inset-top) + 62px); }
   #s-wait h1 { font-size:31px; font-weight:800; margin:0; }
-  /* your name on a "HELLO my name is" sticker, stuck on the bottom of your face */
-  .name-tag { position:absolute; left:50%; top:50%; transform:translate(-50%, calc(var(--o) * .045)) rotate(-4deg); z-index:2;
-              min-width:80px; background:#fff; border:2px solid #e8463c; border-radius:8px; overflow:hidden; text-align:center;
-              box-shadow:0 6px 14px rgba(47,59,69,.18); }
-  .nt-band { background:#e8463c; color:#fff; padding:2px 8px 3px; line-height:1; }
+  #s-wait .wt-top { position:relative; z-index:6; padding:0 22px; }
+  #s-wait .back { position:absolute; left:6px; top:calc(env(safe-area-inset-top) + 2px); z-index:9; width:44px; height:44px; padding:0; margin:0;
+                  border-radius:50%; background:transparent; box-shadow:none; color:var(--ink); display:grid; place-items:center; }
+  .sky { position:absolute; inset:100px 0 0; z-index:1; pointer-events:none; }
+  .bub { position:absolute; width:var(--s); height:var(--s); margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2); border-radius:50%;
+         background:radial-gradient(circle at 32% 28%, rgba(255,255,255,.95) 0 9%, rgba(255,255,255,0) 10%), radial-gradient(circle, rgba(255,236,244,.45) 58%, rgba(255,143,189,.45) 100%);
+         border:1.5px solid rgba(240,111,164,.6); box-shadow:inset 0 0 10px rgba(255,255,255,.7); }
+  .bub img { position:absolute; inset:12%; width:76%; height:76%; }
+  .pop { position:absolute; width:var(--s); height:var(--s); margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2); pointer-events:none; }
+  .pop i { position:absolute; left:50%; top:50%; width:4px; height:12px; margin:-6px -2px; border-radius:2px; background:#ff8fbd; transform:rotate(var(--a)); animation:spark .45s ease-out forwards; }
+  .pop b { position:absolute; inset:0; border-radius:50%; border:2px solid rgba(240,111,164,.8); animation:ring .35s ease-out forwards; }
+  @keyframes spark { to { transform:rotate(var(--a)) translateY(calc(var(--s) * -.75)); opacity:0; } }
+  @keyframes ring { to { transform:scale(1.5); opacity:0; } }
+  .me { position:absolute; left:50%; bottom:calc(env(safe-area-inset-bottom) + 40px); width:240px; height:300px; margin-left:-120px; z-index:4; }
+  .me .fig { position:relative; filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 8px 10px rgba(47,59,69,.22)); }
+  .me .face { display:block; position:relative; z-index:2; width:240px; height:240px; }
+  .me .face.o { position:absolute; left:0; top:0; opacity:0; }
+  .me.blowing .face:not(.o) { opacity:0; } .me.blowing .face.o { opacity:1; }
+  .me .collar { position:absolute; left:50%; top:172px; width:230px; margin-left:-115px; z-index:1; }
+  .me .collar svg { display:block; width:100%; height:auto; overflow:visible; }
+  /* your name on a "HELLO my name is" sticker, clipped to your collar */
+  .name-tag { position:absolute; left:56%; top:204px; z-index:3; transform:rotate(-6deg) scale(.66); transform-origin:0 0; overflow:visible;
+              min-width:80px; background:#fff; border:2px solid #e8463c; border-radius:8px; text-align:center; box-shadow:0 6px 14px rgba(47,59,69,.18); }
+  .nt-band { background:#e8463c; color:#fff; padding:2px 8px 3px; line-height:1; border-radius:5px 5px 0 0; }
   .nt-band b { display:block; font-size:11px; font-weight:900; letter-spacing:.08em; }
   .nt-band small { display:block; font-size:6.3px; font-weight:800; letter-spacing:.04em; margin-top:1px; }
   .nt-name { font-family:"Caveat", "Nunito", sans-serif; font-weight:700; font-size:18.5px; line-height:1; color:#1f2a33; padding:2px 9px 3px; white-space:nowrap; }
-  #wt-pool { font-size:18px; font-weight:700; }
-  #wt-back { font-size:18px; }
-  /* --o is the orbit's size; everything inside scales with it, capped so it fits small phones */
-  .orbit { --o:min(350px, calc(100vw - 24px)); position:relative; width:var(--o); height:var(--o); margin:auto; flex:0 0 auto; }
-  /* two rings: outer turns clockwise, inner counter-clockwise; --r ring radius, --f face size, --t lap time */
-  /* the rings are dotted paths: zero-length dashes with round caps draw as little dots */
-  .orbit .rings { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
-  .orbit .rings circle { fill:none; stroke:#e4e8ed; stroke-width:1.1; stroke-linecap:round; stroke-dasharray:0 3.4; }
-  .orbit .outer { --r:.43; --f:.16; --t:18s; --dir:1; }
-  .orbit .inner { --r:.32; --f:.12; --t:24s; --dir:-1; }
-  .orbit .spin { position:absolute; inset:0; animation:orbit var(--t) linear infinite; }
-  .orbit .spin.inner { animation-direction:reverse; }
-  .orbit .slot { position:absolute; left:50%; top:50%; width:calc(var(--o) * var(--f)); height:calc(var(--o) * var(--f));
-                 margin:calc(var(--o) * var(--f) / -2) 0 0 calc(var(--o) * var(--f) / -2);
-                 transform:rotate(var(--a)) translateY(calc(var(--o) * var(--r) * -1)); }
-  /* .up keeps the face upright as the ring turns; the img inside does the flip */
-  .orbit .up { display:block; width:100%; height:100%; animation:counter var(--t) linear infinite; }
-  .orbit .inner .up { animation-direction:reverse; }
-  .orbit .up img { display:block; width:100%; height:100%;
-                   filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 5px 6px rgba(47,59,69,.22)); }
-  .orbit .up img.flip { animation:flip .36s ease-in-out; }
-  @keyframes orbit { to { transform:rotate(360deg); } }
-  @keyframes counter { from { transform:rotate(calc(-1 * var(--a))); } to { transform:rotate(calc(-1 * var(--a) - 360deg)); } }
-  @keyframes flip { 0%,100% { transform:scaleX(1); } 50% { transform:scaleX(0); } }
-  @media (prefers-reduced-motion: reduce) { .orbit .spin, .orbit .up, .orbit .up img.flip { animation:none; } }
-  .orbit-me { position:absolute; left:50%; top:50%; width:calc(var(--o) * .47); height:calc(var(--o) * .47); margin:calc(var(--o) * -.31) 0 0 calc(var(--o) * -.235);
-              filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
-  .wt-foot { padding-bottom:12px; }
+  .name-tag .clip { position:absolute; left:50%; top:-11px; width:20px; height:13px; margin-left:-10px; border-radius:3px; background:linear-gradient(#e6eaee, #b9c1c9); border:2px solid #111; box-sizing:border-box; z-index:2; }
+  .name-tag .clip::after { content:""; position:absolute; left:50%; top:-8px; width:8px; height:8px; margin-left:-4px; border:2px solid #111; border-bottom:0; border-radius:6px 6px 0 0; box-sizing:border-box; }
+  .gum { position:absolute; left:39%; top:160px; width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%; z-index:5; transform:scale(0); overflow:hidden;
+         background:#ff8fbd; border:.4px solid #111; box-shadow:inset -1.2px -1.2px 0 #f06fa4; }
+  .gum::before { content:""; position:absolute; left:22%; top:18%; width:26%; height:16%; border-radius:50%; background:#fff; transform:rotate(-30deg); }
+  .gum::after { content:""; position:absolute; left:52%; top:20%; width:8%; height:8%; border-radius:50%; background:#fff; }
+  .found { position:absolute; left:0; right:0; height:0; z-index:8; pointer-events:none; }
+  .found .who { position:absolute; left:0; right:0; top:0; translate:0 -50%; text-align:center; animation:popin .5s cubic-bezier(.2,1.6,.4,1) both; }
+  .found .who img { width:180px; filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
+  .found .who b { display:block; font-size:24px; font-weight:900; color:var(--ink); }
+  #wt-pool { position:absolute; left:0; right:0; bottom:calc(env(safe-area-inset-bottom) + 12px); z-index:6; margin:0; font-size:15px; font-weight:700; }
   #wt-pool b { display:inline-block; font-weight:900; color:var(--ink); }
   #wt-pool b.bump { animation:popin .4s cubic-bezier(.2,1.6,.4,1); }
+  @media (prefers-reduced-motion: reduce) { .found .who, #wt-pool b.bump { animation:none; } }
 
   .over { position:relative; z-index:2; }
   .panel { background:rgba(255,255,255,.86); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); border-radius:24px; padding:22px 20px; text-align:center; box-shadow:0 14px 40px rgba(47,59,69,.14); max-width:360px; }
@@ -283,20 +286,17 @@
     </div>
   </section>
 
-  <!-- 2. Waiting: calm and white; your sticker in the middle, a few faces orbiting on a faint ring -->
+  <!-- 2. Waiting: you blow bubble gum; each pop sends people in the room floating up in bubbles -->
   <section id="s-wait" class="screen">
-    <div class="wt-top"><h1>Finding your match…</h1></div>
-    <div class="orbit" aria-hidden="true">
-      <svg class="rings" viewBox="0 0 100 100"><circle cx="50" cy="50" r="43"/><circle cx="50" cy="50" r="32"/></svg>
-      <div class="spin outer" id="wt-spin"></div><div class="spin inner" id="wt-spin2"></div>
-      <img class="orbit-me" id="wt-me" alt="">
-      <div class="name-tag"><div class="nt-band"><b>HELLO</b><small>my name is</small></div><div class="nt-name" id="wt-alias"></div></div>
+    <button type="button" class="back" id="wt-back" aria-label="Back"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="wt-top"><h1>Finding your match…</h1><div class="err" id="wt-err"></div></div>
+    <div class="sky" id="wt-sky" aria-hidden="true"></div>
+    <div class="me" id="wt-box" aria-hidden="true">
+      <div class="fig"><div class="collar" id="wt-collar"></div><img class="face" id="wt-me" alt=""><img class="face o" id="wt-me-o" alt=""></div>
+      <div class="name-tag"><i class="clip"></i><div class="nt-band"><b>HELLO</b><small>my name is</small></div><div class="nt-name" id="wt-alias"></div></div>
+      <div class="gum" id="wt-gum"></div>
     </div>
-    <div class="wt-foot">
-      <div class="status" id="wt-pool"></div>
-      <div class="err" id="wt-err"></div>
-      <button type="button" class="link" id="wt-back">Cancel</button>
-    </div>
+    <div class="status" id="wt-pool"></div>
   </section>
 
   <!-- 3. Match found (purple) -->
@@ -464,38 +464,84 @@
     if (theirs) { const hs = document.createElement('div'); hs.className = 'shake'; hs.textContent = '🤝'; el.append(hs, who(c.partner_avatar || theirs, theirs)); }
   }
   const avatarBare = seed => 'https://api.dicebear.com/9.x/adventurer/svg?hair=' + HAIR + '&seed=' + encodeURIComponent(seed || 'stranger');   // no background, for the sticker look
-  // the orbit: two rings of faces (outer clockwise, inner counter-clockwise). Each face stays upright,
-  // and flips to a new person whenever it passes the top of its ring, so it feels like the crowd keeps changing.
+  // ---- waiting screen: you chew bubble gum; each pop sends a few people up in pink bubbles ----
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const newFace = () => avatarBare('orbit-' + Math.random().toString(36).slice(2, 9));
-  const orbitFaces = [];
-  (function buildOrbit() {
-    [['wt-spin', [0, 72, 144, 216, 288]], ['wt-spin2', [60, 180, 300]]].forEach(([id, angles]) => {
-      angles.forEach(a => {
-        const slot = document.createElement('span'); slot.className = 'slot'; slot.style.setProperty('--a', a + 'deg');
-        const up = document.createElement('span'); up.className = 'up'; up.style.setProperty('--a', a + 'deg');
-        const im = document.createElement('img'); im.alt = ''; im.src = newFace();
-        const next = new Image(); next.src = newFace();   // preloaded, so the flip is instant
-        up.appendChild(im); slot.appendChild(up); $(id).appendChild(slot);
-        orbitFaces.push({ spin: $(id), a, im, next, prev: null });
-      });
-    });
-  })();
-  // the ring's current rotation in degrees, read from its animated transform
-  const spinAngle = el => { const m = new DOMMatrix(getComputedStyle(el).transform); return Math.atan2(m.b, m.a) * 180 / Math.PI; };
-  setInterval(() => {
-    if (!$('s-wait').classList.contains('on')) return;
-    orbitFaces.forEach(f => {
-      const now = f.a + spinAngle(f.spin);
-      if (f.prev !== null) {
-        const d = ((now - f.prev + 540) % 360) - 180;              // short signed step since last check
-        if (Math.floor(f.prev / 360) !== Math.floor((f.prev + d) / 360)) {   // passed the top (a multiple of 360)
-          f.im.classList.remove('flip'); void f.im.offsetWidth; f.im.classList.add('flip');
-          setTimeout(() => { f.im.src = f.next.src; f.next = new Image(); f.next.src = newFace(); }, 180);
-        }
-        f.prev = f.prev + d;
-      } else f.prev = ((now % 360) + 360) % 360;
-    });
-  }, 120);
+  const facePool = Array.from({ length: 7 }, () => { const im = new Image(); im.src = newFace(); return im; });   // preloaded, so bubbles never show blank
+  const face = () => { const src = facePool[0].src; facePool.push(facePool.shift()); facePool[facePool.length - 1].src = newFace(); return src; };
+  const sky = $('wt-sky'), box = $('wt-box'), gum = $('wt-gum'), live = new Set();
+  const skyPos = el => { const r = el.getBoundingClientRect(), o = sky.getBoundingClientRect(); return { x: r.left - o.left + r.width / 2, y: r.top - o.top + r.height / 2, w: r.width }; };
+  function burst(x, y, s) {
+    const p = document.createElement('div'); p.className = 'pop'; p.style.cssText = `left:${x}px;top:${y}px;--s:${s}px`;
+    p.innerHTML = '<b></b>' + [0, 45, 90, 135, 180, 225, 270, 315].map(a => `<i style="--a:${a}deg"></i>`).join(''); sky.append(p); setTimeout(() => p.remove(), 500);
+  }
+  // one person in a bubble, drifting up from (x,y) with a wobble, popping somewhere near the top
+  function release(x, y, dx) {
+    const s = Math.round(50 + Math.random() * 28), b = document.createElement('div'); b.className = 'bub'; b.style.setProperty('--s', s + 'px'); b._s = s;
+    b.innerHTML = '<img alt="" src="' + face() + '">'; sky.append(b); live.add(b);
+    const top = 40 + Math.random() * 120, d = 4200 + Math.random() * 2200, t0 = performance.now(), ph = Math.random() * 6;
+    (function step(t) {
+      if (!b.isConnected || b._taken) return;
+      const k = Math.min(1, (t - t0) / d), e = 1 - Math.pow(1 - k, 1.6);
+      b._x = x + dx * e + Math.sin(ph + k * 9) * 12; b._y = y + (top - y) * e;
+      b.style.left = b._x + 'px'; b.style.top = b._y + 'px'; b.style.transform = `scale(${Math.min(1, .25 + k * 4)})`;
+      if (k < 1) requestAnimationFrame(step); else { burst(b._x, b._y, s); b.remove(); live.delete(b); }
+    })(t0);
+  }
+  let chewing = false, revealing = false;
+  function chew() {
+    if (!$('s-wait').classList.contains('on') || revealing || calm) { chewing = false; return; }
+    chewing = true; box.classList.add('blowing');
+    const t0 = performance.now(), d = 2600;
+    (function step(t) {
+      if (revealing || !$('s-wait').classList.contains('on')) { gum.style.transform = 'scale(0)'; box.classList.remove('blowing'); chewing = false; return; }
+      const k = Math.min(1, (t - t0) / d); gum.style.transform = `scale(${.2 + k * 7.6})`;
+      if (k < 1) return requestAnimationFrame(step);
+      const p = skyPos(gum); gum.style.transform = 'scale(0)'; box.classList.remove('blowing'); burst(p.x, p.y, p.w);
+      for (let i = 0; i < 3; i++) release(p.x + (i - 1) * 30, p.y, (i - 1) * 120 + (Math.random() - .5) * 40);
+      setTimeout(chew, 900);
+    })(t0);
+  }
+  const startChewing = () => { if (!chewing) chew(); };
+  // the match: one bubble floats into the space under the heading, grows, pops, and your match is there
+  function reveal(seed, done) {
+    if (calm) return done();
+    revealing = true;
+    const sk = sky.getBoundingClientRect(), hd = document.querySelector('#s-wait .wt-top').getBoundingClientRect(), fc = $('wt-me').getBoundingClientRect();
+    const gTop = hd.bottom - sk.top + 6, gBot = fc.top - sk.top + fc.height * .12, fit = Math.max(.75, Math.min(1, (gBot - gTop) / 250));
+    const tx = sk.width / 2, ty = gTop + (gBot - gTop) * .5;
+    let b = [...live][0];
+    if (!b) { release(tx, gBot, 0); b = [...live][0]; }
+    b._taken = true; live.delete(b); b.querySelector('img').src = avatarBare(seed);
+    const sx = b._x ?? tx, sy = b._y ?? gBot, t0 = performance.now(), d = 1300;
+    (function step(t) {
+      const k = Math.min(1, (t - t0) / d), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      b.style.left = (sx + (tx - sx) * e) + 'px'; b.style.top = (sy + (ty - sy) * e) + 'px'; b.style.transform = `scale(${1 + e * 1.6})`;
+      if (k < 1) return requestAnimationFrame(step);
+      burst(tx, ty, b._s * 2.6); b.remove();
+      const f = document.createElement('div'); f.className = 'found'; f.style.top = (sk.top - $('s-wait').getBoundingClientRect().top + ty) + 'px';
+      f.innerHTML = '<div class="who" style="scale:' + fit + '"><img alt="" src="' + avatarBare(seed) + '"><b>Found them!</b></div>';
+      $('s-wait').append(f);
+      try { navigator.vibrate && navigator.vibrate([60, 40, 90]); } catch (_) {}
+      setTimeout(() => { revealing = false; done(); setTimeout(() => f.remove(), 400); }, 1900);
+    })(t0);
+  }
+  // you: face, the "o" mouth for blowing, a sliver of neck in your skin tone, a white collar
+  const SKINS = ['f2d3b1', 'ecad80', '9e5622', '763900'];
+  const collarSvg = skin => `<svg viewBox="0 0 230 128">
+    <g transform="translate(115 12) scale(.8) translate(-115 -22)"><path d="M78 34 L80 18 Q115 0 150 18 L152 34 Z" fill="#fff" stroke="#111" stroke-width="3.6" stroke-linejoin="round"/></g>
+    <path d="M97 -30 L97 40 L133 40 L133 -30 Z" fill="#${skin}" stroke="#111" stroke-width="3.2" stroke-linejoin="round"/>
+    <g transform="translate(115 12) scale(.8) translate(-115 -22)"><path d="M80 24 L115 50 L94 84 L64 36 Z" fill="#fff" stroke="#111" stroke-width="3.6" stroke-linejoin="round"/>
+    <path d="M150 24 L115 50 L136 84 L166 36 Z" fill="#fff" stroke="#111" stroke-width="3.6" stroke-linejoin="round"/>
+    <circle cx="115" cy="58" r="3.6" fill="#fff" stroke="#111" stroke-width="2.4"/></g></svg>`;
+  let drawnSeed = null;
+  function drawMe(seed, name) {
+    $('wt-alias').textContent = name;
+    if (seed === drawnSeed) return; drawnSeed = seed;
+    const url = avatarBare(seed); $('wt-me').src = url; $('wt-me-o').src = url + '&mouth=variant18';
+    fetch(url).then(r => r.text()).then(t => { const skin = SKINS.find(c => t.toLowerCase().includes('#' + c)) || 'ecad80'; $('wt-collar').innerHTML = collarSvg(skin); })
+      .catch(() => { $('wt-collar').innerHTML = collarSvg('ecad80'); });
+  }
   let me = null, match = null, pollTimer = null, cardTimer = null, lastCard = null;
 
   const rpc = async (fn, args) => { const { data, error } = await sb.rpc(fn, args || {}); if (error) throw new Error(error.message); return data; };
@@ -663,12 +709,17 @@
   // ---- 2. waiting / search ----
   async function search() {
     stopPolls(); match = null;
-    $('wt-alias').textContent = (me.name || me.alias); $('wt-me').src = avatarBare(me.avatar_seed || me.alias); 
-    show('wait');
+    drawMe(me.avatar_seed || me.alias, me.name || me.alias);
+    document.querySelectorAll('#s-wait .found').forEach(n => n.remove());
+    show('wait'); startChewing();
     const tick = async () => {
       try {
         const m = await rpc('find_match');
-        if (m && m.id) { stopPolls(); match = m; return card(); }
+        if (m && m.id) {
+          stopPolls(); match = m;
+          let c = null; try { c = await rpc('match_card', { p_match: m.id }); } catch (_) {}
+          return c && c.partner_alias ? reveal(c.partner_avatar || c.partner_alias, card) : card();
+        }
         const n = await rpc('pool_size');            // includes you
         const others = Math.max(0, (n || 1) - 1);
         setPool(others);

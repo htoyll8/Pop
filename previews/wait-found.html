@@ -315,16 +315,16 @@ html,body{height:100%} body{display:block;overflow:hidden}
 #s-on{position:fixed;inset:0;z-index:30;background:#fff;display:flex;flex-direction:column;text-align:center;padding:calc(env(safe-area-inset-top) + 34px) 16px calc(env(safe-area-inset-bottom) + 10px);
   opacity:0;pointer-events:none;transition:opacity .35s}
 #s-on.on{opacity:1;pointer-events:auto}
-#s-on h1{font-size:40px;font-weight:900;margin:0;line-height:1.1}
+#s-on h1{font-size:48px;font-weight:900;margin:0;line-height:1.05}
 #s-on .logo{width:58px;margin:0 auto 8px;display:block}
 #s-on .hint{color:var(--muted);font-size:15px;font-weight:700;margin:0 auto 12px;max-width:300px;text-align:center}
 .away{position:fixed;inset:0;z-index:40;background:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:10px}
 .away.on{display:flex}
 .away b{font-size:24px;font-weight:900}.away span{color:var(--muted)}
 #s-on .pair2{display:flex;justify-content:center;align-items:flex-end;margin:26px 0 0}
-#s-on .pair2 img{width:176px;filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25));animation:popin .5s cubic-bezier(.2,1.6,.4,1) both}
-#s-on .pair2 img:first-child{rotate:-7deg;margin-right:-12px} #s-on .pair2 img:last-child{rotate:7deg;margin-left:-12px;animation-delay:.12s}
-#s-on .names{display:flex;justify-content:center;gap:96px;font-weight:900;font-size:17px;margin-top:2px}
+#s-on .pair2 img{width:min(50vw,206px);filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25));animation:popin .5s cubic-bezier(.2,1.6,.4,1) both}
+#s-on .pair2 img:first-child{rotate:-7deg;margin-right:-18px} #s-on .pair2 img:last-child{rotate:7deg;margin-left:-18px;animation-delay:.12s}
+#s-on .names{display:flex;justify-content:center;gap:120px;font-weight:900;font-size:17px;margin-top:2px}
 #s-on .booth{margin:22px auto 0;padding:16px 18px;border-radius:20px;background:#f4f6f8;width:100%;max-width:340px;animation:popin .5s .25s cubic-bezier(.2,1.4,.4,1) both}
 #s-on .booth small{display:block;font-size:13px;font-weight:900;color:#e8463c;text-transform:uppercase;letter-spacing:.06em}
 #s-on .booth b{display:block;font-size:24px;font-weight:900;color:var(--ink);margin-top:2px} #s-on .booth span{color:var(--muted);font-size:15px}

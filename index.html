@@ -228,11 +228,12 @@
   .sheet .x:active { transform:none; background:#e4e9ee; }
   .sheet.dragging { transition:none; }
   .sheet.leaving { transition:transform .22s ease-in; }
-  .sheet h2 { font-size:24px; font-weight:900; margin:0 0 14px; text-align:center; }
+  .sheet h2 { font-size:clamp(17px, 5vw, 21px); font-weight:900; margin:0 0 14px; padding-right:40px; text-align:left; white-space:nowrap; }
   .roles { display:flex; gap:8px; margin:0 0 12px; }
   .roles button { flex:1; margin:0; padding:11px 4px; font-size:15px; background:#fff; color:var(--ink); border:2px solid #e6ebef; box-shadow:none; }
   .roles button.on { border-color:var(--blue); color:var(--blue2); background:#eef6fc; }
   .sheet textarea { width:100%; padding:14px 16px; border-radius:16px; border:2px solid #e6ebef; font:inherit; font-size:16px; margin:0 0 14px; resize:none; color:var(--ink); }
+  .sheet input { text-align:left; }
   .sheet input + input { margin-top:-4px; }
   .wl-fine { color:var(--muted); font-size:13px; font-weight:600; margin:-4px 2px 12px; }
   .sheet textarea:focus { outline:none; border-color:var(--blue); }

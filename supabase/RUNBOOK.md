@@ -41,6 +41,14 @@ Anonymous sign-in, join_event (variants alternate), find_match (A pool + pairing
 
 ## Demo / event-day reset
 ```sql
-truncate checkins, matches, people;   -- keeps vendors and the schema; phones re-join on next tap
+truncate reviews, checkins, matches, people;   -- keeps vendors and the schema; phones re-join on next tap
 ```
 Variant: everyone is A for the 10/17 event (see join_event in schema.sql for how to restore A/B alternation).
+
+
+## 2026-10-16 updates (run in order, once each)
+1. `2026-10-15a-edit-profile.sql`
+2. `2026-10-15b-waitlist.sql`
+3. `2026-10-16a-met-review.sql`: "Found them!" marks the match met; reviews table.
+4. `2026-10-16b-review-note.sql`: the review is an optional face plus an optional note.
+5. Optional, before the event: `2026-10-16c-seeing-sounds-spots.sql` loads the Seeing Sounds activations and vendors as meeting spots. It clears people, matches, check-ins and reviews first.

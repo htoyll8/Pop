@@ -86,6 +86,58 @@
   #wt-pool b.bump { animation:popin .4s cubic-bezier(.2,1.6,.4,1); }
   @media (prefers-reduced-motion: reduce) { .found .who, #wt-pool b.bump { animation:none; } }
 
+  /* match found: stays on the bubble screen; the heading and count fade, you shift up, Let's go slides in */
+  #s-wait .wt-top, #wt-pool { transition:opacity .4s; }
+  #s-wait.matched .wt-top, #s-wait.matched #wt-pool, #s-wait.matched .back { opacity:0; pointer-events:none; }
+  .me { transition:transform .6s cubic-bezier(.3,1.2,.5,1); }
+  #s-wait.matched .me { transform:translateY(-118px) scale(.8); }
+  .found { transition:top .6s cubic-bezier(.3,1.2,.5,1); }
+  .go { position:absolute; left:16px; right:16px; bottom:calc(env(safe-area-inset-bottom) + 10px); z-index:9; transform:translateY(calc(100% + 160px)); opacity:0; visibility:hidden;
+        transition:transform .5s cubic-bezier(.3,1.3,.5,1), opacity .25s, visibility 0s .5s; }
+  #s-wait.matched .go { transform:none; opacity:1; visibility:visible; transition:transform .5s cubic-bezier(.3,1.3,.5,1), opacity .25s, visibility 0s; }
+  /* the big bottom button; a timer fills it left to right */
+  button.tbtn { position:relative; overflow:hidden; width:100%; max-width:420px; margin:0 auto; display:block; padding:0; height:62px; border-radius:18px; }
+  button.tbtn:disabled { opacity:.85; box-shadow:0 5px 0 var(--blue2); }
+  .tbtn .fill { position:absolute; inset:0; background:rgba(255,255,255,.22); transform:scaleX(0); transform-origin:left center; }
+  .tbtn .lbl { position:relative; display:flex; justify-content:space-between; align-items:center; height:100%; padding:0 22px; font-size:20px; font-weight:900; }
+  .tbtn .lbl.mid { justify-content:center; }
+  .tbtn .lbl small { font-size:17px; font-weight:800; opacity:.85; font-variant-numeric:tabular-nums; }
+  button.under { display:block; width:auto; margin:6px auto 0; padding:8px; background:none; box-shadow:none; color:var(--muted); font-weight:800; font-size:16px; }
+  /* It's on! and You're both here!: white, full screen */
+  .flow.on { position:fixed; inset:0; background:#fff; z-index:5; display:flex; flex-direction:column; text-align:center; min-height:0;
+             padding:calc(env(safe-area-inset-top) + 34px) 16px calc(env(safe-area-inset-bottom) + 10px); }
+  .flow .grow { flex:1; }
+  #s-on .logo { width:58px; margin:0 auto 8px; display:block; }
+  #s-on h1 { font-size:48px; font-weight:900; margin:0; line-height:1.05; }
+  .pair2 { display:flex; justify-content:center; align-items:flex-end; margin:26px 0 0; }
+  .pair2 img { width:min(50vw, 206px); height:auto; aspect-ratio:1 / 1; animation:popin .5s cubic-bezier(.2,1.6,.4,1) both;
+               filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
+  .pair2 img:first-child { rotate:-7deg; margin-right:-18px; } .pair2 img:last-child { rotate:7deg; margin-left:-18px; animation-delay:.12s; }
+  #s-on .names { display:flex; justify-content:center; gap:120px; font-weight:900; font-size:17px; margin-top:2px; }
+  #s-on .booth { margin:22px auto 0; padding:16px 18px; border-radius:20px; background:#f4f6f8; width:100%; max-width:340px; animation:popin .5s .25s cubic-bezier(.2,1.4,.4,1) both; }
+  #s-on .booth small { display:block; font-size:15px; font-weight:900; color:#e8463c; text-transform:uppercase; letter-spacing:.06em; }
+  #s-on .booth b { display:block; font-size:24px; font-weight:900; color:var(--ink); margin-top:2px; }
+  #s-on .booth span { color:var(--muted); font-size:17px; font-weight:700; }
+  #s-bc { padding-top:calc(env(safe-area-inset-top) + 64px); }
+  #s-bc .hd { display:table; margin:0 auto; }   /* the line under the heading wraps to the heading's width */
+  #s-bc .hd .sub { display:table-caption; caption-side:bottom; color:var(--muted); font-size:16px; font-weight:700; margin-top:6px; }
+  #s-bc h1 { font-size:34px; font-weight:900; margin:0; line-height:1.1; }
+  .bc { --o:min(400px, calc(100vw - 8px)); position:relative; width:var(--o); height:var(--o); margin:14px auto 0; transition:transform .5s cubic-bezier(.3,1.2,.5,1); }
+  .bc .duo2 { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+  .bc .duo2 img { width:52%; height:auto; aspect-ratio:1 / 1; flex:none; animation:bob 2.4s ease-in-out infinite;
+                  filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
+  .bc .duo2 img:first-child { rotate:-7deg; margin-right:-6%; } .bc .duo2 img:last-child { rotate:7deg; margin-left:-6%; animation-delay:-1.2s; }
+  @keyframes bob { 50% { translate:0 -6px; } }
+  #s-bc.rev .bc { transform:scale(.72); margin-top:-30px; margin-bottom:-60px; }
+  .revbox { display:none; width:100%; max-width:420px; margin:0 auto; animation:popin .4s cubic-bezier(.2,1.3,.4,1); }
+  #s-bc.rev .revbox { display:block; } #s-bc.rev #bc-found { display:none; }
+  .rate3 { display:flex; gap:10px; margin:0 0 10px; }
+  .rate3 button { flex:1; margin:0; padding:8px 4px 6px; background:#f4f6f8; color:var(--ink); box-shadow:none; border:2px solid transparent; border-radius:18px; font-size:14px; font-weight:800; }
+  .rate3 button b { display:block; font-size:38px; line-height:1.15; } .rate3 button.on { background:#fff; border-color:var(--blue); }
+  .revbox textarea { width:100%; box-sizing:border-box; border:2px solid #e6ebef; border-radius:16px; padding:12px 14px; font:inherit; font-size:16px; resize:none; margin:0 0 10px; color:var(--ink); }
+  .revbox textarea:focus { outline:none; border-color:var(--blue); }
+  @media (prefers-reduced-motion: reduce) { .bc .duo2 img, .pair2 img { animation:none; } }
+
   .over { position:relative; z-index:2; }
   .panel { background:rgba(255,255,255,.86); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); border-radius:24px; padding:22px 20px; text-align:center; box-shadow:0 14px 40px rgba(47,59,69,.14); max-width:360px; }
   .panel h1 { margin-bottom:6px; }
@@ -206,40 +258,6 @@
   .rain { position:absolute; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
   .screen.purple .top, .screen.purple .stage, .screen.purple .bottom, .screen.purple .brand { position:relative; z-index:1; }
   .screen.purple .brand { position:absolute; z-index:4; }
-  /* booth screen: fit on one phone screen without scrolling */
-  #s-booth .top { padding-top:calc(env(safe-area-inset-top) + 56px); }
-  #s-booth h1 { font-size:27px; margin-bottom:4px; }
-  #s-booth .sub { font-size:16px; margin-bottom:0; }
-  #s-booth .stage { min-height:175px; }
-  #s-booth .duo .who { width:124px; }
-  #s-booth .duo .who img { width:112px; height:112px; }
-  #s-booth .duo .shake { font-size:36px; margin-top:-24px; }
-  #s-booth .card { padding:12px 16px; margin-bottom:10px; }
-  #s-booth .arrived { padding:12px; font-size:17px; margin-bottom:10px; }
-  #s-booth #b-status { min-height:0; margin:0 0 4px; }
-  /* both at the booth: celebrate + one icebreaker */
-  #s-both .ask { background:#fff; color:var(--ink); border-radius:22px; padding:16px 18px 10px; margin:0 0 14px; text-align:center; animation:popin .5s .25s both cubic-bezier(.2,.9,.3,1.3); }
-  #s-both .ask .lbl { font-size:14px; font-weight:900; color:var(--purple2); text-transform:uppercase; letter-spacing:.06em; }
-  #s-both .ask .q { font-size:21px; font-weight:900; line-height:1.3; margin:6px 0 2px; }
-  #s-both .ask button.link { color:var(--purple2); background:transparent; box-shadow:none; border:0; font-size:15px; margin:0; padding:8px 12px; }
-  #s-booth #b-again { padding:8px; margin:0; font-size:16px; }
-  .purple button.code { background:transparent; color:#fff; box-shadow:none; border:2px solid rgba(255,255,255,.55); font-weight:800; }
-  #s-booth button.code { padding:10px; font-size:16px; margin-bottom:6px; }
-  /* face QR: your avatar sits in the middle of a code your match scans */
-  .qr-box { position:relative; width:min(260px, 70vw); margin:4px auto 10px; }
-  .qr-box svg { display:block; width:100%; height:auto; }
-  .qr-box img { position:absolute; left:50%; top:50%; width:30%; height:30%; transform:translate(-50%,-50%); background:#fff; border-radius:50%; padding:4px; box-sizing:border-box; }
-  #qr .sub { text-align:center; margin:0 0 12px; }
-  /* review after meeting */
-  #s-review h1 { font-size:28px; }
-  .rate { display:flex; gap:10px; justify-content:center; margin:0 0 14px; }
-  .purple .rate button { flex:1; margin:0; padding:10px 4px 8px; background:rgba(255,255,255,.14); color:#fff; box-shadow:none; border:2px solid transparent; border-radius:20px; font-size:15px; font-weight:800; }
-  .rate button b { display:block; font-size:40px; line-height:1.2; }
-  .purple .rate button.on { background:#fff; color:var(--purple2); border-color:#fff; transform:scale(1.06); }
-  .tags { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:0 0 16px; }
-  .purple .tags button { width:auto; margin:0; padding:8px 14px; font-size:15px; background:transparent; color:#fff; box-shadow:none; border:2px solid rgba(255,255,255,.5); border-radius:999px; font-weight:800; }
-  .purple .tags button.on { background:#fff; color:var(--purple2); border-color:#fff; }
-  .purple button:disabled { opacity:.5; }
   .rain i { position:absolute; top:-30px; display:block; opacity:.95; animation:fall var(--dur) var(--delay) cubic-bezier(.3,.1,.6,1) forwards; }
   .rain i.sq { width:11px; height:11px; border-radius:2px; }
   .rain i.strip { width:6px; height:16px; border-radius:2px; }
@@ -297,107 +315,35 @@
       <div class="gum" id="wt-gum"></div>
     </div>
     <div class="status" id="wt-pool"></div>
+    <div class="go" id="go"><button class="tbtn" id="go-btn"><i class="fill" id="go-fill"></i><span class="lbl"><span id="go-t">Let's go</span><small id="go-c">2:00</small></span></button><button class="under" id="go-no">Not this time</button><div class="err" id="go-err"></div></div>
   </section>
 
-  <!-- 3. Match found (purple) -->
-  <section id="s-card" class="screen purple">
-    <div class="brand"><img class="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
-    <div class="rain" aria-hidden="true"></div>
-    <div class="top">
-      <h1 id="c-title">You matched!</h1>
-      <div class="sub" id="c-status">Both of you have to say yes.</div>
-    </div>
-    <div class="stage">
-      <div class="pair">
-        <div class="duo" id="c-faces"></div>
-        <div class="names" id="c-names" hidden></div>
-      </div>
-    </div>
-    <div class="bottom">
-      <div class="card">
-        <div class="where" id="c-vendor"></div>
-        <div class="loc" id="c-loc"></div>
-      </div>
-      <button id="c-yes">Accept</button>
-      <button id="c-pass" class="secondary">Pass, find another</button>
-      <div class="err" id="c-err"></div>
+  <!-- 3. It's on: both said yes; now the spot -->
+  <section id="s-on" class="screen flow">
+    <img class="logo" src="media/pop-logo-header.png" alt="pop"><h1>It's on!</h1>
+    <div class="pair2"><img id="on-me" alt=""><img id="on-them" alt=""></div><div class="names"><span>You</span><span id="on-name"></span></div>
+    <div class="booth"><small>Meet at</small><b id="on-where"></b><span id="on-kind"></span></div>
+    <div class="grow"></div>
+    <button class="tbtn" id="here-btn"><i class="fill" id="here-fill"></i><span class="lbl"><span id="here-t">I'm here</span><small id="here-c">7:00</small></span></button>
+    <button class="under" id="here-no">Can't make it</button><div class="err" id="on-err"></div>
+  </section>
+
+  <!-- 4. You're both here: hold up your phone; Found them! turns this screen into the review -->
+  <section id="s-bc" class="screen flow">
+    <div class="hd"><h1 id="bc-h">You're both here!</h1><div class="sub" id="bc-sub"></div></div>
+    <div class="bc"><div class="duo2"><img id="bc-me" alt=""><img id="bc-them" alt=""></div></div>
+    <div class="grow"></div>
+    <button class="tbtn" id="bc-found"><span class="lbl mid"><span>Found them!</span></span></button>
+    <div class="revbox">
+      <div class="rate3" id="rv-rate"><button type="button" data-r="1"><b>😕</b>Meh</button><button type="button" data-r="2"><b>🙂</b>Good</button><button type="button" data-r="3"><b>🤩</b>Amazing</button></div>
+      <textarea id="rv-txt" rows="2" placeholder="Anything else? (optional)"></textarea>
+      <button class="tbtn" id="rv-again"><span class="lbl mid"><span>Match again</span></span></button>
+      <button class="under" id="rv-done">I'm done for now</button>
     </div>
   </section>
 
-  <!-- 4. At the booth (purple) -->
-  <!-- 5. Both at the booth: you found each other -->
-  <section id="s-both" class="screen purple">
-    <div class="brand"><img class="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
-    <div class="rain" aria-hidden="true"></div>
-    <div class="top">
-      <h1>You found each other!</h1>
-      <div class="sub" id="d-sub"></div>
-    </div>
-    <div class="stage">
-      <div class="pair"><div class="duo" id="d-faces"></div></div>
-    </div>
-    <div class="bottom">
-      <div class="ask"><div class="lbl">Try asking</div><div class="q" id="d-q"></div><button type="button" class="link" id="d-next">Another one ↻</button></div>
-      <button id="d-met">We met!</button>
-      <button id="d-code" class="code">Show my code</button>
-    </div>
-  </section>
-  <!-- 6. After meeting: one-tap review -->
-  <section id="s-review" class="screen purple">
-    <div class="brand"><img class="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
-    <div class="rain" aria-hidden="true"></div>
-    <div class="top">
-      <h1 id="r-title">How was it?</h1>
-      <div class="sub">One tap. It helps us make better matches.</div>
-    </div>
-    <div class="stage">
-      <div class="pair"><div class="duo" id="r-faces"></div></div>
-    </div>
-    <div class="bottom">
-      <div class="rate" id="r-rate">
-        <button type="button" data-r="1"><b>😕</b>Meh</button><button type="button" data-r="2"><b>🙂</b>Good</button><button type="button" data-r="3"><b>🤩</b>Amazing</button>
-      </div>
-      <div class="tags" id="r-tags">
-        <button type="button">Great convo</button><button type="button">Would meet again</button><button type="button">Fun icebreaker</button><button type="button">Learned something</button><button type="button">A bit awkward</button>
-      </div>
-      <button id="r-done" disabled>Done</button>
-      <button id="r-skip" class="secondary">Skip</button>
-      <div class="err" id="r-err"></div>
-    </div>
-  </section>
-  <section id="s-booth" class="screen purple">
-    <div class="brand"><img class="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
-    <div class="rain" aria-hidden="true"></div>
-    <div class="top">
-      <h1 id="b-title">It's on!</h1>
-      <div class="sub" id="b-sub">Head over and say hi.</div>
-    </div>
-    <div class="stage">
-      <div class="pair">
-        <div class="duo" id="b-faces"></div>
-        <div class="names" id="b-names" hidden></div>
-      </div>
-    </div>
-    <div class="bottom">
-      <div class="card">
-        <div class="where" id="b-vendor"></div>
-        <div class="loc" id="b-loc"></div>
-      </div>
-      <button id="b-self">I'm at the booth</button>
-      <button id="b-code" class="code">Show my code</button>
-      <div class="status" id="b-status"></div>
-      <button id="b-again" class="secondary">Find someone new</button>
-      <div class="err" id="b-err"></div>
-    </div>
-  </section>
+
 </main>
-<div class="sheet-bg" id="qr-bg" hidden></div>
-<div class="sheet" id="qr" hidden role="dialog" aria-modal="true" aria-labelledby="qr-title">
-  <div class="grab"></div><button type="button" class="x" id="qr-x" aria-label="Close">×</button>
-  <h2 id="qr-title">Have them scan this</h2>
-  <div class="qr-box" id="qr-box"></div>
-  <p class="sub" id="qr-sub">Open the camera and point it here. It tells Pop you met.</p>
-</div>
 <div class="sheet-bg" id="wl-bg" hidden></div>
 <div class="sheet" id="wl" hidden role="dialog" aria-modal="true" aria-labelledby="wl-title">
   <div class="grab"></div><button type="button" class="x" id="wl-x" aria-label="Close">×</button>
@@ -416,7 +362,6 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script src="config.js"></script>
 <script>
 (() => {
@@ -448,7 +393,7 @@
     }
     setTimeout(() => { if (box) box.innerHTML = ''; }, 5500);
   }
-  const TIMEOUT_MS = 10 * 60 * 1000, POLL_MS = 3000;
+  const YES_SECS = 120, WALK_SECS = 420, POLL_MS = 3000;   // 2 min to say yes, 7 min to get to the spot
   const ANIMAL = { Otter:'🦦', Heron:'🪶', Lynx:'🐱', Falcon:'🦅', Fox:'🦊', Badger:'🦡', Ibis:'🦩', Marten:'🐾', Puffin:'🐧', Stoat:'🐿️', Wren:'🐦', Yak:'🐂' };
   const emojiFor = alias => ANIMAL[(alias || '').split(' ').pop()] || '🫧';
   // hairstyles whose artwork stays inside the frame (8 of 45 run off the edge and look boxed as stickers)
@@ -505,7 +450,7 @@
   const startChewing = () => { if (!chewing) chew(); };
   // the match: one bubble floats into the space under the heading, grows, pops, and your match is there
   function reveal(seed, done) {
-    if (calm) return done();
+    if (calm) return done(null);
     revealing = true;
     const sk = sky.getBoundingClientRect(), hd = document.querySelector('#s-wait .wt-top').getBoundingClientRect(), fc = $('wt-me').getBoundingClientRect();
     const gTop = hd.bottom - sk.top + 6, gBot = fc.top - sk.top + fc.height * .12, fit = Math.max(.75, Math.min(1, (gBot - gTop) / 250));
@@ -523,7 +468,7 @@
       f.innerHTML = '<div class="who" style="scale:' + fit + '"><img alt="" src="' + avatarBare(seed) + '"><b>Found them!</b></div>';
       $('s-wait').append(f);
       try { navigator.vibrate && navigator.vibrate([60, 40, 90]); } catch (_) {}
-      setTimeout(() => { revealing = false; done(); setTimeout(() => f.remove(), 400); }, 1900);
+      setTimeout(() => done(f), 900);
     })(t0);
   }
   // you: face, the "o" mouth for blowing, a sliver of neck in your skin tone, a white collar
@@ -562,12 +507,6 @@
       await session();
       // already joined on this device? then jump straight back in
       const { data: rows } = await sb.from('people').select('*').limit(1);
-      const met = new URLSearchParams(location.search).get('met');
-      if (met) history.replaceState(null, '', location.pathname);
-      if (rows && rows[0] && met) {   // opened by scanning your match's face QR
-        me = rows[0]; match = { id: met };
-        try { await rpc('confirm_met', { p_match: met }); return review(await rpc('match_card', { p_match: met })); } catch (_) { match = null; }
-      }
       if (rows && rows[0]) { me = rows[0]; return search(); }
       shuffle(); shuffleName();
       show('welcome');   // the front door (s-intro) is parked for now; switch back to show('intro') to use it
@@ -710,6 +649,7 @@
   async function search() {
     stopPolls(); match = null;
     drawMe(me.avatar_seed || me.alias, me.name || me.alias);
+    clearFlow(); $('s-wait').classList.remove('matched'); revealing = false;
     document.querySelectorAll('#s-wait .found').forEach(n => n.remove());
     show('wait'); startChewing();
     const tick = async () => {
@@ -718,7 +658,8 @@
         if (m && m.id) {
           stopPolls(); match = m;
           let c = null; try { c = await rpc('match_card', { p_match: m.id }); } catch (_) {}
-          return c && c.partner_alias ? reveal(c.partner_avatar || c.partner_alias, card) : card();
+          if (!c) return search();
+          return c.partner_alias ? reveal(c.partner_avatar || c.partner_alias, f => found(c, f)) : itsOn(c);
         }
         const n = await rpc('pool_size');            // includes you
         const others = Math.max(0, (n || 1) - 1);
@@ -729,158 +670,124 @@
     if (!match) pollTimer = setInterval(tick, POLL_MS);
   }
 
-  // ---- 3. the card ----
-  async function card() {
-    err('c-err'); $('c-yes').disabled = false;
-    const c = await rpc('match_card', { p_match: match.id });
-    renderCard(c);
-    show('card');
-    // if nobody acts in 10 minutes, time out and go back to the mix
-    cardTimer = setTimeout(async () => { try { await rpc('respond_to_match', { p_match: match.id, p_action: 'timed_out' }); } catch (_) {} search(); }, TIMEOUT_MS);
-    // watch the partner's answer
+  // ---- 3. match found: on the bubble screen, "Let's go" with a 2-minute timer filling the button ----
+  let flowTimer = null, stage = null;   // 'found' | 'on' | 'bc' | 'rev'
+  const clearFlow = () => { clearInterval(flowTimer); flowTimer = null; stopPolls(); stage = null; };
+  // fills `fill` left to right over `secs` (counting from `since`), shows the time left, calls onEnd when full
+  function fillTimer(fill, clock, secs, since, onEnd) {
+    clearInterval(flowTimer);
+    const tick = () => {
+      const k = Math.min(1, Math.max(0, (Date.now() - since) / 1000 / secs)), left = Math.ceil(secs * (1 - k));
+      fill.style.transform = 'scaleX(' + k + ')'; clock.textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
+      if (k >= 1) { clearInterval(flowTimer); onEnd(); }
+    };
+    tick(); flowTimer = setInterval(tick, 250);
+  }
+  const otherOf = c => c.my_slot === 1 ? c.status_2 : c.status_1;
+  const mineOf = c => c.my_slot === 1 ? c.status_1 : c.status_2;
+  // leaving for real ("Can't make it", a timer running out, "I'm done for now"): out of the pool, back to the welcome screen
+  async function toWelcome(action) {
+    clearFlow();
+    if (match && action) { try { await rpc('respond_to_match', { p_match: match.id, p_action: action }); } catch (_) {} }
+    try { await rpc('leave_pool'); } catch (_) {}
+    match = null; $('s-wait').classList.remove('matched'); revealing = false;
+    mySeed = me.avatar_seed || me.alias; $('w-avatar').src = avatarBare(mySeed);
+    myAlias = me.alias; $('w-name').placeholder = myAlias; $('w-name').value = me.name || '';
+    $('w-go').disabled = false; err('w-err'); show('welcome'); placeCaret();
+  }
+  function found(c, f) {
+    stage = 'found'; lastCard = c; err('go-err');
+    $('s-wait').classList.add('matched');
+    if (f) { f.style.top = ($('s-wait').querySelector('.wt-top').getBoundingClientRect().top - $('s-wait').getBoundingClientRect().top + 120) + 'px'; f.firstChild.style.scale = 1; }
+    $('go-t').textContent = 'Let\'s go'; $('go-btn').disabled = false;
+    fillTimer($('go-fill'), $('go-c'), YES_SECS, Date.parse(c.created_at) || Date.now(), () => toWelcome('timed_out'));
     pollTimer = setInterval(async () => {
       try {
         const c2 = await rpc('match_card', { p_match: match.id });
-        const other = c2.my_slot === 1 ? c2.status_2 : c2.status_1;
-        const mine  = c2.my_slot === 1 ? c2.status_1 : c2.status_2;
-        if (other === 'passed' || other === 'timed_out') { $('c-status').textContent = 'They passed. Finding someone else…'; return setTimeout(search, 1200); }
-        if (mine === 'confirmed' && (other === 'confirmed' || c2.partner_alias == null)) { stopPolls(); return booth(c2); }
-        if (mine === 'confirmed') $('c-status').textContent = 'You\'re in. Waiting for ' + c2.partner_alias + '…';
-      } catch (e) { err('c-err', e); }
+        if (stage !== 'found') return;
+        if (['passed', 'timed_out'].includes(otherOf(c2))) return search();          // they passed: keep looking
+        if (mineOf(c2) === 'confirmed' && otherOf(c2) === 'confirmed') itsOn(c2);
+      } catch (_) {}
     }, POLL_MS);
   }
-  function renderCard(c) {
-    const mine = me.name || me.alias, theirs = c.partner_alias;
-    $('c-title').textContent = theirs ? 'You matched!' : 'Head to the booth!';
-    renderDuo($('c-faces'), c);
-    $('c-vendor').textContent = c.vendor_name; $('c-loc').textContent = c.vendor_location;
-    $('c-status').textContent = theirs ? 'Both of you have to say yes.' : '';
-  }
-  $('c-yes').onclick = async () => {
-    $('c-yes').disabled = true; err('c-err');
+  $('go-btn').onclick = async () => {
+    $('go-btn').disabled = true; err('go-err');
     try {
       const m = await rpc('respond_to_match', { p_match: match.id, p_action: 'confirmed' });
-      const solo = !m.person_2;
-      if (solo || (m.status_1 === 'confirmed' && m.status_2 === 'confirmed')) { stopPolls(); booth(await rpc('match_card', { p_match: match.id })); }
-      else $('c-status').textContent = 'You\'re in. Waiting for your match…';
-    } catch (e) { err('c-err', e); $('c-yes').disabled = false; }
+      if (stage !== 'found') return;
+      if (!m.person_2 || (m.status_1 === 'confirmed' && m.status_2 === 'confirmed')) return itsOn(await rpc('match_card', { p_match: match.id }));
+      $('go-t').textContent = 'Waiting for ' + (lastCard.partner_alias || 'them') + '…';
+    } catch (e) { err('go-err', e); $('go-btn').disabled = false; }
   };
-  $('c-pass').onclick = async () => {
-    err('c-err');
-    try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (e) { return err('c-err', e); }
-    search();
-  };
+  $('go-no').onclick = async () => { clearFlow(); try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
 
-  // ---- 4. at the booth ----
-  let arrivedShown = false;
-  function announceArrival(c) {
-    if (arrivedShown) return; arrivedShown = true;
-    $('b-sub').textContent = c.partner_alias + ' is at the booth waiting for you!';
-    $('b-title').textContent = c.partner_alias + ' is here!';
-    const card = document.createElement('div'); card.className = 'arrived'; card.textContent = '📍 ' + c.partner_alias + ' is at ' + c.vendor_name + ' now';
-    $('s-booth').querySelector('.bottom').prepend(card);
-    $('toast-av').src = avatarFor(c.partner_avatar || c.partner_alias); $('toast-t').textContent = c.partner_alias + ' is at the booth';
-    $('toast-s').textContent = 'Waiting for you at ' + c.vendor_name; $('toast').hidden = false; requestAnimationFrame(() => $('toast').classList.add('show'));
-    try { navigator.vibrate && navigator.vibrate([120, 60, 120]); } catch (_) {}
-    setTimeout(() => { $('toast').classList.remove('show'); setTimeout(() => $('toast').hidden = true, 400); }, 8000);
-  }
-  function booth(c) {
-    stopPolls(); arrivedShown = false; lastCard = c;
-    document.querySelectorAll('#s-booth .arrived').forEach(n => n.remove());
-    const mine = me.name || me.alias, theirs = c.partner_alias;
-    renderDuo($('b-faces'), c);
-    if (theirs) {
-      const note = () => rpc('match_card', { p_match: match.id }).then(c2 => {
-        if (c2.met_at) return review(c2);
-        if (c2.self_at && c2.partner_self_at) return bothHere(c2);
-        if (c2.partner_self_at) announceArrival(c2);
-      }).catch(() => {});
-      note(); pollTimer = setInterval(note, POLL_MS);
-    }
-    $('b-title').textContent = theirs ? ('It\'s on with ' + theirs + '!') : 'It\'s on!';
-    $('b-vendor').textContent = c.vendor_name; $('b-loc').textContent = c.vendor_location;
-    $('b-self').disabled = !!c.self_at;
-    $('b-status').textContent = ''; err('b-err'); $('b-sub').textContent = theirs ? 'Head over and say hi. We\'ll tell you when they arrive.' : 'Head over and say hi.';
-    show('booth');
-  }
-  $('b-self').onclick = async () => {
-    try {
-      await rpc('check_in', { p_match: match.id, p_kind: 'self' }); $('b-self').disabled = true;
-      const c2 = await rpc('match_card', { p_match: match.id });
-      if (c2.partner_alias && c2.partner_self_at) return bothHere(c2);
-      $('b-status').textContent = c2.partner_alias ? 'Checked in. Your match will see that you\'re here.' : 'Checked in.';
-    } catch (e) { err('b-err', e); }
-  };
-
-  // ---- 5. both at the booth ----
-  const ICEBREAKERS = [
-    'What brought you here today?', 'What\'s the best thing you\'ve seen here so far?', 'What would you buy from this booth?',
-    'What\'s something you\'re weirdly good at?', 'What\'s the last thing that made you laugh?', 'What\'s your go-to snack at events like this?',
-    'If you ran a booth here, what would you sell?', 'What are you into lately?', 'Best concert or show you\'ve been to?',
-    'What\'s a small thing that made your week?', 'Are you here with anyone, or flying solo?', 'What should I check out next?'];
-  let qIdx = 0;
-  function bothHere(c) {
-    if ($('s-both').classList.contains('on')) return;
-    stopPolls(); $('toast').classList.remove('show'); $('toast').hidden = true; lastCard = c;
-    // when either person taps "We met!" or scans, both move on to the review
-    pollTimer = setInterval(() => rpc('match_card', { p_match: match.id }).then(c2 => { if (c2.met_at) review(c2); }).catch(() => {}), POLL_MS);
-    renderDuo($('d-faces'), c);
-    $('d-sub').textContent = 'Say hi to ' + c.partner_alias + ' at ' + c.vendor_name + '.';
-    // both people start on the same question: pick it from the match id
-    qIdx = [...String(match.id)].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7) % ICEBREAKERS.length;
-    $('d-q').textContent = ICEBREAKERS[qIdx];
-    try { navigator.vibrate && navigator.vibrate([80, 40, 80, 40, 160]); } catch (_) {}
-    show('both');
-  }
-  $('d-next').onclick = () => { qIdx = (qIdx + 1) % ICEBREAKERS.length; $('d-q').textContent = ICEBREAKERS[qIdx]; };
-  // "We met!" (or a scan of your face QR) marks the match met, then both people get the review
-  $('d-met').onclick = async () => {
-    try { await rpc('confirm_met', { p_match: match.id }); review(await rpc('match_card', { p_match: match.id })); } catch (e) { review(lastCard); }
-  };
-
-  // ---- face QR: the other person scans it with their camera, which opens Pop at ?met=<match> ----
-  const metLink = () => location.origin + location.pathname + '?met=' + encodeURIComponent(match.id);
-  function showCode() {
-    if (!match || !window.qrcode) return;
-    const q = qrcode(0, 'H'); q.addData(metLink()); q.make();   // H = high error correction, so the face can cover the middle
-    $('qr-box').innerHTML = q.createSvgTag({ cellSize: 8, margin: 2, scalable: true });
-    const im = document.createElement('img'); im.alt = ''; im.src = avatarBare(me.avatar_seed || me.alias); $('qr-box').append(im);
-    $('qr-title').textContent = lastCard && lastCard.partner_alias ? 'Have ' + lastCard.partner_alias + ' scan this' : 'Have them scan this';
-    $('qr-bg').hidden = false; $('qr').hidden = false;
-    // the person showing the code moves on as soon as the scan lands
-    clearInterval(metPoll); metPoll = setInterval(async () => {
-      try { const c = await rpc('match_card', { p_match: match.id }); if (c.met_at) review(c); } catch (_) {}
+  // ---- 4. It's on: both faces, the spot, "I'm here" with a 7-minute timer ----
+  function itsOn(c) {
+    if (stage === 'on') return;
+    clearFlow(); stage = 'on'; lastCard = c; err('on-err');
+    $('on-me').src = avatarBare(me.avatar_seed || me.alias); $('on-them').src = avatarBare(c.partner_avatar || c.partner_alias);
+    $('on-them').hidden = !c.partner_alias; $('on-name').textContent = c.partner_alias || '';
+    $('on-where').textContent = c.vendor_name; $('on-kind').textContent = c.vendor_location;
+    $('here-t').textContent = 'I\'m here'; $('here-btn').disabled = false;
+    show('on'); try { navigator.vibrate && navigator.vibrate([80, 40, 80]); } catch (_) {}
+    if (c.self_at) $('here-t').textContent = 'Waiting for ' + (c.partner_alias || 'them') + '…';
+    fillTimer($('here-fill'), $('here-c'), WALK_SECS, Date.now(), () => toWelcome('timed_out'));
+    pollTimer = setInterval(async () => {
+      try {
+        const c2 = await rpc('match_card', { p_match: match.id });
+        if (stage !== 'on') return;
+        if (['passed', 'timed_out'].includes(otherOf(c2))) return search();
+        if (c2.self_at && (c2.partner_self_at || !c2.partner_alias)) beacon(c2);
+      } catch (_) {}
     }, POLL_MS);
   }
-  let metPoll = null;
-  function hideCode() { clearInterval(metPoll); metPoll = null; $('qr').hidden = true; $('qr-bg').hidden = true; }
-  $('d-code').onclick = showCode; $('b-code').onclick = showCode;
-  $('qr-x').onclick = hideCode; $('qr-bg').onclick = hideCode;
-
-  // ---- 6. review ----
-  let rating = 0;
-  function review(c) {
-    stopPolls(); hideCode();
-    if ($('s-review').classList.contains('on')) return;
-    rating = 0; $('r-done').disabled = true; err('r-err');
-    document.querySelectorAll('#r-rate button, #r-tags button').forEach(b => b.classList.remove('on'));
-    if (c) renderDuo($('r-faces'), c);
-    $('r-title').textContent = c && c.partner_alias ? 'How was meeting ' + c.partner_alias + '?' : 'How was it?';
-    show('review');
-  }
-  document.querySelectorAll('#r-rate button').forEach(b => b.onclick = () => {
-    document.querySelectorAll('#r-rate button').forEach(x => x.classList.toggle('on', x === b));
-    rating = +b.dataset.r; $('r-done').disabled = false;
-  });
-  document.querySelectorAll('#r-tags button').forEach(b => b.onclick = () => b.classList.toggle('on'));
-  const finish = async () => { try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
-  $('r-done').onclick = async () => {
-    const tags = [...document.querySelectorAll('#r-tags button.on')].map(b => b.textContent);
-    try { await rpc('review_match', { p_match: match.id, p_rating: rating, p_tags: tags }); } catch (_) {}   // never trap someone here
-    finish();
+  $('here-btn').onclick = async () => {
+    $('here-btn').disabled = true; err('on-err');
+    try {
+      await rpc('check_in', { p_match: match.id, p_kind: 'self' });
+      const c2 = await rpc('match_card', { p_match: match.id });
+      if (stage !== 'on') return;
+      if (c2.partner_self_at || !c2.partner_alias) return beacon(c2);
+      $('here-t').textContent = 'Waiting for ' + c2.partner_alias + '…';
+    } catch (e) { err('on-err', e); $('here-btn').disabled = false; }
   };
-  $('r-skip').onclick = finish;
-  $('b-again').onclick = async () => { try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
+  $('here-no').onclick = () => toWelcome('passed');
+
+  // ---- 5. You're both here: hold up your phones; Found them! becomes the review on the same screen ----
+  function beacon(c) {
+    if (stage === 'bc' || stage === 'rev') return;
+    clearFlow(); stage = 'bc'; lastCard = c;
+    const them = c.partner_alias || 'them';
+    $('bc-me').src = avatarBare(me.avatar_seed || me.alias); $('bc-them').src = avatarBare(c.partner_avatar || c.partner_alias);
+    $('bc-h').textContent = 'You\'re both here!'; $('bc-sub').textContent = 'Hold up your phone. ' + them + '\'s screen matches yours.';
+    $('s-bc').classList.remove('rev'); rating = 0; $('rv-txt').value = '';
+    document.querySelectorAll('#rv-rate button').forEach(b => b.classList.remove('on'));
+    show('bc'); try { navigator.vibrate && navigator.vibrate([80, 40, 80, 40, 160]); } catch (_) {}
+    // if they tap Found them! first, this phone moves to the review too
+    pollTimer = setInterval(async () => {
+      try { const c2 = await rpc('match_card', { p_match: match.id }); if (stage === 'bc' && c2.met_at) toReview(); } catch (_) {}
+    }, POLL_MS);
+  }
+  function toReview() {
+    stopPolls(); stage = 'rev';
+    $('s-bc').classList.add('rev'); $('bc-h').textContent = 'How\'d it go?'; $('bc-sub').textContent = 'It helps us make better matches.';
+  }
+  $('bc-found').onclick = async () => { toReview(); try { await rpc('confirm_met', { p_match: match.id }); } catch (_) {} };
+
+  // ---- 6. review: optional face + note; then match again or call it a night ----
+  let rating = 0;
+  document.querySelectorAll('#rv-rate button').forEach(b => b.onclick = () => {
+    const on = !b.classList.contains('on');
+    document.querySelectorAll('#rv-rate button').forEach(x => x.classList.toggle('on', on && x === b));
+    rating = on ? +b.dataset.r : 0;
+  });
+  async function saveReview() {
+    const note = $('rv-txt').value.trim();
+    if (rating || note) { try { await rpc('review_match', { p_match: match.id, p_rating: rating || null, p_note: note || null }); } catch (_) {} }
+  }
+  // the match is over either way; 'passed' frees both people (there's no separate 'met' status)
+  $('rv-again').onclick = async () => { await saveReview(); try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
+  $('rv-done').onclick = async () => { await saveReview(); toWelcome('passed'); };
 
   // load screen: hide once the letters have landed (~2.2s) or the clip ends, and the app is ready; tap skips
   const splashDone = new Promise(res => {

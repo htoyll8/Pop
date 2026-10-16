@@ -148,6 +148,13 @@
   .revbox textarea { width:100%; box-sizing:border-box; border:2px solid #e6ebef; border-radius:16px; padding:12px 14px; font:inherit; font-size:16px; resize:none; margin:0 0 10px; color:var(--ink); }
   .revbox textarea:focus { outline:none; border-color:var(--blue); }
   @media (prefers-reduced-motion: reduce) { .bc .duo2 img, .pair2 img { animation:none; } }
+
+  /* the other person backed out: say so, then keep looking */
+  .found.out .who img { opacity:.35; filter:grayscale(1); transition:opacity .4s, filter .4s; }
+  #s-wait.out .go { transform:translateY(calc(100% + 160px)); opacity:0; }
+  #s-on.out .booth, #s-on.out .tbtn, #s-on.out .under, #s-on.out .names { opacity:0; transition:opacity .4s; pointer-events:none; }
+  #s-on.out .pair2 img:last-child { opacity:.35; filter:grayscale(1); transition:opacity .4s, filter .4s; }
+  .out-note { color:var(--muted); font-size:16px; font-weight:700; margin-top:6px; }
   /* laptops and tall screens: keep the button close under the content instead of at the far bottom */
   @media (min-width:700px), (min-height:900px) {
     .flow.on { justify-content:center; padding-top:24px; }
@@ -456,18 +463,25 @@
   function release(x, y, dx) {
     const s = Math.round(50 + Math.random() * 28), b = document.createElement('div'); b.className = 'bub'; b.style.setProperty('--s', s + 'px'); b._s = s;
     b.innerHTML = '<img alt="" src="' + face() + '">'; sky.append(b); live.add(b);
-    const top = 40 + Math.random() * 120, d = 4200 + Math.random() * 2200, t0 = performance.now(), ph = Math.random() * 6;
+    const top = 40 + Math.random() * 120, d = (4200 + Math.random() * 2200) * (calm ? 1.9 : 1), t0 = performance.now(), ph = Math.random() * 6, sway = calm ? 3 : 12;
     (function step(t) {
       if (!b.isConnected || b._taken) return;
       const k = Math.min(1, (t - t0) / d), e = 1 - Math.pow(1 - k, 1.6);
-      b._x = x + dx * e + Math.sin(ph + k * 9) * 12; b._y = y + (top - y) * e;
-      b.style.left = b._x + 'px'; b.style.top = b._y + 'px'; b.style.transform = `scale(${Math.min(1, .25 + k * 4)})`;
-      if (k < 1) requestAnimationFrame(step); else { burst(b._x, b._y, s); b.remove(); live.delete(b); }
+      b._x = x + dx * e + Math.sin(ph + k * 9) * sway; b._y = y + (top - y) * e;
+      b.style.left = b._x + 'px'; b.style.top = b._y + 'px';
+      if (calm) { b.style.opacity = Math.min(1, k * 5, (1 - k) * 4); }   // fade in and out, no pop
+      else b.style.transform = `scale(${Math.min(1, .25 + k * 4)})`;
+      if (k < 1) requestAnimationFrame(step); else { if (!calm) burst(b._x, b._y, s); b.remove(); live.delete(b); }
     })(t0);
   }
   let chewing = false, revealing = false;
   function chew() {
-    if (!$('s-wait').classList.contains('on') || revealing || calm) { chewing = false; return; }
+    if (!$('s-wait').classList.contains('on') || revealing) { chewing = false; return; }
+    if (calm) {   // reduced motion (e.g. some power-saving modes): no gum, just people drifting up slowly
+      chewing = true; const w = sky.clientWidth, h = sky.clientHeight;
+      release(w * (.15 + Math.random() * .7), h * .62, (Math.random() - .5) * 60);
+      return setTimeout(chew, 2400);
+    }
     chewing = true; box.classList.add('blowing');
     const t0 = performance.now(), d = 2600;
     (function step(t) {
@@ -687,7 +701,7 @@
   async function search() {
     stopPolls(); match = null;
     drawMe(me.avatar_seed || me.alias, me.name || me.alias);
-    clearFlow(); $('s-wait').classList.remove('matched'); revealing = false; $('wt-box').style.transform = '';
+    clearFlow(); $('s-wait').classList.remove('matched', 'out'); $('s-on').classList.remove('out'); revealing = false; $('wt-box').style.transform = '';
     document.querySelectorAll('#s-wait .found').forEach(n => n.remove());
     show('wait'); startChewing();
     const tick = async () => {
@@ -742,6 +756,17 @@
     if (f) { f.style.top = (cardTop + cardH / 2) + 'px'; f.firstChild.style.scale = k; }
     box.style.transformOrigin = '50% 0'; box.style.transform = `translateY(${meTop - box.offsetTop}px) scale(${sMe})`;
   }
+  function partnerOut(c2) {
+    clearFlow(); stage = 'out';
+    const who = (c2 && c2.partner_alias) || (lastCard && lastCard.partner_alias) || 'They';
+    if ($('s-on').classList.contains('on')) {
+      $('s-on').classList.add('out'); $('s-on').querySelector('h1').innerHTML = who + ' can\'t make it<div class="out-note">Finding you someone new…</div>';
+    } else {
+      $('s-wait').classList.add('out'); const f = $('s-wait').querySelector('.found');
+      if (f) { f.classList.add('out'); f.querySelector('b').innerHTML = who + ' can\'t make it this time<div class="out-note">Finding you someone new…</div>'; }
+    }
+    setTimeout(search, 2600);
+  }
   function found(c, f) {
     stage = 'found'; lastCard = c; err('go-err');
     $('s-wait').classList.add('matched'); layoutFound(f);
@@ -751,7 +776,7 @@
       try {
         const c2 = await rpc('match_card', { p_match: match.id });
         if (stage !== 'found') return;
-        if (['passed', 'timed_out'].includes(otherOf(c2))) return search();          // they passed: keep looking
+        if (['passed', 'timed_out'].includes(otherOf(c2))) return partnerOut(c2);      // they passed: say so, then keep looking
         if (mineOf(c2) === 'confirmed' && otherOf(c2) === 'confirmed') itsOn(c2);
       } catch (_) {}
     }, POLL_MS);
@@ -774,6 +799,7 @@
     $('on-me').src = avatarBare(me.avatar_seed || me.alias); $('on-them').src = avatarBare(c.partner_avatar || c.partner_alias);
     $('on-them').hidden = !c.partner_alias; $('on-name').textContent = c.partner_alias || '';
     $('on-where').textContent = c.vendor_name; $('on-kind').textContent = c.vendor_location;
+    $('s-on').classList.remove('out'); $('s-on').querySelector('h1').textContent = 'It\'s on!';
     $('here-t').textContent = 'I\'m here'; $('here-btn').disabled = false;
     show('on'); try { navigator.vibrate && navigator.vibrate([80, 40, 80]); } catch (_) {}
     if (c.self_at) $('here-t').textContent = 'Waiting for ' + (c.partner_alias || 'them') + '…';
@@ -782,7 +808,7 @@
       try {
         const c2 = await rpc('match_card', { p_match: match.id });
         if (stage !== 'on') return;
-        if (['passed', 'timed_out'].includes(otherOf(c2))) return search();
+        if (['passed', 'timed_out'].includes(otherOf(c2))) return partnerOut(c2);
         if (c2.self_at && (c2.partner_self_at || !c2.partner_alias)) beacon(c2);
       } catch (_) {}
     }, POLL_MS);

@@ -59,7 +59,7 @@
   /* two rings: outer turns clockwise, inner counter-clockwise; --r ring radius, --f face size, --t lap time */
   /* the rings are dotted paths: zero-length dashes with round caps draw as little dots */
   .orbit .rings { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
-  .orbit .rings circle { fill:none; stroke:#cfd6de; stroke-width:1.1; stroke-linecap:round; stroke-dasharray:0 3.4; }
+  .orbit .rings circle { fill:none; stroke:#e4e8ed; stroke-width:1.1; stroke-linecap:round; stroke-dasharray:0 3.4; }
   .orbit .outer { --r:.43; --f:.16; --t:18s; --dir:1; }
   .orbit .inner { --r:.32; --f:.12; --t:24s; --dir:-1; }
   .orbit .spin { position:absolute; inset:0; animation:orbit var(--t) linear infinite; }
@@ -82,11 +82,14 @@
   .wt-foot { padding-bottom:12px; }
   #wt-pool:has(.odo) { display:flex; justify-content:center; align-items:center; gap:.4em; line-height:1; }
   /* each digit is a little lock wheel: the current number in the middle, its neighbors peeking above and below */
-  .odo { display:inline-flex; gap:3px; font-size:24px; font-weight:900; color:var(--ink); }
-  .odo .wheel { position:relative; display:inline-block; width:.82em; height:2.1em; overflow:hidden; border-radius:8px; background:#f2f4f7;
-                box-shadow:inset 0 2px 4px rgba(47,59,69,.12), inset 0 -2px 4px rgba(47,59,69,.12);
-                -webkit-mask-image:linear-gradient(rgba(0,0,0,.15), #000 30%, #000 70%, rgba(0,0,0,.15)); mask-image:linear-gradient(rgba(0,0,0,.15), #000 30%, #000 70%, rgba(0,0,0,.15)); }
-  .odo .strip { display:flex; flex-direction:column; align-items:center; margin-top:-.45em; transition:transform .9s cubic-bezier(.2,.9,.25,1.15); }
+  .odo { display:inline-flex; gap:2px; font-size:18px; font-weight:900; color:var(--ink); }
+  /* each digit is a little lock cylinder: lit in the middle, shading toward the top and bottom edges */
+  .odo .wheel { position:relative; display:inline-block; width:.82em; height:1.9em; overflow:hidden; border-radius:4px;
+                background:linear-gradient(#c9d0d8, #f4f6f8 32%, #fff 50%, #f4f6f8 68%, #c9d0d8); border:1px solid #cdd3da;
+                box-shadow:0 1px 2px rgba(47,59,69,.15); }
+  .odo .wheel::after { content:""; position:absolute; inset:0; pointer-events:none;
+                       background:linear-gradient(rgba(70,82,93,.55), rgba(70,82,93,0) 34%, rgba(70,82,93,0) 66%, rgba(70,82,93,.55)); }
+  .odo .strip { display:flex; flex-direction:column; align-items:center; margin-top:-.55em; transition:transform .9s cubic-bezier(.2,.9,.25,1.15); }
   .odo .strip span { height:1em; line-height:1em; }
   @media (prefers-reduced-motion: reduce) { .odo .strip { transition:none; } }
 

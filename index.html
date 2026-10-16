@@ -68,9 +68,9 @@
                   drop-shadow(0 5px 6px rgba(47,59,69,.30)); }
   .dice.roll { animation:roll .5s cubic-bezier(.3,1.4,.5,1); }
   /* "tap me!" with a hand-drawn arrow at the dice; fades in after the demo roll, gone after the first tap */
-  .tap-hint { position:absolute; z-index:4; right:8px; bottom:100px; color:var(--ink); pointer-events:none; opacity:0; transition:opacity .35s; display:flex; flex-direction:column; align-items:flex-end; }
+  .tap-hint { position:absolute; z-index:4; right:8px; bottom:100px; color:#46525d; pointer-events:none; opacity:0; transition:opacity .35s; display:flex; flex-direction:column; align-items:flex-end; }
   .tap-hint.show { opacity:1; animation:bob 1.6s ease-in-out infinite; }
-  .tap-word { font-weight:900; font-size:17px; transform:rotate(10deg); margin-right:-6px; white-space:nowrap; }
+  .tap-word { font-weight:900; font-size:17px; transform:rotate(10deg); margin-right:-13px; white-space:nowrap; }
   .tap-hint svg { width:46px; height:46px; margin-top:-2px; margin-right:6px; }
   @keyframes bob { 0%,100% { transform:translate(0,0); } 50% { transform:translate(-3px,4px); } }
   @media (prefers-reduced-motion: reduce) { .tap-hint.show { animation:none; } }

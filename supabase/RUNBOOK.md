@@ -52,4 +52,5 @@ Variant: everyone is A for the 10/17 event (see join_event in schema.sql for how
 3. `2026-10-16a-met-review.sql`: "Found them!" marks the match met; reviews table.
 4. `2026-10-16b-review-note.sql`: the review is an optional face plus an optional note.
 5. `2026-10-16d-waitlist-phone.sql`: the waitlist takes a phone number, an email, or both.
-6. Optional, before the event: `2026-10-16c-seeing-sounds-spots.sql` loads the Seeing Sounds activations and vendors as meeting spots. It clears people, matches, check-ins and reviews first.
+6. `2026-10-16e-reports.sql`: automatic error reports and "Report a bug" (read them in Table Editor → reports).
+7. Optional, before the event: `2026-10-16c-seeing-sounds-spots.sql` loads the Seeing Sounds activations and vendors as meeting spots. It clears people, matches, check-ins and reviews first.

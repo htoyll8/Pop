@@ -236,6 +236,10 @@
   .sheet textarea { width:100%; padding:14px 16px; border-radius:16px; border:2px solid #e6ebef; font:inherit; font-size:16px; margin:0 0 14px; resize:none; color:var(--ink); }
   .sheet input { text-align:left; }
   .sheet input + input { margin-top:-4px; }
+  .minor { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:2px; font-size:14px; font-weight:800; color:var(--muted); }
+  .minor a { display:inline-flex; align-items:center; gap:5px; color:var(--muted); text-decoration:none; }
+  .minor button.link { margin:0; padding:6px 2px; font-size:14px; font-weight:800; color:var(--muted); }
+  .sheet .sub a { color:var(--blue2); font-weight:800; }
   .wl-fine { color:var(--muted); font-size:13px; font-weight:600; margin:-4px 2px 12px; }
   .sheet textarea:focus { outline:none; border-color:var(--blue); }
   /* load screen */
@@ -344,6 +348,7 @@
       <button id="w-go">Find my match</button>
       <div class="err" id="w-err"></div>
       <button type="button" class="link bring" id="w-bring">Want Pop at your next event?</button>
+      <div class="minor"><a href="https://www.instagram.com/popmeeter/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="currentColor"/></svg>@popmeeter</a><span>·</span><button type="button" class="link" id="w-bug">Report a bug</button></div>
     </div>
   </section>
 
@@ -387,6 +392,17 @@
 
 
 </main>
+<div class="sheet-bg" id="bug-bg" hidden></div>
+<div class="sheet" id="bug" hidden role="dialog" aria-modal="true" aria-labelledby="bug-title">
+  <div class="grab"></div><button type="button" class="x" id="bug-x" aria-label="Close">×</button>
+  <div id="bug-form">
+    <h2 id="bug-title">Report a bug</h2>
+    <textarea id="bug-txt" rows="4" placeholder="What went wrong? What were you doing?"></textarea>
+    <button id="bug-go">Send</button>
+    <div class="err" id="bug-err"></div>
+  </div>
+  <div id="bug-done" hidden><h2>Thank you!</h2><p class="sub">That helps a lot.</p><button id="bug-close">Done</button></div>
+</div>
 <div class="sheet-bg" id="wl-bg" hidden></div>
 <div class="sheet" id="wl" hidden role="dialog" aria-modal="true" aria-labelledby="wl-title">
   <div class="grab"></div><button type="button" class="x" id="wl-x" aria-label="Close">×</button>
@@ -402,7 +418,7 @@
     <button id="wl-go">Count me in</button>
     <div class="err" id="wl-err"></div>
   </div>
-  <div id="wl-done" hidden><h2>Thanks!</h2><p class="sub">We'll be in touch.</p><button id="wl-close">Done</button></div>
+  <div id="wl-done" hidden><h2>Thanks!</h2><p class="sub">We'll be in touch. Follow <a href="https://www.instagram.com/popmeeter/" target="_blank" rel="noopener">@popmeeter</a> for updates.</p><button id="wl-close">Done</button></div>
 </div>
 
 
@@ -544,7 +560,23 @@
   }
   let me = null, match = null, pollTimer = null, cardTimer = null, lastCard = null;
 
-  const rpc = async (fn, args) => { const { data, error } = await sb.rpc(fn, args || {}); if (error) throw new Error(error.message); return data; };
+  // ---- reports: errors are sent automatically (with context); people can add details or report what looks wrong ----
+  const APP_VERSION = 'v72';
+  const context = extra => ({ screen: (document.querySelector('.screen.on') || {}).id || null, stage: (() => { try { return stage; } catch (_) { return null; } })(),
+    ua: navigator.userAgent, w: innerWidth, h: innerHeight, calm: matchMedia('(prefers-reduced-motion: reduce)').matches, url: location.href, ...extra });
+  const sentAuto = new Set(); let autoCount = 0, promptedBug = false;
+  function report(kind, message, extra) {
+    if (kind === 'auto') { if (sentAuto.has(message) || ++autoCount > 15) return; sentAuto.add(message); }
+    try { sb.rpc('report_issue', { p_kind: kind, p_message: String(message).slice(0, 2000), p_detail: context(extra), p_version: APP_VERSION }).then(() => {}, () => {}); } catch (_) {}
+    if (kind === 'auto' && !promptedBug) { promptedBug = true; bugToast(); }
+  }
+  window.addEventListener('error', e => report('auto', (e.message || 'error') + (e.filename ? ' @' + e.filename.split('/').pop() + ':' + e.lineno : '')));
+  window.addEventListener('unhandledrejection', e => report('auto', 'promise: ' + ((e.reason && e.reason.message) || e.reason)));
+  const rpc = async (fn, args) => {
+    const { data, error } = await sb.rpc(fn, args || {});
+    if (error) { if (fn !== 'report_issue') report('auto', 'rpc ' + fn + ': ' + error.message); throw new Error(error.message); }
+    return data;
+  };
   const stopPolls = () => { clearInterval(pollTimer); clearTimeout(cardTimer); pollTimer = cardTimer = null; };
   const err = (id, e) => { $(id).textContent = e ? (e.message || String(e)) : ''; };
 
@@ -671,6 +703,24 @@
     const w = $('s-welcome'); w.classList.remove('rise'); void w.offsetWidth; w.classList.add('rise');
     flyLogo(from, $('w-logo'), () => setTimeout(startNudge, 300));
   };
+  function openBug(auto) { $('bug-form').hidden = false; $('bug-done').hidden = true; err('bug-err'); $('bug-bg').hidden = false; $('bug').hidden = false;
+    $('bug-txt').placeholder = auto ? 'Something went wrong on our end. What were you doing?' : 'What went wrong? What were you doing?'; }
+  function closeBug() { $('bug').hidden = true; $('bug-bg').hidden = true; }
+  $('w-bug').onclick = () => openBug(false);
+  $('bug-x').onclick = $('bug-bg').onclick = $('bug-close').onclick = closeBug;
+  $('bug-go').onclick = async () => {
+    const t = $('bug-txt').value.trim(); if (!t) return err('bug-err', 'Tell us a little about what happened.');
+    $('bug-go').disabled = true;
+    try { await session(); await rpc('report_issue', { p_kind: 'user', p_message: t, p_detail: context(), p_version: APP_VERSION }); $('bug-txt').value = ''; $('bug-form').hidden = true; $('bug-done').hidden = false; }
+    catch (e) { err('bug-err', e); } finally { $('bug-go').disabled = false; }
+  };
+  // after an automatic report: a small note at the top; tapping it opens the bug sheet
+  function bugToast() {
+    $('toast-av').hidden = true; $('toast-t').textContent = 'Something went wrong'; $('toast-s').textContent = 'Tap to tell us what happened.';
+    $('toast').hidden = false; requestAnimationFrame(() => $('toast').classList.add('show'));
+    $('toast').onclick = () => { $('toast').classList.remove('show'); openBug(true); };
+    setTimeout(() => { $('toast').classList.remove('show'); setTimeout(() => $('toast').hidden = true, 400); }, 7000);
+  }
   $('wl-bg').onclick = closeWaitlist; $('wl-close').onclick = closeWaitlist; $('wl-x').onclick = closeWaitlist;
   document.querySelectorAll('#wl-roles button').forEach(b => b.onclick = () => openWaitlist(b.dataset.role, wlSource));
   $('wl-phone').oninput = () => { $('wl-sms').hidden = !$('wl-phone').value.trim(); };   // texting consent shows as soon as they type a number

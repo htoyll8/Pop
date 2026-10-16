@@ -356,6 +356,8 @@ const SHAPES={
      fold:'<path d="M40 52 Q48 70 44 128 M190 52 Q182 70 186 128" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round" opacity=".35"/>'}};
 const shape=q.get('shape')||'tag';
 if(shape==='neck'||shape==='collar'){ const t=document.querySelector('.name-tag'); t.style.left='50%'; t.style.top='204px'; t.style.transform='translateX(-50%) rotate(-4deg) scale(.85)'; t.style.transformOrigin='50% 0'; }
+if(shape==='dress'){ const t=document.querySelector('.name-tag'); t.style.left='58%'; t.style.top='218px'; t.style.transform='rotate(-6deg) scale(.66)'; t.style.transformOrigin='0 0';
+  t.insertAdjacentHTML('afterbegin','<i class="clip"></i>'); document.querySelector('.me').style.bottom='-14px'; }
 if(shape==='tag'){ document.querySelector('.shirt').style.display='none'; const t=document.querySelector('.name-tag'); t.style.left='50%'; t.style.top='196px'; t.style.transform='translateX(-50%) rotate(-3deg) scale(.82)'; t.style.transformOrigin='50% 0';
   t.insertAdjacentHTML('afterbegin','<i class="clip"></i>'); document.querySelector('.me').style.bottom='-14px'; }
 if(shape==='fade'){ const t=document.querySelector('.name-tag'); t.style.left='50%'; t.style.top='212px'; t.style.transform='translateX(-50%) rotate(-3deg) scale(.82)'; t.style.transformOrigin='50% 0';
@@ -366,6 +368,12 @@ if(shape==='none'){ document.querySelector('.shirt').style.display='none';
   document.querySelector('.me').style.bottom='40px'; }
 function bare(skin, mode){
   const neck=`<path d="M92 -30 L92 140 L138 140 L138 -30 Z" fill="#${skin}" stroke="#111" stroke-width="3.2" stroke-linejoin="round"/>`;
+  if(mode==='dress') return `<svg viewBox="0 0 230 128">
+    <path d="M96 -30 L96 36 L134 36 L134 -30 Z" fill="#${skin}" stroke="#111" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M78 22 Q115 2 152 22 L152 36 Q115 20 78 36 Z" fill="#fff" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M80 24 L115 50 L94 84 L64 36 Z" fill="#fff" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M150 24 L115 50 L136 84 L166 36 Z" fill="#fff" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="115" cy="58" r="3.4" fill="#fff" stroke="#111" stroke-width="2"/></svg>`;
   if(mode==='fade') return `<svg viewBox="0 0 230 128"><defs><linearGradient id="nf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient><mask id="nm" maskUnits="userSpaceOnUse" x="0" y="-40" width="230" height="120"><rect x="0" y="-40" width="230" height="110" fill="url(#nf)"/></mask></defs><g mask="url(#nm)"><path d="M92 -30 L92 80 L138 80 L138 -30 Z" fill="#${skin}" stroke="#111" stroke-width="3.2"/></g></svg>`;
   if(mode==='neck') return `<svg viewBox="0 0 230 128">${neck}</svg>`;
   if(mode==='collar') return `<svg viewBox="0 0 230 128">${neck}<path d="M84 140 L87 30 Q115 46 143 30 L146 140 Z" fill="${color}" stroke="#111" stroke-width="3.2" stroke-linejoin="round"/><path d="M98 50 L97 140 M108 54 L108 140 M122 54 L122 140 M132 50 L133 140" stroke="#111" stroke-width="1.6" opacity=".25"/></svg>`;
@@ -384,5 +392,7 @@ function shirt(skin){
 }
 const faceUrl='https://api.dicebear.com/9.x/adventurer/svg?hair='+HAIR+'&seed='+encodeURIComponent(seed);
 document.querySelector('.face:not(.pk)').src=faceUrl; document.querySelector('.face.pk').src=faceUrl+'&mouth=variant18';
-fetch(faceUrl).then(r=>r.text()).then(t=>{ const skin=SKINS.find(c=>t.toLowerCase().includes('#'+c))||'ecad80'; const sh=document.querySelector('.shirt'); if(shape==='tag'){} else if(['neck','collar','lanyard','fade'].includes(shape)) sh.innerHTML=bare(skin,shape); else if(shape!=='none') sh.innerHTML=shirt(skin); });
+fetch(faceUrl).then(r=>r.text()).then(t=>{ const skin=SKINS.find(c=>t.toLowerCase().includes('#'+c))||'ecad80'; const sh=document.querySelector('.shirt'); if(shape==='dress'){ const t=document.querySelector('.name-tag'); t.style.left='58%'; t.style.top='218px'; t.style.transform='rotate(-6deg) scale(.66)'; t.style.transformOrigin='0 0';
+  t.insertAdjacentHTML('afterbegin','<i class="clip"></i>'); document.querySelector('.me').style.bottom='-14px'; }
+if(shape==='tag'){} else if(['neck','collar','lanyard','fade','dress'].includes(shape)) sh.innerHTML=bare(skin,shape); else if(shape!=='none') sh.innerHTML=shirt(skin); });
 </script></body></html>

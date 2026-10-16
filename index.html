@@ -67,6 +67,13 @@
           filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff)
                   drop-shadow(0 5px 6px rgba(47,59,69,.30)); }
   .dice.roll { animation:roll .5s cubic-bezier(.3,1.4,.5,1); }
+  /* "tap me!" with a hand-drawn arrow at the dice; fades in after the demo roll, gone after the first tap */
+  .tap-hint { position:absolute; z-index:4; right:-30px; bottom:96px; color:#ff6b8a; pointer-events:none; opacity:0; transition:opacity .35s; display:flex; flex-direction:column; align-items:flex-end; }
+  .tap-hint.show { opacity:1; animation:bob 1.6s ease-in-out infinite; }
+  .tap-word { font-weight:900; font-size:17px; transform:rotate(10deg); margin-right:-6px; white-space:nowrap; }
+  .tap-hint svg { width:46px; height:46px; margin-top:-2px; margin-right:6px; }
+  @keyframes bob { 0%,100% { transform:translate(0,0); } 50% { transform:translate(-3px,4px); } }
+  @media (prefers-reduced-motion: reduce) { .tap-hint.show { animation:none; } }
   @keyframes roll { from { transform:rotate(-14deg) scale(.8); } to { transform:rotate(346deg) scale(1); } }
   .sticker.wiggle .w-hero { animation:wiggle .7s ease-in-out; }
   @keyframes wiggle { 0%,100% { transform:rotate(0); } 20% { transform:rotate(-7deg); } 40% { transform:rotate(6deg); } 60% { transform:rotate(-4deg); } 80% { transform:rotate(2deg); } }
@@ -214,7 +221,7 @@
   <!-- 1. Welcome: logo on top, avatar as the star, name pre-filled, one button -->
   <section id="s-welcome" class="screen">
     <div class="brand" id="w-brand"><img class="w-logo" id="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
-    <div class="stage"><div class="sticker" id="w-shuffle" role="button" tabindex="0" aria-label="Change your look"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><span class="dice" id="w-tapme" aria-hidden="true">🎲</span></div></div>
+    <div class="stage"><div class="sticker" id="w-shuffle" role="button" tabindex="0" aria-label="Change your look"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><span class="dice" id="w-tapme" aria-hidden="true">🎲</span><span class="tap-hint" id="w-hint" aria-hidden="true"><span class="tap-word">tap me!</span><svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M44 6 C 52 26, 40 44, 14 50"/><path d="M24 42 L 13 50 L 25 56"/></svg></span></div></div>
     <div class="bottom">
       <div class="hint">This is the name others will see.</div>
       <div class="namebox"><input id="w-name" autocomplete="off" aria-label="Your name"><span class="fakecaret" id="w-caret"></span><button type="button" class="link inline" id="w-shuffle-name" aria-label="New nickname">↻</button></div>
@@ -444,13 +451,13 @@
         if (tapped) return;
         mySeed = sd; $('w-avatar').src = avatarBare(sd); rollDice();
         if (k === seeds.length - 1) done();
-      }, k * 380));
+      }, k * 650));
     });
   }
   function startNudge() { if (tapped) return; clearInterval(wiggleTimer);
-    demoRoll(() => { if (tapped) return; wiggleTimer = setInterval(wiggle, 4500); }); }
+    demoRoll(() => { if (tapped) return; setTimeout(() => { if (!tapped) $('w-hint').classList.add('show'); }, 500); wiggleTimer = setInterval(wiggle, 4500); }); }
   $('w-shuffle').onclick = () => { shuffle(); rollDice();
-    if (!tapped) { tapped = true; clearInterval(wiggleTimer); } };
+    if (!tapped) { tapped = true; clearInterval(wiggleTimer); $('w-hint').classList.remove('show'); } };
   $('w-shuffle').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('w-shuffle').onclick(); } };
   $('w-shuffle-name').onclick = shuffleName;
   // waitlist sheet

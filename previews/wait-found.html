@@ -326,8 +326,8 @@ html,body{height:100%} body{display:block;overflow:hidden}
 #s-on .pair2 img:first-child{rotate:-7deg;margin-right:-18px} #s-on .pair2 img:last-child{rotate:7deg;margin-left:-18px;animation-delay:.12s}
 #s-on .names{display:flex;justify-content:center;gap:120px;font-weight:900;font-size:17px;margin-top:2px}
 #s-on .booth{margin:22px auto 0;padding:16px 18px;border-radius:20px;background:#f4f6f8;width:100%;max-width:340px;animation:popin .5s .25s cubic-bezier(.2,1.4,.4,1) both}
-#s-on .booth small{display:block;font-size:13px;font-weight:900;color:#e8463c;text-transform:uppercase;letter-spacing:.06em}
-#s-on .booth b{display:block;font-size:24px;font-weight:900;color:var(--ink);margin-top:2px} #s-on .booth span{color:var(--muted);font-size:15px}
+#s-on .booth small{display:block;font-size:15px;font-weight:900;color:#e8463c;text-transform:uppercase;letter-spacing:.06em}
+#s-on .booth b{display:block;font-size:24px;font-weight:900;color:var(--ink);margin-top:2px} #s-on .booth span{color:var(--muted);font-size:17px;font-weight:700}
 #s-on .grow{flex:1}
 
 #s-bc{position:fixed;inset:0;z-index:35;background:#fff;display:flex;flex-direction:column;text-align:center;padding:calc(env(safe-area-inset-top) + 34px) 16px calc(env(safe-area-inset-bottom) + 10px);opacity:0;pointer-events:none;transition:opacity .35s}
@@ -335,7 +335,7 @@ html,body{height:100%} body{display:block;overflow:hidden}
 #s-bc .logo{width:58px;margin:0 auto 8px;display:block}
 #s-bc h1{font-size:34px;font-weight:900;margin:0;line-height:1.1}
 #s-bc .sub{color:var(--muted);font-size:16px;font-weight:700;margin-top:6px}
-.bc{--o:min(360px,calc(100vw - 20px));position:relative;width:var(--o);height:var(--o);margin:14px auto 0}
+.bc{--o:min(400px,calc(100vw - 8px));position:relative;width:var(--o);height:var(--o);margin:14px auto 0}
 .bc .ring{position:absolute;inset:0;border-radius:50%;border:2.5px dotted #f3a6c5;animation:spin 24s linear infinite}
 .bc .ring.r2{inset:9%;border-color:#e4e8ed;animation-duration:32s;animation-direction:reverse}
 .bc .pulse{position:absolute;inset:14%;border-radius:50%;border:3px solid rgba(255,107,160,.55);animation:beat 1.6s ease-out infinite}
@@ -344,7 +344,7 @@ html,body{height:100%} body{display:block;overflow:hidden}
   background:radial-gradient(circle at 32% 28%,#fff 0 18%,rgba(255,255,255,0) 20%),radial-gradient(circle,rgba(255,236,244,.6) 55%,rgba(255,143,189,.7));border:1.5px solid #f06fa4}
 .bc .orb.o2{animation-duration:13s;animation-direction:reverse} .bc .orb.o2 i{top:auto;bottom:-7px;width:13px;height:13px;margin-left:-6px}
 .bc .duo2{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-.bc .duo2 img{width:47%;height:auto;aspect-ratio:1/1;flex:none;filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25));animation:bob 2.4s ease-in-out infinite}
+.bc .duo2 img{width:52%;height:auto;aspect-ratio:1/1;flex:none;filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25));animation:bob 2.4s ease-in-out infinite}
 .bc .duo2 img:first-child{rotate:-7deg;margin-right:-6%} .bc .duo2 img:last-child{rotate:7deg;margin-left:-6%;animation-delay:-1.2s}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes beat{0%{transform:scale(.9);opacity:.9}100%{transform:scale(1.18);opacity:0}}
@@ -449,7 +449,7 @@ document.getElementById('here-btn').onclick=()=>{ document.getElementById('here-
     document.getElementById('s-bc').classList.add('on'); try{navigator.vibrate&&navigator.vibrate([80,40,80])}catch(_){} },1600); };
 // Found them! turns this same screen into the review
 document.getElementById('bc-found').onclick=()=>{ const b=document.getElementById('s-bc'); b.classList.add('rev');
-  document.getElementById('bc-h').textContent='How was meeting Sam?'; document.getElementById('bc-sub').textContent='One tap. It helps us make better matches.'; };
+  document.getElementById('bc-h').textContent='How\'d it go?'; document.getElementById('bc-sub').textContent='One tap. It helps us make better matches.'; };
 document.querySelectorAll('.rate3 button').forEach(x=>x.onclick=()=>{ document.querySelectorAll('.rate3 button').forEach(y=>y.classList.toggle('on',y===x)); document.getElementById('rv-done').disabled=false; });
 function endReview(){ const b=document.getElementById('s-bc'); b.classList.remove('on','rev'); document.getElementById('bc-h').textContent="You're both here!";
   document.getElementById('bc-sub').textContent="Hold up your phone. Sam's screen matches yours."; document.querySelectorAll('.rate3 button').forEach(y=>y.classList.remove('on'));

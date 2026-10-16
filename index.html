@@ -41,13 +41,23 @@
   .avatar { width:150px; height:150px; border-radius:50%; background:#f1f3ff; object-fit:cover; }
   .hero-img { position:relative; z-index:1; filter:drop-shadow(0 12px 12px rgba(0,0,0,.12)); }
   .faces img { width:64px; height:64px; border-radius:50%; background:#fff; margin:0 6px; }
-  /* waiting: full-screen crowd, drifting */
-  .screen.crowd.on { position:fixed; inset:0; display:flex; flex-direction:column; padding:28px 22px; overflow:hidden; }
-  .crowd-field { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
-  .crowd-track { position:absolute; top:0; left:0; height:100%; width:200%; animation:drift 60s linear infinite; will-change:transform; }
-  @keyframes drift { from { transform:translateX(-50%); } to { transform:translateX(0); } }
-  .crowd-track img { position:absolute; width:64px; height:64px; border-radius:50%; opacity:1; animation:floaty var(--d,8s) ease-in-out infinite; animation-delay:var(--delay,0s); filter:drop-shadow(0 6px 6px rgba(0,0,0,.08)); will-change:transform; }
-  @keyframes floaty { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-14px); } }
+  /* waiting: white, one sticker, faces orbiting on a faint ring */
+  #s-wait { text-align:center; padding-top:calc(env(safe-area-inset-top) + 56px); }
+  #s-wait h1 { margin-bottom:6px; }
+  #s-wait .sub { font-size:16px; max-width:300px; margin:0 auto; }
+  .orbit { position:relative; width:280px; height:280px; margin:auto; flex:0 0 auto; }
+  .orbit .ring { position:absolute; inset:28px; border:2px dashed #dfe4ea; border-radius:50%; }
+  .orbit .spin { position:absolute; inset:0; animation:orbit 16s linear infinite; }
+  .orbit .spin span { position:absolute; left:50%; top:50%; width:58px; height:58px; margin:-29px 0 0 -29px;
+                      transform:rotate(var(--a)) translateY(-112px); }
+  .orbit .spin span img { position:static; margin:0; transform:none; animation:counter 16s linear infinite;
+                          filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 5px 6px rgba(47,59,69,.22)); }
+  @keyframes orbit { to { transform:rotate(360deg); } }
+  @keyframes counter { from { transform:rotate(calc(-1 * var(--a))); } to { transform:rotate(calc(-1 * var(--a) - 360deg)); } }
+  .orbit-me { position:absolute; left:50%; top:50%; width:132px; height:132px; margin:-66px 0 0 -66px;
+              filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
+  .wt-foot { padding-bottom:12px; }
+  @media (prefers-reduced-motion: reduce) { .orbit .spin, .orbit .spin span img { animation:none; } }
   .over { position:relative; z-index:2; }
   .panel { background:rgba(255,255,255,.86); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); border-radius:24px; padding:22px 20px; text-align:center; box-shadow:0 14px 40px rgba(47,59,69,.14); max-width:360px; }
   .panel h1 { margin-bottom:6px; }
@@ -231,19 +241,22 @@
     </div>
   </section>
 
-  <!-- 2. Waiting: a full-screen crowd drifting left to right, you in the middle -->
-  <section id="s-wait" class="screen crowd">
-    <div class="crowd-field" id="crowd"><div class="crowd-track" id="crowd-track"></div></div>
-    <button type="button" class="back" id="wt-back" aria-label="Back">‹ Back</button>
-    <div class="stage over">
-      <div class="panel">
-        <h1>Finding someone…</h1>
-        <div class="sub">You're <span class="alias" id="wt-alias"></span>. <span id="wt-status"></span></div>
-        <div class="status" id="wt-pool"></div>
-        <div class="err" id="wt-err"></div>
-      </div>
+  <!-- 2. Waiting: calm and white; your sticker in the middle, a few faces orbiting on a faint ring -->
+  <section id="s-wait" class="screen">
+    <div class="wt-top">
+      <h1>Finding someone…</h1>
+      <div class="sub">You're <span class="alias" id="wt-alias"></span>. <span id="wt-status"></span></div>
     </div>
-    <img id="wt-mascot" alt="" style="display:none">
+    <div class="orbit" aria-hidden="true">
+      <div class="ring"></div>
+      <div class="spin" id="wt-spin"></div>
+      <img class="orbit-me" id="wt-me" alt="">
+    </div>
+    <div class="wt-foot">
+      <div class="status" id="wt-pool"></div>
+      <div class="err" id="wt-err"></div>
+      <button type="button" class="link" id="wt-back">Cancel</button>
+    </div>
   </section>
 
   <!-- 3. Match found (purple) -->
@@ -378,21 +391,15 @@
     if (theirs) { const hs = document.createElement('div'); hs.className = 'shake'; hs.textContent = '🤝'; el.append(hs, who(c.partner_avatar || theirs, theirs)); }
   }
   const avatarBare = seed => 'https://api.dicebear.com/9.x/adventurer/svg?hair=' + HAIR + '&seed=' + encodeURIComponent(seed || 'stranger');   // no background, for the sticker look
-  // the crowd: a jittered grid of generic faces, duplicated once so the drift wraps seamlessly
-  (function buildCrowd() {
-    const track = $('crowd-track'); const cols = 5, rows = 7, N = cols * rows;
-    const rnd = (i, k) => { const x = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
-    for (let half = 0; half < 2; half++) {
-      for (let i = 0; i < N; i++) {
-        const c = i % cols, r = Math.floor(i / cols);
-        const im = document.createElement('img'); im.alt = ''; im.src = avatarFor('crowd-' + i);
-        im.style.left = (half * 50 + (c + 0.15 + rnd(i, 1) * 0.7) * (50 / cols)) + '%';
-        im.style.top = ((r + 0.1 + rnd(i, 2) * 0.8) * (100 / rows)) + '%';
-        im.style.setProperty('--d', (6 + rnd(i, 3) * 6).toFixed(1) + 's');
-        im.style.setProperty('--delay', (-rnd(i, 4) * 8).toFixed(1) + 's');
-        im.dataset.i = i; track.appendChild(im);
-      }
-    }
+  // the orbit: three faces spaced around the ring; each one counter-rotates so it stays upright
+  (function buildOrbit() {
+    const spin = $('wt-spin');
+    [0, 120, 240].forEach((a, i) => {
+      const slot = document.createElement('span'); slot.style.setProperty('--a', a + 'deg');
+      const im = document.createElement('img'); im.alt = ''; im.style.setProperty('--a', a + 'deg');
+      im.src = avatarBare('orbit-' + i + '-' + Math.random().toString(36).slice(2, 7));
+      slot.appendChild(im); spin.appendChild(slot);
+    });
   })();
   let me = null, match = null, pollTimer = null, cardTimer = null;
 
@@ -545,7 +552,7 @@
   // ---- 2. waiting / search ----
   async function search() {
     stopPolls(); match = null;
-    $('wt-alias').textContent = (me.name || me.alias); $('wt-mascot').src = avatarFor(me.avatar_seed || me.alias); $('wt-status').textContent = me.variant === 'A' ? 'We\'ll pair you with someone else in the mix.' : 'Finding you a booth.';
+    $('wt-alias').textContent = (me.name || me.alias); $('wt-me').src = avatarBare(me.avatar_seed || me.alias); $('wt-status').textContent = me.variant === 'A' ? 'We\'ll pair you with someone else in the mix.' : 'Finding you a booth.';
     show('wait');
     const tick = async () => {
       try {

@@ -230,6 +230,23 @@
   #s-both .ask .q { font-size:21px; font-weight:900; line-height:1.3; margin:6px 0 2px; }
   #s-both .ask button.link { color:var(--purple2); background:transparent; box-shadow:none; border:0; font-size:15px; margin:0; padding:8px 12px; }
   #s-booth #b-again { padding:8px; margin:0; font-size:16px; }
+  .purple button.code { background:transparent; color:#fff; box-shadow:none; border:2px solid rgba(255,255,255,.55); font-weight:800; }
+  #s-booth button.code { padding:10px; font-size:16px; margin-bottom:6px; }
+  /* face QR: your avatar sits in the middle of a code your match scans */
+  .qr-box { position:relative; width:min(260px, 70vw); margin:4px auto 10px; }
+  .qr-box svg { display:block; width:100%; height:auto; }
+  .qr-box img { position:absolute; left:50%; top:50%; width:30%; height:30%; transform:translate(-50%,-50%); background:#fff; border-radius:50%; padding:4px; box-sizing:border-box; }
+  #qr .sub { text-align:center; margin:0 0 12px; }
+  /* review after meeting */
+  #s-review h1 { font-size:28px; }
+  .rate { display:flex; gap:10px; justify-content:center; margin:0 0 14px; }
+  .purple .rate button { flex:1; margin:0; padding:10px 4px 8px; background:rgba(255,255,255,.14); color:#fff; box-shadow:none; border:2px solid transparent; border-radius:20px; font-size:15px; font-weight:800; }
+  .rate button b { display:block; font-size:40px; line-height:1.2; }
+  .purple .rate button.on { background:#fff; color:var(--purple2); border-color:#fff; transform:scale(1.06); }
+  .tags { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:0 0 16px; }
+  .purple .tags button { width:auto; margin:0; padding:8px 14px; font-size:15px; background:transparent; color:#fff; box-shadow:none; border:2px solid rgba(255,255,255,.5); border-radius:999px; font-weight:800; }
+  .purple .tags button.on { background:#fff; color:var(--purple2); border-color:#fff; }
+  .purple button:disabled { opacity:.5; }
   .rain i { position:absolute; top:-30px; display:block; opacity:.95; animation:fall var(--dur) var(--delay) cubic-bezier(.3,.1,.6,1) forwards; }
   .rain i.sq { width:11px; height:11px; border-radius:2px; }
   .rain i.strip { width:6px; height:16px; border-radius:2px; }
@@ -331,7 +348,31 @@
     </div>
     <div class="bottom">
       <div class="ask"><div class="lbl">Try asking</div><div class="q" id="d-q"></div><button type="button" class="link" id="d-next">Another one ↻</button></div>
-      <button id="d-again">Meet someone new</button>
+      <button id="d-met">We met!</button>
+      <button id="d-code" class="code">Show my code</button>
+    </div>
+  </section>
+  <!-- 6. After meeting: one-tap review -->
+  <section id="s-review" class="screen purple">
+    <div class="brand"><img class="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
+    <div class="rain" aria-hidden="true"></div>
+    <div class="top">
+      <h1 id="r-title">How was it?</h1>
+      <div class="sub">One tap. It helps us make better matches.</div>
+    </div>
+    <div class="stage">
+      <div class="pair"><div class="duo" id="r-faces"></div></div>
+    </div>
+    <div class="bottom">
+      <div class="rate" id="r-rate">
+        <button type="button" data-r="1"><b>😕</b>Meh</button><button type="button" data-r="2"><b>🙂</b>Good</button><button type="button" data-r="3"><b>🤩</b>Amazing</button>
+      </div>
+      <div class="tags" id="r-tags">
+        <button type="button">Great convo</button><button type="button">Would meet again</button><button type="button">Fun icebreaker</button><button type="button">Learned something</button><button type="button">A bit awkward</button>
+      </div>
+      <button id="r-done" disabled>Done</button>
+      <button id="r-skip" class="secondary">Skip</button>
+      <div class="err" id="r-err"></div>
     </div>
   </section>
   <section id="s-booth" class="screen purple">
@@ -353,12 +394,20 @@
         <div class="loc" id="b-loc"></div>
       </div>
       <button id="b-self">I'm at the booth</button>
+      <button id="b-code" class="code">Show my code</button>
       <div class="status" id="b-status"></div>
       <button id="b-again" class="secondary">Find someone new</button>
       <div class="err" id="b-err"></div>
     </div>
   </section>
 </main>
+<div class="sheet-bg" id="qr-bg" hidden></div>
+<div class="sheet" id="qr" hidden role="dialog" aria-modal="true" aria-labelledby="qr-title">
+  <div class="grab"></div><button type="button" class="x" id="qr-x" aria-label="Close">×</button>
+  <h2 id="qr-title">Have them scan this</h2>
+  <div class="qr-box" id="qr-box"></div>
+  <p class="sub" id="qr-sub">Open the camera and point it here. It tells Pop you met.</p>
+</div>
 <div class="sheet-bg" id="wl-bg" hidden></div>
 <div class="sheet" id="wl" hidden role="dialog" aria-modal="true" aria-labelledby="wl-title">
   <div class="grab"></div><button type="button" class="x" id="wl-x" aria-label="Close">×</button>
@@ -377,6 +426,7 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script src="config.js"></script>
 <script>
 (() => {
@@ -456,7 +506,7 @@
       } else f.prev = ((now % 360) + 360) % 360;
     });
   }, 120);
-  let me = null, match = null, pollTimer = null, cardTimer = null;
+  let me = null, match = null, pollTimer = null, cardTimer = null, lastCard = null;
 
   const rpc = async (fn, args) => { const { data, error } = await sb.rpc(fn, args || {}); if (error) throw new Error(error.message); return data; };
   const stopPolls = () => { clearInterval(pollTimer); clearTimeout(cardTimer); pollTimer = cardTimer = null; };
@@ -476,6 +526,12 @@
       await session();
       // already joined on this device? then jump straight back in
       const { data: rows } = await sb.from('people').select('*').limit(1);
+      const met = new URLSearchParams(location.search).get('met');
+      if (met) history.replaceState(null, '', location.pathname);
+      if (rows && rows[0] && met) {   // opened by scanning your match's face QR
+        me = rows[0]; match = { id: met };
+        try { await rpc('confirm_met', { p_match: met }); return review(await rpc('match_card', { p_match: met })); } catch (_) { match = null; }
+      }
       if (rows && rows[0]) { me = rows[0]; return search(); }
       shuffle(); shuffleName();
       show('welcome');   // the front door (s-intro) is parked for now; switch back to show('intro') to use it
@@ -694,12 +750,13 @@
     setTimeout(() => { $('toast').classList.remove('show'); setTimeout(() => $('toast').hidden = true, 400); }, 8000);
   }
   function booth(c) {
-    stopPolls(); arrivedShown = false;
+    stopPolls(); arrivedShown = false; lastCard = c;
     document.querySelectorAll('#s-booth .arrived').forEach(n => n.remove());
     const mine = me.name || me.alias, theirs = c.partner_alias;
     renderDuo($('b-faces'), c);
     if (theirs) {
       const note = () => rpc('match_card', { p_match: match.id }).then(c2 => {
+        if (c2.met_at) return review(c2);
         if (c2.self_at && c2.partner_self_at) return bothHere(c2);
         if (c2.partner_self_at) announceArrival(c2);
       }).catch(() => {});
@@ -729,7 +786,9 @@
   let qIdx = 0;
   function bothHere(c) {
     if ($('s-both').classList.contains('on')) return;
-    stopPolls(); $('toast').classList.remove('show'); $('toast').hidden = true;
+    stopPolls(); $('toast').classList.remove('show'); $('toast').hidden = true; lastCard = c;
+    // when either person taps "We met!" or scans, both move on to the review
+    pollTimer = setInterval(() => rpc('match_card', { p_match: match.id }).then(c2 => { if (c2.met_at) review(c2); }).catch(() => {}), POLL_MS);
     renderDuo($('d-faces'), c);
     $('d-sub').textContent = 'Say hi to ' + c.partner_alias + ' at ' + c.vendor_name + '.';
     // both people start on the same question: pick it from the match id
@@ -739,8 +798,53 @@
     show('both');
   }
   $('d-next').onclick = () => { qIdx = (qIdx + 1) % ICEBREAKERS.length; $('d-q').textContent = ICEBREAKERS[qIdx]; };
-  // no 'met' status in the database yet, so closing out reuses 'passed' (it frees both people for a new match)
-  $('d-again').onclick = async () => { try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
+  // "We met!" (or a scan of your face QR) marks the match met, then both people get the review
+  $('d-met').onclick = async () => {
+    try { await rpc('confirm_met', { p_match: match.id }); review(await rpc('match_card', { p_match: match.id })); } catch (e) { review(lastCard); }
+  };
+
+  // ---- face QR: the other person scans it with their camera, which opens Pop at ?met=<match> ----
+  const metLink = () => location.origin + location.pathname + '?met=' + encodeURIComponent(match.id);
+  function showCode() {
+    if (!match || !window.qrcode) return;
+    const q = qrcode(0, 'H'); q.addData(metLink()); q.make();   // H = high error correction, so the face can cover the middle
+    $('qr-box').innerHTML = q.createSvgTag({ cellSize: 8, margin: 2, scalable: true });
+    const im = document.createElement('img'); im.alt = ''; im.src = avatarBare(me.avatar_seed || me.alias); $('qr-box').append(im);
+    $('qr-title').textContent = lastCard && lastCard.partner_alias ? 'Have ' + lastCard.partner_alias + ' scan this' : 'Have them scan this';
+    $('qr-bg').hidden = false; $('qr').hidden = false;
+    // the person showing the code moves on as soon as the scan lands
+    clearInterval(metPoll); metPoll = setInterval(async () => {
+      try { const c = await rpc('match_card', { p_match: match.id }); if (c.met_at) review(c); } catch (_) {}
+    }, POLL_MS);
+  }
+  let metPoll = null;
+  function hideCode() { clearInterval(metPoll); metPoll = null; $('qr').hidden = true; $('qr-bg').hidden = true; }
+  $('d-code').onclick = showCode; $('b-code').onclick = showCode;
+  $('qr-x').onclick = hideCode; $('qr-bg').onclick = hideCode;
+
+  // ---- 6. review ----
+  let rating = 0;
+  function review(c) {
+    stopPolls(); hideCode();
+    if ($('s-review').classList.contains('on')) return;
+    rating = 0; $('r-done').disabled = true; err('r-err');
+    document.querySelectorAll('#r-rate button, #r-tags button').forEach(b => b.classList.remove('on'));
+    if (c) renderDuo($('r-faces'), c);
+    $('r-title').textContent = c && c.partner_alias ? 'How was meeting ' + c.partner_alias + '?' : 'How was it?';
+    show('review');
+  }
+  document.querySelectorAll('#r-rate button').forEach(b => b.onclick = () => {
+    document.querySelectorAll('#r-rate button').forEach(x => x.classList.toggle('on', x === b));
+    rating = +b.dataset.r; $('r-done').disabled = false;
+  });
+  document.querySelectorAll('#r-tags button').forEach(b => b.onclick = () => b.classList.toggle('on'));
+  const finish = async () => { try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
+  $('r-done').onclick = async () => {
+    const tags = [...document.querySelectorAll('#r-tags button.on')].map(b => b.textContent);
+    try { await rpc('review_match', { p_match: match.id, p_rating: rating, p_tags: tags }); } catch (_) {}   // never trap someone here
+    finish();
+  };
+  $('r-skip').onclick = finish;
   $('b-again').onclick = async () => { try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
 
   // load screen: hide once the letters have landed (~2.2s) or the clip ends, and the app is ready; tap skips

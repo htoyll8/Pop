@@ -43,8 +43,12 @@
   .faces img { width:64px; height:64px; border-radius:50%; background:#fff; margin:0 6px; }
   /* waiting: white, one sticker, faces orbiting on a faint ring */
   #s-wait { text-align:center; padding-top:calc(env(safe-area-inset-top) + 56px); }
-  #s-wait h1 { margin-bottom:6px; }
-  #s-wait .sub { font-size:16px; max-width:300px; margin:0 auto; }
+  #s-wait h1 { font-size:26px; font-weight:800; margin:0; }
+  /* your name as a little tag stuck on the bottom of your sticker */
+  .name-tag { position:absolute; left:50%; top:50%; transform:translate(-50%, 50px) rotate(-3deg); z-index:2; white-space:nowrap;
+              background:#fff; border:1.5px solid #e3e8ee; border-radius:999px; padding:4px 12px; font-size:14px; font-weight:800; color:var(--ink);
+              box-shadow:0 4px 10px rgba(47,59,69,.12); }
+  #wt-pool { font-size:15px; font-weight:700; }
   .orbit { position:relative; width:280px; height:280px; margin:auto; flex:0 0 auto; }
   .orbit .ring { position:absolute; inset:28px; border:2px dashed #dfe4ea; border-radius:50%; }
   .orbit .spin { position:absolute; inset:0; animation:orbit 16s linear infinite; }
@@ -243,14 +247,12 @@
 
   <!-- 2. Waiting: calm and white; your sticker in the middle, a few faces orbiting on a faint ring -->
   <section id="s-wait" class="screen">
-    <div class="wt-top">
-      <h1>Finding someone…</h1>
-      <div class="sub">You're <span class="alias" id="wt-alias"></span>. <span id="wt-status"></span></div>
-    </div>
+    <div class="wt-top"><h1>Finding someone…</h1></div>
     <div class="orbit" aria-hidden="true">
       <div class="ring"></div>
       <div class="spin" id="wt-spin"></div>
       <img class="orbit-me" id="wt-me" alt="">
+      <span class="name-tag" id="wt-alias"></span>
     </div>
     <div class="wt-foot">
       <div class="status" id="wt-pool"></div>
@@ -552,7 +554,7 @@
   // ---- 2. waiting / search ----
   async function search() {
     stopPolls(); match = null;
-    $('wt-alias').textContent = (me.name || me.alias); $('wt-me').src = avatarBare(me.avatar_seed || me.alias); $('wt-status').textContent = me.variant === 'A' ? 'We\'ll pair you with someone else in the mix.' : 'Finding you a booth.';
+    $('wt-alias').textContent = (me.name || me.alias); $('wt-me').src = avatarBare(me.avatar_seed || me.alias); 
     show('wait');
     const tick = async () => {
       try {
@@ -560,7 +562,7 @@
         if (m && m.id) { stopPolls(); match = m; return card(); }
         const n = await rpc('pool_size');            // includes you
         const others = Math.max(0, (n || 1) - 1);
-        $('wt-pool').textContent = others === 0 ? 'You\'re the first one here. Hang tight.' : (others === 1 ? '1 other person is nearby.' : others + ' other people are nearby.');
+        $('wt-pool').textContent = others === 0 ? 'You\'re the first one here' : (others === 1 ? '1 person nearby' : others + ' people nearby');
       } catch (e) { err('wt-err', e); }
     };
     await tick();

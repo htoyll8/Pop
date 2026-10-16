@@ -86,11 +86,22 @@
   #wt-pool b.bump { animation:popin .4s cubic-bezier(.2,1.6,.4,1); }
   @media (prefers-reduced-motion: reduce) { .found .who, #wt-pool b.bump { animation:none; } }
 
+  /* the rules: shown once, before you pick your avatar */
+  #s-rules.on { position:fixed; inset:0; background:#fff; z-index:6; display:flex; flex-direction:column; min-height:0;
+                padding:calc(env(safe-area-inset-top) + 40px) 24px calc(env(safe-area-inset-bottom) + 14px); }
+  #s-rules .logo { width:64px; margin:0 auto 10px; display:block; }
+  #s-rules h1 { font-size:34px; font-weight:900; text-align:center; margin:0 0 20px; line-height:1.1; }
+  #s-rules ul { list-style:none; margin:0 auto; padding:0; max-width:380px; display:flex; flex-direction:column; gap:16px; }
+  #s-rules li { display:flex; gap:14px; align-items:flex-start; font-size:17px; font-weight:700; line-height:1.35; color:var(--ink); }
+  #s-rules li i { font-style:normal; font-size:26px; line-height:1; flex:none; width:32px; text-align:center; }
+  #s-rules li small { display:block; font-size:15px; font-weight:600; color:var(--muted); margin-top:2px; }
+  #s-rules .grow { flex:1; min-height:20px; }
+  #s-rules .fine { text-align:center; color:var(--muted); font-size:13px; font-weight:600; margin:8px 0 0; }
+
   /* match found: stays on the bubble screen; the heading and count fade, you shift up, Let's go slides in */
   #s-wait .wt-top, #wt-pool { transition:opacity .4s; }
   #s-wait.matched .wt-top, #s-wait.matched #wt-pool, #s-wait.matched .back { opacity:0; pointer-events:none; }
   .me { transition:transform .6s cubic-bezier(.3,1.2,.5,1); }
-  #s-wait.matched .me { transform:translateY(-118px) scale(.8); }
   .found { transition:top .6s cubic-bezier(.3,1.2,.5,1); }
   .go { position:absolute; left:16px; right:16px; bottom:calc(env(safe-area-inset-bottom) + 10px); z-index:9; transform:translateY(calc(100% + 160px)); opacity:0; visibility:hidden;
         transition:transform .5s cubic-bezier(.3,1.3,.5,1), opacity .25s, visibility 0s .5s; }
@@ -124,10 +135,10 @@
   #s-bc h1 { font-size:34px; font-weight:900; margin:0; line-height:1.1; }
   .bc { --o:min(400px, calc(100vw - 8px)); position:relative; width:var(--o); height:var(--o); margin:14px auto 0; transition:transform .5s cubic-bezier(.3,1.2,.5,1); }
   .bc .duo2 { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
-  .bc .duo2 img { width:52%; height:auto; aspect-ratio:1 / 1; flex:none; animation:bob 2.4s ease-in-out infinite;
+  .bc .duo2 img { width:52%; height:auto; aspect-ratio:1 / 1; flex:none; animation:bob2 2.4s ease-in-out infinite;
                   filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
   .bc .duo2 img:first-child { rotate:-7deg; margin-right:-6%; } .bc .duo2 img:last-child { rotate:7deg; margin-left:-6%; animation-delay:-1.2s; }
-  @keyframes bob { 50% { translate:0 -6px; } }
+  @keyframes bob2 { 50% { translate:0 -6px; } }
   #s-bc.rev .bc { transform:scale(.72); margin-top:-30px; margin-bottom:-60px; }
   .revbox { display:none; width:100%; max-width:420px; margin:0 auto; animation:popin .4s cubic-bezier(.2,1.3,.4,1); }
   #s-bc.rev .revbox { display:block; } #s-bc.rev #bc-found { display:none; }
@@ -163,10 +174,11 @@
           filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff)
                   drop-shadow(0 5px 6px rgba(47,59,69,.30)); }
   .dice.roll { animation:roll .5s cubic-bezier(.3,1.4,.5,1); }
-  /* "tap me!" with a hand-drawn arrow at the dice; fades in after the demo roll, gone after the first tap */
+  /* "Tap to choose your avatar" with a hand-drawn arrow at the dice; fades in after the demo roll, gone after the first tap */
   .tap-hint { position:absolute; z-index:4; right:8px; bottom:100px; color:#3a4550; pointer-events:none; opacity:0; transition:opacity .35s; display:flex; flex-direction:column; align-items:flex-end; }
   .tap-hint.show { opacity:1; animation:bob 1.6s ease-in-out infinite; }
-  .tap-word { font-weight:900; font-size:17px; transform:rotate(10deg); margin-right:-13px; white-space:nowrap; }
+  .tap-word { font-weight:900; font-size:15px; line-height:1.15; text-align:right; transform:rotate(8deg); margin-right:-28px; white-space:nowrap; }
+  @media (max-width:370px) { .tap-word { font-size:13.5px; margin-right:-14px; } }
   .tap-hint svg { width:46px; height:46px; margin-top:-2px; margin-right:6px; }
   @keyframes bob { 0%,100% { transform:translate(0,0); } 50% { transform:translate(-3px,4px); } }
   @media (prefers-reduced-motion: reduce) { .tap-hint.show { animation:none; } }
@@ -298,9 +310,23 @@
   </section>
 
   <!-- 1. Welcome: logo on top, avatar as the star, name pre-filled, one button -->
+  <!-- 0.5 The rules: once, before you pick your avatar -->
+  <section id="s-rules" class="screen">
+    <img class="logo" src="media/pop-logo-header.png" alt="pop">
+    <h1>Before you pop in</h1>
+    <ul>
+      <li><i>📍</i><span>Meet only at the spot Pop picks<small>It's always a public booth or activation.</small></span></li>
+      <li><i>💛</i><span>Be kind<small>If it's not clicking, it's fine to say bye and match again.</small></span></li>
+      <li><i>👋</i><span>Leave anytime<small>Tap "Can't make it" or the back arrow. No explanation needed.</small></span></li>
+      <li><i>🔒</i><span>Just a nickname and an avatar<small>No phone number or email to play.</small></span></li>
+    </ul>
+    <div class="grow"></div>
+    <button class="tbtn" id="rules-ok"><span class="lbl mid"><span>I agree</span></span></button>
+    <p class="fine">By tapping I agree, you agree to these rules.</p>
+  </section>
   <section id="s-welcome" class="screen">
     <div class="brand" id="w-brand"><img class="w-logo" id="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
-    <div class="stage"><div class="sticker" id="w-shuffle" role="button" tabindex="0" aria-label="Change your look"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><span class="dice" id="w-tapme" aria-hidden="true">🎲</span><span class="tap-hint" id="w-hint" aria-hidden="true"><span class="tap-word">tap me!</span><svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M42 4 C 50 22, 44 40, 26 54"/><path d="M38 53 L 26 54 L 30 43"/></svg></span></div></div>
+    <div class="stage"><div class="sticker" id="w-shuffle" role="button" tabindex="0" aria-label="Change your look"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><span class="dice" id="w-tapme" aria-hidden="true">🎲</span><span class="tap-hint" id="w-hint" aria-hidden="true"><span class="tap-word">Tap to choose<br>your avatar</span><svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M42 4 C 50 22, 44 40, 26 54"/><path d="M38 53 L 26 54 L 30 43"/></svg></span></div></div>
     <div class="bottom">
       <div class="hint">This is the name others will see.</div>
       <div class="namebox"><input id="w-name" autocomplete="off" aria-label="Your name"><span class="fakecaret" id="w-caret"></span><button type="button" class="link inline" id="w-shuffle-name" aria-label="New nickname">↻</button></div>
@@ -455,9 +481,14 @@
   }
   const startChewing = () => { if (!chewing) chew(); };
   // the match: one bubble floats into the space under the heading, grows, pops, and your match is there
+  function foundCard(seed) {
+    const f = document.createElement('div'); f.className = 'found';
+    f.innerHTML = '<div class="who"><img alt="" src="' + avatarBare(seed) + '"><b>Found them!</b></div>';
+    $('s-wait').append(f); return f;
+  }
   function reveal(seed, done) {
-    if (calm) return done(null);
     revealing = true;
+    if (calm) return done(foundCard(seed));   // reduced motion: no bubble flight, just the card
     const sk = sky.getBoundingClientRect(), hd = document.querySelector('#s-wait .wt-top').getBoundingClientRect(), fc = $('wt-me').getBoundingClientRect();
     const gTop = hd.bottom - sk.top + 6, gBot = fc.top - sk.top + fc.height * .12, fit = Math.max(.75, Math.min(1, (gBot - gTop) / 250));
     const tx = sk.width / 2, ty = gTop + (gBot - gTop) * .5;
@@ -470,9 +501,7 @@
       b.style.left = (sx + (tx - sx) * e) + 'px'; b.style.top = (sy + (ty - sy) * e) + 'px'; b.style.transform = `scale(${1 + e * 1.6})`;
       if (k < 1) return requestAnimationFrame(step);
       burst(tx, ty, b._s * 2.6); b.remove();
-      const f = document.createElement('div'); f.className = 'found'; f.style.top = (sk.top - $('s-wait').getBoundingClientRect().top + ty) + 'px';
-      f.innerHTML = '<div class="who" style="scale:' + fit + '"><img alt="" src="' + avatarBare(seed) + '"><b>Found them!</b></div>';
-      $('s-wait').append(f);
+      const f = foundCard(seed); f.style.top = (sk.top - $('s-wait').getBoundingClientRect().top + ty) + 'px'; f.firstChild.style.scale = fit;
       try { navigator.vibrate && navigator.vibrate([60, 40, 90]); } catch (_) {}
       setTimeout(() => done(f), 900);
     })(t0);
@@ -515,7 +544,9 @@
       const { data: rows } = await sb.from('people').select('*').limit(1);
       if (rows && rows[0]) { me = rows[0]; return search(); }
       shuffle(); shuffleName();
-      show('welcome');   // the front door (s-intro) is parked for now; switch back to show('intro') to use it
+      // first visit on this phone: the rules come before picking your avatar
+      let agreed = false; try { agreed = localStorage.getItem('pop-rules') === '1'; } catch (_) {}
+      show(agreed ? 'welcome' : 'rules');   // the front door (s-intro) is parked for now; switch back to show('intro') to use it
     } catch (e) { shuffle(); shuffleName(); show('welcome'); err('w-err', e); }
   }
   let mySeed = null, myAlias = null;
@@ -553,6 +584,7 @@
       }, k * 650));
     });
   }
+  $('rules-ok').onclick = () => { try { localStorage.setItem('pop-rules', '1'); } catch (_) {} show('welcome'); placeCaret(); setTimeout(startNudge, 500); };
   function startNudge() { if (tapped) return; clearInterval(wiggleTimer);
     demoRoll(() => { if (tapped) return; setTimeout(() => { if (!tapped) $('w-hint').classList.add('show'); }, 500); wiggleTimer = setInterval(wiggle, 4500); }); }
   $('w-shuffle').onclick = () => { shuffle(); rollDice();
@@ -655,7 +687,7 @@
   async function search() {
     stopPolls(); match = null;
     drawMe(me.avatar_seed || me.alias, me.name || me.alias);
-    clearFlow(); $('s-wait').classList.remove('matched'); revealing = false;
+    clearFlow(); $('s-wait').classList.remove('matched'); revealing = false; $('wt-box').style.transform = '';
     document.querySelectorAll('#s-wait .found').forEach(n => n.remove());
     show('wait'); startChewing();
     const tick = async () => {
@@ -696,15 +728,23 @@
     clearFlow();
     if (match && action) { try { await rpc('respond_to_match', { p_match: match.id, p_action: action }); } catch (_) {} }
     try { await rpc('leave_pool'); } catch (_) {}
-    match = null; $('s-wait').classList.remove('matched'); revealing = false;
+    match = null; $('s-wait').classList.remove('matched'); revealing = false; $('wt-box').style.transform = '';
     mySeed = me.avatar_seed || me.alias; $('w-avatar').src = avatarBare(mySeed);
     myAlias = me.alias; $('w-name').placeholder = myAlias; $('w-name').value = me.name || '';
     $('w-go').disabled = false; err('w-err'); show('welcome'); placeCaret();
   }
+  // Fit "Found them!" (their face) above you, both above the Let's go button, on any screen height
+  const CARD_H = 215, ME_H = 245, ME_S = .8;     // card height; your figure's height (face + collar + tag) at full size
+  function layoutFound(f) {
+    const sw = $('s-wait'), H = sw.clientHeight, goTop = H - ($('go').offsetHeight + 12), box = $('wt-box');
+    const avail = goTop - 20 - 12, need = CARD_H + 10 + ME_H * ME_S, k = Math.min(1, avail / need), extra = Math.max(0, avail - need * k);
+    const cardTop = 20 + extra * .35, cardH = CARD_H * k, meTop = cardTop + cardH + 10 + extra * .3, sMe = ME_S * k;
+    if (f) { f.style.top = (cardTop + cardH / 2) + 'px'; f.firstChild.style.scale = k; }
+    box.style.transformOrigin = '50% 0'; box.style.transform = `translateY(${meTop - box.offsetTop}px) scale(${sMe})`;
+  }
   function found(c, f) {
     stage = 'found'; lastCard = c; err('go-err');
-    $('s-wait').classList.add('matched');
-    if (f) { f.style.top = ($('s-wait').querySelector('.wt-top').getBoundingClientRect().top - $('s-wait').getBoundingClientRect().top + 120) + 'px'; f.firstChild.style.scale = 1; }
+    $('s-wait').classList.add('matched'); layoutFound(f);
     $('go-t').textContent = 'Let\'s go'; $('go-btn').disabled = false;
     fillTimer($('go-fill'), $('go-c'), YES_SECS, Date.parse(c.created_at) || Date.now(), () => toWelcome('timed_out'));
     pollTimer = setInterval(async () => {

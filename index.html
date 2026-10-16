@@ -45,21 +45,23 @@
   #s-wait { text-align:center; padding-top:calc(env(safe-area-inset-top) + 56px); }
   #s-wait h1 { font-size:31px; font-weight:800; margin:0; }
   /* your name as a little tag stuck on the bottom of your sticker */
-  .name-tag { position:absolute; left:50%; top:50%; transform:translate(-50%, 34px) rotate(-3deg); z-index:2; white-space:nowrap;
+  .name-tag { position:absolute; left:50%; top:50%; transform:translate(-50%, calc(var(--o) * .12)) rotate(-3deg); z-index:2; white-space:nowrap;
               background:#fff; border:1.5px solid #e3e8ee; border-radius:999px; padding:4px 12px; font-size:14px; font-weight:800; color:var(--ink);
               box-shadow:0 4px 10px rgba(47,59,69,.12); }
   #wt-pool { font-size:18px; font-weight:700; }
   #wt-back { font-size:18px; }
-  .orbit { position:relative; width:280px; height:280px; margin:auto; flex:0 0 auto; }
-  .orbit .ring { position:absolute; inset:28px; border:2px dashed #dfe4ea; border-radius:50%; }
+  /* --o is the orbit's size; everything inside scales with it, capped so it fits small phones */
+  .orbit { --o:min(350px, calc(100vw - 24px)); position:relative; width:var(--o); height:var(--o); margin:auto; flex:0 0 auto; }
+  .orbit .ring { position:absolute; inset:calc(var(--o) * .1); border:2px dashed #dfe4ea; border-radius:50%; }
   .orbit .spin { position:absolute; inset:0; animation:orbit 16s linear infinite; }
-  .orbit .spin span { position:absolute; left:50%; top:50%; width:58px; height:58px; margin:-29px 0 0 -29px;
-                      transform:rotate(var(--a)) translateY(-112px); }
+  .orbit .spin span { position:absolute; left:50%; top:50%; width:calc(var(--o) * .21); height:calc(var(--o) * .21); margin:calc(var(--o) * -.105) 0 0 calc(var(--o) * -.105);
+                      transform:rotate(var(--a)) translateY(calc(var(--o) * -.4)); }
+  .orbit .spin span img { width:100%; height:100%; }
   .orbit .spin span img { position:static; margin:0; transform:none; animation:counter 16s linear infinite;
                           filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 5px 6px rgba(47,59,69,.22)); }
   @keyframes orbit { to { transform:rotate(360deg); } }
   @keyframes counter { from { transform:rotate(calc(-1 * var(--a))); } to { transform:rotate(calc(-1 * var(--a) - 360deg)); } }
-  .orbit-me { position:absolute; left:50%; top:50%; width:132px; height:132px; margin:-82px 0 0 -66px;
+  .orbit-me { position:absolute; left:50%; top:50%; width:calc(var(--o) * .47); height:calc(var(--o) * .47); margin:calc(var(--o) * -.29) 0 0 calc(var(--o) * -.235);
               filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
   .wt-foot { padding-bottom:12px; }
   @media (prefers-reduced-motion: reduce) { .orbit .spin, .orbit .spin span img { animation:none; } }

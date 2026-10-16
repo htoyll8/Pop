@@ -79,11 +79,14 @@
   .orbit-me { position:absolute; left:50%; top:50%; width:calc(var(--o) * .47); height:calc(var(--o) * .47); margin:calc(var(--o) * -.31) 0 0 calc(var(--o) * -.235);
               filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
   .wt-foot { padding-bottom:12px; }
-  #wt-pool:has(.odo) { display:flex; justify-content:center; align-items:center; gap:.28em; line-height:1; }
-  .odo { display:inline-flex; }
-  .odo .wheel { display:inline-block; height:1em; line-height:1em; overflow:hidden; }
-  .odo .strip { display:flex; flex-direction:column; transition:transform .9s cubic-bezier(.2,.9,.25,1.15); }
-  .odo .strip span { height:1em; }
+  #wt-pool:has(.odo) { display:flex; justify-content:center; align-items:center; gap:.4em; line-height:1; }
+  /* each digit is a little lock wheel: the current number in the middle, its neighbors peeking above and below */
+  .odo { display:inline-flex; gap:3px; font-size:24px; font-weight:900; color:var(--ink); }
+  .odo .wheel { position:relative; display:inline-block; width:.82em; height:2.1em; overflow:hidden; border-radius:8px; background:#f2f4f7;
+                box-shadow:inset 0 2px 4px rgba(47,59,69,.12), inset 0 -2px 4px rgba(47,59,69,.12);
+                -webkit-mask-image:linear-gradient(rgba(0,0,0,.15), #000 30%, #000 70%, rgba(0,0,0,.15)); mask-image:linear-gradient(rgba(0,0,0,.15), #000 30%, #000 70%, rgba(0,0,0,.15)); }
+  .odo .strip { display:flex; flex-direction:column; align-items:center; margin-top:-.45em; transition:transform .9s cubic-bezier(.2,.9,.25,1.15); }
+  .odo .strip span { height:1em; line-height:1em; }
   @media (prefers-reduced-motion: reduce) { .odo .strip { transition:none; } }
 
   .over { position:relative; z-index:2; }
@@ -422,7 +425,7 @@
   const newFace = () => avatarBare('orbit-' + Math.random().toString(36).slice(2, 9));
   const orbitFaces = [];
   (function buildOrbit() {
-    [['wt-spin', [0, 120, 240]], ['wt-spin2', [60, 180, 300]]].forEach(([id, angles]) => {
+    [['wt-spin', [0, 72, 144, 216, 288]], ['wt-spin2', [60, 180, 300]]].forEach(([id, angles]) => {
       angles.forEach(a => {
         const slot = document.createElement('span'); slot.className = 'slot'; slot.style.setProperty('--a', a + 'deg');
         const up = document.createElement('span'); up.className = 'up'; up.style.setProperty('--a', a + 'deg');
@@ -606,7 +609,7 @@
     const digits = String(n).split('');
     while (odo.children.length < digits.length) {   // add a wheel (0-9) for each new digit, starting at 0
       const w = document.createElement('span'); w.className = 'wheel';
-      w.innerHTML = '<span class="strip">' + [...'0123456789'].map(d => '<span>' + d + '</span>').join('') + '</span>';
+      w.innerHTML = '<span class="strip">' + [...'9012345678901'].map(d => '<span>' + d + '</span>').join('') + '</span>';   // 9 above 0 and 0,1 below 9 so neighbors always show
       odo.prepend(w);
     }
     while (odo.children.length > digits.length) odo.firstChild.remove();

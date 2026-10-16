@@ -150,11 +150,11 @@
   @media (prefers-reduced-motion: reduce) { .bc .duo2 img, .pair2 img { animation:none; } }
 
   /* the other person backed out: say so, then keep looking */
-  .found.out .who img { opacity:.35; filter:grayscale(1); transition:opacity .4s, filter .4s; }
+  .found.out .who { animation:none; } .found.out .who img { opacity:.35; filter:grayscale(1); transition:opacity .4s, filter .4s; }
   #s-wait.out .go { transform:translateY(calc(100% + 160px)); opacity:0; }
-  #s-on.out .booth, #s-on.out .tbtn, #s-on.out .under, #s-on.out .names { opacity:0; transition:opacity .4s; pointer-events:none; }
-  #s-on.out .pair2 img:last-child { opacity:.35; filter:grayscale(1); transition:opacity .4s, filter .4s; }
-  .out-note { color:var(--muted); font-size:16px; font-weight:700; margin-top:6px; }
+  #s-on.out .booth, #s-on.out .tbtn, #s-on.out .under, #s-on.out .names { animation:none; opacity:0; transition:opacity .4s; pointer-events:none; }
+  #s-on.out h1 { font-size:30px; }
+  #s-on.out .pair2 img:last-child { animation:none; opacity:.35; filter:grayscale(1); transition:opacity .4s, filter .4s; }
   /* laptops and tall screens: keep the button close under the content instead of at the far bottom */
   @media (min-width:700px), (min-height:900px) {
     .flow.on { justify-content:center; padding-top:24px; }
@@ -760,10 +760,10 @@
     clearFlow(); stage = 'out';
     const who = (c2 && c2.partner_alias) || (lastCard && lastCard.partner_alias) || 'They';
     if ($('s-on').classList.contains('on')) {
-      $('s-on').classList.add('out'); $('s-on').querySelector('h1').innerHTML = who + ' can\'t make it<div class="out-note">Finding you someone new…</div>';
+      $('s-on').classList.add('out'); $('s-on').querySelector('h1').textContent = who + ' can\'t make it';
     } else {
       $('s-wait').classList.add('out'); const f = $('s-wait').querySelector('.found');
-      if (f) { f.classList.add('out'); f.querySelector('b').innerHTML = who + ' can\'t make it this time<div class="out-note">Finding you someone new…</div>'; }
+      if (f) { f.classList.add('out'); f.querySelector('b').textContent = who + ' can\'t make it'; }
     }
     setTimeout(search, 2600);
   }

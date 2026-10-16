@@ -82,6 +82,10 @@
   .found .who img { width:180px; filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
   .found .who b { display:block; font-size:24px; font-weight:900; color:var(--ink); }
   #wt-pool { position:absolute; left:0; right:0; bottom:calc(env(safe-area-inset-bottom) + 12px); z-index:6; margin:0; font-size:15px; font-weight:700; }
+  .wt-still { position:absolute; left:24px; right:24px; bottom:calc(env(safe-area-inset-bottom) + 36px); z-index:6; text-align:center; color:var(--muted); font-size:14px; font-weight:700; animation:popin .4s ease both; }
+  #s-wait.matched .wt-still { display:none; }
+  #wt-box { transition:transform .6s cubic-bezier(.3,1.2,.5,1), bottom .4s; }
+  #s-wait.long .me { bottom:calc(env(safe-area-inset-bottom) + 62px); }
   #wt-pool b { display:inline-block; font-weight:900; color:var(--ink); }
   #wt-pool b.bump { animation:popin .4s cubic-bezier(.2,1.6,.4,1); }
   @media (prefers-reduced-motion: reduce) { .found .who, #wt-pool b.bump { animation:none; } }
@@ -363,6 +367,7 @@
       <div class="gum" id="wt-gum"></div>
     </div>
     <div class="status" id="wt-pool"></div>
+    <div class="wt-still" id="wt-still" hidden>Still looking. Keep Pop open and we'll let you know.</div>
     <div class="go" id="go"><button class="tbtn" id="go-btn"><i class="fill" id="go-fill"></i><span class="lbl"><span id="go-t">Let's go</span><small id="go-c">2:00</small></span></button><button class="under" id="go-no">Not this time</button><div class="err" id="go-err"></div></div>
   </section>
 
@@ -741,7 +746,7 @@
     $('w-go').disabled = false; err('w-err'); show('welcome'); placeCaret();
   };
   $('w-go').onclick = async () => {
-    $('w-go').disabled = true; err('w-err');
+    unlockSound(); $('w-go').disabled = true; err('w-err');
     const typed = $('w-name').value.trim();
     const ownName = typed && typed !== myAlias ? typed : null;   // empty box = keep the nickname; anything typed is their name
     try {
@@ -762,13 +767,38 @@
     if (poolN !== null && poolN !== n) b.classList.add('bump');
     poolN = n;
   }
+  // ---- keeping people in the loop while they wait ----
+  const STILL_MS = 90 * 1000;   // after this long without a match, say we're still looking
+  let wakeLock = null, stillTimer = null, audio = null, titleTimer = null;
+  const baseTitle = document.title;
+  async function stayAwake() { try { if ('wakeLock' in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => wakeLock = null); } } catch (_) {} }
+  function letSleep() { try { wakeLock && wakeLock.release(); } catch (_) {} wakeLock = null; }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && $('s-wait').classList.contains('on')) stayAwake(); });
+  // phones only allow sound after a tap, so "Find my match" unlocks it
+  function unlockSound() { try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume(); } catch (_) {} }
+  function ping() {
+    try {
+      if (!audio) return; const t = audio.currentTime;
+      [[880, 0], [1320, .12]].forEach(([f, d]) => { const o = audio.createOscillator(), g = audio.createGain(); o.type = 'sine'; o.frequency.value = f;
+        g.gain.setValueAtTime(.0001, t + d); g.gain.exponentialRampToValueAtTime(.25, t + d + .02); g.gain.exponentialRampToValueAtTime(.0001, t + d + .28);
+        o.connect(g).connect(audio.destination); o.start(t + d); o.stop(t + d + .3); });
+    } catch (_) {}
+  }
+  function flashTitle() {
+    clearInterval(titleTimer); let on = false;
+    titleTimer = setInterval(() => { document.title = (on = !on) ? '🎉 Match found!' : baseTitle; }, 900);
+  }
+  function stopFlash() { clearInterval(titleTimer); titleTimer = null; document.title = baseTitle; }
+  function matchAlert() { ping(); flashTitle(); try { navigator.vibrate && navigator.vibrate([120, 60, 120, 60, 200]); } catch (_) {} }
+  function resetStill() { clearTimeout(stillTimer); $('wt-still').hidden = true; $('s-wait').classList.remove('long');
+    stillTimer = setTimeout(() => { if ($('s-wait').classList.contains('on') && !match) { $('wt-still').hidden = false; $('s-wait').classList.add('long'); } }, STILL_MS); }
   // ---- 2. waiting / search ----
   async function search() {
     stopPolls(); match = null;
     drawMe(me.avatar_seed || me.alias, me.name || me.alias);
     clearFlow(); $('s-wait').classList.remove('matched', 'out'); $('s-on').classList.remove('out'); revealing = false; $('wt-box').style.transform = '';
     document.querySelectorAll('#s-wait .found').forEach(n => n.remove());
-    show('wait'); startChewing();
+    show('wait'); startChewing(); stayAwake(); stopFlash(); resetStill();
     const tick = async () => {
       try {
         const m = await rpc('find_match');
@@ -807,7 +837,7 @@
     clearFlow();
     if (match && action) { try { await rpc('respond_to_match', { p_match: match.id, p_action: action }); } catch (_) {} }
     try { await rpc('leave_pool'); } catch (_) {}
-    match = null; $('s-wait').classList.remove('matched'); revealing = false; $('wt-box').style.transform = '';
+    match = null; $('s-wait').classList.remove('matched'); revealing = false; $('wt-box').style.transform = ''; letSleep(); stopFlash(); clearTimeout(stillTimer);
     mySeed = me.avatar_seed || me.alias; $('w-avatar').src = avatarBare(mySeed);
     myAlias = me.alias; $('w-name').placeholder = myAlias; $('w-name').value = me.name || '';
     $('w-go').disabled = false; err('w-err'); show('welcome'); placeCaret();
@@ -833,6 +863,7 @@
     setTimeout(search, 2600);
   }
   function found(c, f) {
+    clearTimeout(stillTimer); $('wt-still').hidden = true; $('s-wait').classList.remove('long'); matchAlert();
     stage = 'found'; lastCard = c; err('go-err');
     $('s-wait').classList.add('matched'); layoutFound(f);
     $('go-t').textContent = 'Let\'s go'; $('go-btn').disabled = false;
@@ -860,7 +891,7 @@
   // ---- 4. It's on: both faces, the spot, "I'm here" with a 7-minute timer ----
   function itsOn(c) {
     if (stage === 'on') return;
-    clearFlow(); stage = 'on'; lastCard = c; err('on-err');
+    clearFlow(); stage = 'on'; lastCard = c; err('on-err'); stopFlash();
     $('on-me').src = avatarBare(me.avatar_seed || me.alias); $('on-them').src = avatarBare(c.partner_avatar || c.partner_alias);
     $('on-them').hidden = !c.partner_alias; $('on-name').textContent = c.partner_alias || '';
     $('on-where').textContent = c.vendor_name; $('on-kind').textContent = c.vendor_location;

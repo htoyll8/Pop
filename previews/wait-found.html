@@ -315,8 +315,12 @@ html,body{height:100%} body{display:block;overflow:hidden}
 #s-on{position:fixed;inset:0;z-index:30;background:#fff;display:flex;flex-direction:column;text-align:center;padding:calc(env(safe-area-inset-top) + 34px) 16px calc(env(safe-area-inset-bottom) + 10px);
   opacity:0;pointer-events:none;transition:opacity .35s}
 #s-on.on{opacity:1;pointer-events:auto}
-#s-on h1{font-size:31px;font-weight:800;margin:0}
-#s-on .logo{width:92px;margin:0 auto 6px;display:block}
+#s-on h1{font-size:40px;font-weight:900;margin:0;line-height:1.1}
+#s-on .logo{width:58px;margin:0 auto 8px;display:block}
+#s-on .hint{color:var(--muted);font-size:15px;font-weight:700;margin:0 auto 12px;max-width:300px;text-align:center}
+.away{position:fixed;inset:0;z-index:40;background:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:10px}
+.away.on{display:flex}
+.away b{font-size:24px;font-weight:900}.away span{color:var(--muted)}
 #s-on .pair2{display:flex;justify-content:center;align-items:flex-end;margin:26px 0 0}
 #s-on .pair2 img{width:176px;filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25));animation:popin .5s cubic-bezier(.2,1.6,.4,1) both}
 #s-on .pair2 img:first-child{rotate:-7deg;margin-right:-12px} #s-on .pair2 img:last-child{rotate:7deg;margin-left:-12px;animation-delay:.12s}
@@ -326,10 +330,11 @@ html,body{height:100%} body{display:block;overflow:hidden}
 #s-on .booth b{display:block;font-size:24px;font-weight:900;color:var(--ink);margin-top:2px} #s-on .booth span{color:var(--muted);font-size:15px}
 #s-on .grow{flex:1}
 .found .who b{display:block;font-size:24px;font-weight:900;color:var(--ink)}
-</style></head><body><section id="s-wait" class="screen on"><div class="wt-top"><h1>Finding your match…</h1><div class="status" id="cnt-top" style="margin-top:6px"></div></div><button type="button" class="back" aria-label="Back"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="status cnt-bot" id="cnt-bot"></div><section id="s-on"><img class="logo" src="../media/pop-logo-header.png" alt="pop"><h1>It's on!</h1>
+</style></head><body><section id="s-wait" class="screen on"><div class="wt-top"><h1>Finding your match…</h1><div class="status" id="cnt-top" style="margin-top:6px"></div></div><button type="button" class="back" aria-label="Back"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="status cnt-bot" id="cnt-bot"></div><div class="away" id="away"><b>Back to the welcome screen</b><span>In the app, they choose whether to rejoin.</span><button class="tbtn" id="away-ok" style="max-width:260px;margin-top:12px"><span class="lbl" style="justify-content:center"><span>Restart demo</span></span></button></div><section id="s-on"><img class="logo" src="../media/pop-logo-header.png" alt="pop"><h1>It's on!</h1>
   <div class="pair2"><img id="on-me"><img id="on-them"></div><div class="names"><span>You</span><span>Sam</span></div>
   <div class="booth"><small>Meet at</small><b id="on-where"></b><span id="on-kind"></span></div>
   <div class="grow"></div>
+  <div class="hint">Sam sees this same screen. Hold it up when you're there.</div>
   <button class="tbtn" id="here-btn"><i class="fill" id="here-fill"></i><span class="lbl"><span id="here-t">I'm here</span><small id="here-c">7:00</small></span></button>
   <button class="under" id="here-no" style="display:block;margin:6px auto 0;background:none;border:0;box-shadow:none;color:var(--muted);font-weight:800;font-size:16px;padding:8px;width:auto">Can't make it</button>
 </section><div class="go" id="go"><button class="tbtn" id="go-btn"><i class="fill" id="go-fill"></i><span class="lbl"><span id="go-t">Let's go</span><small id="go-c">2:00</small></span></button><button class="under" id="go-no">Not this time</button></div><div class="sky"></div><div class="me"><div class="fig"><div class="shirt"></div><img class="face" src="https://api.dicebear.com/9.x/adventurer/svg?hair=long01,long02,long03,long04,long05,long07,long08,long10,long11,long12,long13,long14,long15,long19,long20,long21,long23,long24,long25,long26,short01,short02,short03,short04,short05,short06,short07,short08,short09,short10,short11,short12,short13,short14,short17,short18,short19&seed=me1"><img class="face pk" src="https://api.dicebear.com/9.x/adventurer/svg?hair=long01,long02,long03,long04,long05,long07,long08,long10,long11,long12,long13,long14,long15,long19,long20,long21,long23,long24,long25,long26,short01,short02,short03,short04,short05,short06,short07,short08,short09,short10,short11,short12,short13,short14,short17,short18,short19&seed=me1&mouth=variant18" style="position:absolute;left:0;top:0;opacity:0;z-index:2"></div><div class="name-tag small"><div class="nt-band"><b>HELLO</b><small>my name is</small></div><div class="nt-name">Velvet Ibis</div></div><div class="gum"></div></div><div style="flex:1"></div></section><script>const HAIR = 'long01,long02,long03,long04,long05,long07,long08,long10,long11,long12,long13,long14,long15,long19,long20,long21,long23,long24,long25,long26,short01,short02,short03,short04,short05,short06,short07,short08,short09,short10,short11,short12,short13,short14,short17,short18,short19';
@@ -375,7 +380,7 @@ setTimeout(match, 6000);
 let tm=null;
 function startTimer(){ const secs=120, t0=Date.now(), f=document.getElementById('go-fill'), c=document.getElementById('go-c');
   clearInterval(tm); tm=setInterval(()=>{ const k=Math.min(1,(Date.now()-t0)/1000/secs), left=Math.ceil(secs*(1-k));
-    f.style.transform='scaleX('+k+')'; c.textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0'); if(k>=1){ clearInterval(tm); reset(); } },250); }
+    f.style.transform='scaleX('+k+')'; c.textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0'); if(k>=1){ clearInterval(tm); reset(); document.getElementById('away').classList.add('on'); } },250); }
 function reset(){ clearInterval(tm); const sw=document.getElementById('s-wait'); sw.classList.remove('matched'); document.querySelectorAll('.found').forEach(n=>n.remove());
   document.getElementById('go-t').textContent="Let's go"; document.getElementById('go-fill').style.transform='scaleX(0)'; matching=false; setTimeout(match,6000); }
 document.getElementById('go-no').onclick=reset;
@@ -389,10 +394,12 @@ const SPOTS=[['Namela X Thirdspace Arcade Lounge','Activation'],['Visible Mendin
 document.getElementById('go-btn').onclick=()=>{ document.getElementById('go-t').textContent='Waiting for Sam…';
   setTimeout(()=>{ clearInterval(tm); const me=document.querySelector('.face:not(.pk)').src, them=document.querySelector('.found img').src;
     const sp=SPOTS[Math.floor(Math.random()*SPOTS.length)]; document.getElementById('on-where').textContent=sp[0]; document.getElementById('on-kind').textContent=sp[1]; document.getElementById('on-me').src=me; document.getElementById('on-them').src=them; document.getElementById('s-on').classList.add('on');
-    hereTm=fillTimer(document.getElementById('here-fill'), document.getElementById('here-c'), 420, backToBubbles); }, 1600); };
+    hereTm=fillTimer(document.getElementById('here-fill'), document.getElementById('here-c'), 420, toWelcome); }, 1600); };
 function backToBubbles(){ clearInterval(hereTm); document.getElementById('s-on').classList.remove('on'); document.getElementById('here-t').textContent="I'm here"; document.getElementById('here-fill').style.transform='scaleX(0)'; reset(); }
-document.getElementById('here-no').onclick=backToBubbles;
-document.getElementById('here-btn').onclick=()=>{ document.getElementById('here-t').textContent='You\'re here. Waiting for Sam…'; };
+function toWelcome(){ clearInterval(tm); backToBubbles(); document.getElementById('away').classList.add('on'); }
+document.getElementById('away-ok').onclick=()=>document.getElementById('away').classList.remove('on');
+document.getElementById('here-no').onclick=toWelcome;
+document.getElementById('here-btn').onclick=()=>{ document.getElementById('here-t').textContent='Waiting for Sam…'; };
 
 const gum=document.querySelector('.gum');
 function chew(){

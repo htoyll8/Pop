@@ -357,11 +357,11 @@ const SHAPES={
 const shape=q.get('shape')||'tag';
 if(shape==='neck'||shape==='collar'){ const t=document.querySelector('.name-tag'); t.style.left='50%'; t.style.top='204px'; t.style.transform='translateX(-50%) rotate(-4deg) scale(.85)'; t.style.transformOrigin='50% 0'; }
 if(shape==='dress'){ const t=document.querySelector('.name-tag'); t.style.left='58%'; t.style.top='218px'; t.style.transform='rotate(-6deg) scale(.66)'; t.style.transformOrigin='0 0';
-  t.insertAdjacentHTML('afterbegin','<i class="clip"></i>'); document.querySelector('.me').style.bottom='-14px'; }
+  t.insertAdjacentHTML('afterbegin','<i class="clip"></i>'); document.querySelector('.me').style.bottom='16px'; }
 if(shape==='tag'){ document.querySelector('.shirt').style.display='none'; const t=document.querySelector('.name-tag'); t.style.left='50%'; t.style.top='196px'; t.style.transform='translateX(-50%) rotate(-3deg) scale(.82)'; t.style.transformOrigin='50% 0';
-  t.insertAdjacentHTML('afterbegin','<i class="clip"></i>'); document.querySelector('.me').style.bottom='-14px'; }
+  t.insertAdjacentHTML('afterbegin','<i class="clip"></i>'); document.querySelector('.me').style.bottom='16px'; }
 if(shape==='fade'){ const t=document.querySelector('.name-tag'); t.style.left='50%'; t.style.top='212px'; t.style.transform='translateX(-50%) rotate(-3deg) scale(.82)'; t.style.transformOrigin='50% 0';
-  t.insertAdjacentHTML('afterbegin','<i class="clip"></i>'); document.querySelector('.me').style.bottom='-14px'; }
+  t.insertAdjacentHTML('afterbegin','<i class="clip"></i>'); document.querySelector('.me').style.bottom='16px'; }
 if(shape==='lanyard'){ const t=document.querySelector('.name-tag'); t.style.left='50%'; t.style.top='224px'; t.style.transform='translateX(-50%) rotate(2deg) scale(.66)'; t.style.transformOrigin='50% 0'; }
 if(shape==='none'){ document.querySelector('.shirt').style.display='none';
   const t=document.querySelector('.name-tag'); t.style.left='50%'; t.style.top='176px'; t.style.transform='translateX(-50%) rotate(-4deg) scale(.9)'; t.style.transformOrigin='50% 0';
@@ -393,6 +393,6 @@ function shirt(skin){
 const faceUrl='https://api.dicebear.com/9.x/adventurer/svg?hair='+HAIR+'&seed='+encodeURIComponent(seed);
 document.querySelector('.face:not(.pk)').src=faceUrl; document.querySelector('.face.pk').src=faceUrl+'&mouth=variant18';
 fetch(faceUrl).then(r=>r.text()).then(t=>{ const skin=SKINS.find(c=>t.toLowerCase().includes('#'+c))||'ecad80'; const sh=document.querySelector('.shirt'); if(shape==='dress'){ const t=document.querySelector('.name-tag'); t.style.left='58%'; t.style.top='218px'; t.style.transform='rotate(-6deg) scale(.66)'; t.style.transformOrigin='0 0';
-  t.insertAdjacentHTML('afterbegin','<i class="clip"></i>'); document.querySelector('.me').style.bottom='-14px'; }
+  t.insertAdjacentHTML('afterbegin','<i class="clip"></i>'); document.querySelector('.me').style.bottom='16px'; }
 if(shape==='tag'){} else if(['neck','collar','lanyard','fade','dress'].includes(shape)) sh.innerHTML=bare(skin,shape); else if(shape!=='none') sh.innerHTML=shirt(skin); });
 </script></body></html>

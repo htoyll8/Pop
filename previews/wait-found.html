@@ -42,7 +42,7 @@
   .hero-img { position:relative; z-index:1; filter:drop-shadow(0 12px 12px rgba(0,0,0,.12)); }
   .faces img { width:64px; height:64px; border-radius:50%; background:#fff; margin:0 6px; }
   /* waiting: white, one sticker, faces orbiting on a faint ring */
-  #s-wait { text-align:center; padding-top:calc(env(safe-area-inset-top) + 56px); }
+  #s-wait { text-align:center; padding-top:calc(env(safe-area-inset-top) + 80px); }
   #s-wait h1 { font-size:31px; font-weight:800; margin:0; }
   /* your name on a "HELLO my name is" sticker, stuck on the bottom of your face */
   .name-tag { position:absolute; left:50%; top:50%; transform:translate(-50%, calc(var(--o) * .045)) rotate(-4deg); z-index:2;
@@ -292,7 +292,7 @@ html,body{height:100%} body{display:block;overflow:hidden}
 .name-tag .clip{position:absolute;left:50%;top:-11px;width:20px;height:13px;margin-left:-10px;border-radius:3px;background:linear-gradient(#e6eaee,#b9c1c9);border:2px solid #111;box-sizing:border-box;z-index:2}
 .name-tag .clip::after{content:"";position:absolute;left:50%;top:-8px;width:8px;height:8px;margin-left:-4px;border:2px solid #111;border-bottom:0;border-radius:6px 6px 0 0;box-sizing:border-box}
 .name-tag{overflow:visible}
-.back{position:absolute;left:10px;top:calc(env(safe-area-inset-top) + 14px);z-index:9;width:44px;height:44px;padding:0;margin:0;border-radius:50%;
+.back{position:absolute;left:6px;top:calc(env(safe-area-inset-top) + 2px);z-index:9;width:44px;height:44px;padding:0;margin:0;border-radius:50%;
   background:transparent;box-shadow:none;color:var(--ink);display:grid;place-items:center}
 .cnt-bot{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 12px);z-index:6;text-align:center;margin:0}
 

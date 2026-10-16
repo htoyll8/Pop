@@ -394,9 +394,8 @@
     <div class="roles" id="wl-roles">
       <button type="button" data-role="attendee" class="on">Attendee</button><button type="button" data-role="organizer">Organizer</button><button type="button" data-role="vendor">Vendor</button>
     </div>
-    <input id="wl-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Phone number">
     <input id="wl-email" type="email" inputmode="email" autocomplete="email" placeholder="Email">
-    <p class="wl-fine">Fill in either or both.</p>
+    <input id="wl-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Phone number (optional)">
     <p class="wl-fine" id="wl-sms" hidden>By adding your number, you agree to get texts from Pop about upcoming events. Msg &amp; data rates may apply. Reply STOP to opt out.</p>
     <textarea id="wl-note" rows="3" placeholder="Tell us about your event (optional)"></textarea>
     <button id="wl-go">Count me in</button>
@@ -676,8 +675,8 @@
   $('wl-phone').oninput = () => { $('wl-sms').hidden = !$('wl-phone').value.trim(); };   // texting consent shows as soon as they type a number
   $('wl-go').onclick = async () => {
     const email = $('wl-email').value.trim(), phone = $('wl-phone').value.trim(), digits = phone.replace(/[^0-9]/g, ''); err('wl-err');
-    if (!email && !phone) return err('wl-err', 'Add a phone number or an email.');
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err('wl-err', 'Please check your email.');
+    if (!email) return err('wl-err', 'Add your email.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err('wl-err', 'Please check your email.');
     if (phone && (digits.length < 7 || digits.length > 15)) return err('wl-err', 'Please check your phone number.');
     $('wl-go').disabled = true;
     try { await session(); await rpc('join_waitlist', { p_email: email || null, p_phone: phone || null, p_role: wlRole, p_note: $('wl-note').value || null, p_source: wlSource });

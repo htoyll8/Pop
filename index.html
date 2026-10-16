@@ -417,7 +417,8 @@
   const ANIMALS = ['Otter','Heron','Lynx','Falcon','Fox','Badger','Ibis','Marten','Puffin','Stoat','Wren','Yak'];
   const pick = a => a[Math.floor(Math.random() * a.length)];
   function shuffle() { mySeed = 'av-' + Math.random().toString(36).slice(2, 10); $('w-avatar').src = avatarBare(mySeed); }
-  function shuffleName() { myAlias = pick(ADJ) + ' ' + pick(ANIMALS); $('w-name').placeholder = myAlias; placeCaret(); }
+  // a new nickname clears anything typed, so the new name actually shows
+  function shuffleName() { myAlias = pick(ADJ) + ' ' + pick(ANIMALS); $('w-name').value = ''; $('w-name').placeholder = myAlias; placeCaret(); }
   // a blinking cursor at the start of the empty box, so it's clear you can type (phones won't focus a field until tapped)
   function placeCaret() {
     const inp = $('w-name'), c = $('w-caret'); if (!inp || !c) return;
@@ -429,8 +430,26 @@
   // nudge: wiggle the sticker now and then until it's tapped once; the bubble goes away after the first tap
   let tapped = false, wiggleTimer = null;
   function wiggle() { const s = $('w-shuffle'); if (tapped || !s) return; s.classList.remove('wiggle'); void s.offsetWidth; s.classList.add('wiggle'); }
-  function startNudge() { if (tapped) return; clearInterval(wiggleTimer); setTimeout(wiggle, 400); wiggleTimer = setInterval(wiggle, 4500); }
-  $('w-shuffle').onclick = () => { shuffle(); const d = $('w-tapme'); d.classList.remove('roll'); void d.offsetWidth; d.classList.add('roll');
+  // once per visit: the face flips through a few looks by itself (dice spinning each time) to show what a tap does
+  let demoed = false;
+  function rollDice() { const d = $('w-tapme'); d.classList.remove('roll'); void d.offsetWidth; d.classList.add('roll'); }
+  function demoRoll(done) {
+    if (demoed || tapped || matchMedia('(prefers-reduced-motion: reduce)').matches) return done();
+    demoed = true;
+    const seeds = [1, 2, 3].map(() => 'av-' + Math.random().toString(36).slice(2, 10));
+    // preload so each flip is instant; give up waiting after 1.5s
+    const loads = seeds.map(sd => new Promise(r => { const i = new Image(); i.onload = i.onerror = r; i.src = avatarBare(sd); }));
+    Promise.race([Promise.all(loads), new Promise(r => setTimeout(r, 1500))]).then(() => {
+      seeds.forEach((sd, k) => setTimeout(() => {
+        if (tapped) return;
+        mySeed = sd; $('w-avatar').src = avatarBare(sd); rollDice();
+        if (k === seeds.length - 1) done();
+      }, k * 380));
+    });
+  }
+  function startNudge() { if (tapped) return; clearInterval(wiggleTimer);
+    demoRoll(() => { if (tapped) return; wiggleTimer = setInterval(wiggle, 4500); }); }
+  $('w-shuffle').onclick = () => { shuffle(); rollDice();
     if (!tapped) { tapped = true; clearInterval(wiggleTimer); } };
   $('w-shuffle').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('w-shuffle').onclick(); } };
   $('w-shuffle-name').onclick = shuffleName;

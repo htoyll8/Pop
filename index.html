@@ -554,13 +554,19 @@
   async function boot() {
     try {
       await session();
-      // already joined on this device? then jump straight back in
       const { data: rows } = await sb.from('people').select('*').limit(1);
-      if (rows && rows[0]) { me = rows[0]; return search(); }
+      if (rows && rows[0]) {
+        // joined before: mid-match? go back to it. Otherwise land on the avatar page, out of the queue, one tap to rejoin.
+        me = rows[0];
+        const { data: ms } = await sb.from('matches').select('id,created_at,status_1,status_2,person_1,met_at').order('created_at', { ascending: false }).limit(1);
+        const m = ms && ms[0], gone = st => st === 'passed' || st === 'timed_out';
+        if (m && !m.met_at && Date.now() - Date.parse(m.created_at) < 12 * 60 * 1000
+              && !gone(m.person_1 === me.id ? m.status_1 : m.status_2) && !gone(m.person_1 === me.id ? m.status_2 : m.status_1)) return search();
+        return toWelcome(null);
+      }
+      // not signed up yet (new here, or after a reset): the rules come before picking your avatar
       shuffle(); shuffleName();
-      // first visit on this phone: the rules come before picking your avatar
-      let agreed = false; try { agreed = localStorage.getItem('pop-rules') === '1'; } catch (_) {}
-      show(agreed ? 'welcome' : 'rules');   // the front door (s-intro) is parked for now; switch back to show('intro') to use it
+      show('rules');   // the front door (s-intro) is parked for now; switch back to show('intro') to use it
     } catch (e) { shuffle(); shuffleName(); show('welcome'); err('w-err', e); }
   }
   let mySeed = null, myAlias = null;
@@ -598,7 +604,7 @@
       }, k * 650));
     });
   }
-  $('rules-ok').onclick = () => { try { localStorage.setItem('pop-rules', '1'); } catch (_) {} show('welcome'); placeCaret(); setTimeout(startNudge, 500); };
+  $('rules-ok').onclick = () => { show('welcome'); placeCaret(); setTimeout(startNudge, 500); };
   function startNudge() { if (tapped) return; clearInterval(wiggleTimer);
     demoRoll(() => { if (tapped) return; setTimeout(() => { if (!tapped) $('w-hint').classList.add('show'); }, 500); wiggleTimer = setInterval(wiggle, 4500); }); }
   $('w-shuffle').onclick = () => { shuffle(); rollDice();

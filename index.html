@@ -57,8 +57,9 @@
   /* --o is the orbit's size; everything inside scales with it, capped so it fits small phones */
   .orbit { --o:min(350px, calc(100vw - 24px)); position:relative; width:var(--o); height:var(--o); margin:auto; flex:0 0 auto; }
   /* two rings: outer turns clockwise, inner counter-clockwise; --r ring radius, --f face size, --t lap time */
-  .orbit .ring { position:absolute; left:50%; top:50%; width:calc(var(--o) * var(--r) * 2); height:calc(var(--o) * var(--r) * 2);
-                 margin:calc(var(--o) * var(--r) * -1) 0 0 calc(var(--o) * var(--r) * -1); border:2px dashed #dfe4ea; border-radius:50%; }
+  /* the rings are dotted paths: zero-length dashes with round caps draw as little dots */
+  .orbit .rings { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+  .orbit .rings circle { fill:none; stroke:#cfd6de; stroke-width:1.1; stroke-linecap:round; stroke-dasharray:0 3.4; }
   .orbit .outer { --r:.43; --f:.16; --t:18s; --dir:1; }
   .orbit .inner { --r:.32; --f:.12; --t:24s; --dir:-1; }
   .orbit .spin { position:absolute; inset:0; animation:orbit var(--t) linear infinite; }
@@ -276,7 +277,7 @@
   <section id="s-wait" class="screen">
     <div class="wt-top"><h1>Finding your match…</h1></div>
     <div class="orbit" aria-hidden="true">
-      <div class="ring outer"></div><div class="ring inner"></div>
+      <svg class="rings" viewBox="0 0 100 100"><circle cx="50" cy="50" r="43"/><circle cx="50" cy="50" r="32"/></svg>
       <div class="spin outer" id="wt-spin"></div><div class="spin inner" id="wt-spin2"></div>
       <img class="orbit-me" id="wt-me" alt="">
       <div class="name-tag"><div class="nt-band"><b>HELLO</b><small>my name is</small></div><div class="nt-name" id="wt-alias"></div></div>

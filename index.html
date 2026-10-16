@@ -141,10 +141,11 @@
   @keyframes bob2 { 50% { translate:0 -6px; } }
   #s-bc.rev .bc { transform:scale(.72); margin-top:-30px; margin-bottom:-60px; }
   .revbox { display:none; width:100%; max-width:420px; margin:0 auto; animation:popin .4s cubic-bezier(.2,1.3,.4,1); }
-  #s-bc.rev .revbox { display:block; } #s-bc.rev #bc-found { display:none; }
-  .rate3 { display:flex; gap:10px; margin:0 0 10px; }
+  #s-bc.rev .revbox { display:block; }
+  .rv-q { font-size:20px; font-weight:900; color:var(--ink); text-align:left; margin:0 2px 8px; }
+  .rate3 { display:flex; gap:8px; margin:0 0 10px; }
   .rate3 button { flex:1; margin:0; padding:8px 4px 6px; background:#f4f6f8; color:var(--ink); box-shadow:none; border:2px solid transparent; border-radius:18px; font-size:14px; font-weight:800; }
-  .rate3 button b { display:block; font-size:38px; line-height:1.15; } .rate3 button.on { background:#fff; border-color:var(--blue); }
+  .rate3 button b { display:block; font-size:34px; line-height:1.15; } .rate3 button.on { background:#fff; border-color:var(--blue); }
   .revbox textarea { width:100%; box-sizing:border-box; border:2px solid #e6ebef; border-radius:16px; padding:12px 14px; font:inherit; font-size:16px; resize:none; margin:0 0 10px; color:var(--ink); }
   .revbox textarea:focus { outline:none; border-color:var(--blue); }
   @media (prefers-reduced-motion: reduce) { .bc .duo2 img, .pair2 img { animation:none; } }
@@ -375,9 +376,9 @@
     <div class="hd"><h1 id="bc-h">You're both here!</h1><div class="sub" id="bc-sub"></div></div>
     <div class="bc"><div class="duo2"><img id="bc-me" alt=""><img id="bc-them" alt=""></div></div>
     <div class="grow"></div>
-    <button class="tbtn" id="bc-found"><span class="lbl mid"><span>Found them!</span></span></button>
     <div class="revbox">
-      <div class="rate3" id="rv-rate"><button type="button" data-r="1"><b>😕</b>Meh</button><button type="button" data-r="2"><b>🙂</b>Good</button><button type="button" data-r="3"><b>🤩</b>Amazing</button></div>
+      <div class="rv-q">How'd it go?</div>
+      <div class="rate3" id="rv-rate"><button type="button" data-r="1"><b>😕</b>Meh</button><button type="button" data-r="2"><b>🙂</b>Good</button><button type="button" data-r="3"><b>🤩</b>Amazing</button><button type="button" data-r="0"><b>👻</b>No show</button></div>
       <textarea id="rv-txt" rows="2" placeholder="Anything else? (optional)"></textarea>
       <button class="tbtn" id="rv-again"><span class="lbl mid"><span>Match again</span></span></button>
       <button class="under" id="rv-done">I'm done for now</button>
@@ -841,36 +842,30 @@
   $('here-no').onclick = () => toWelcome('passed');
 
   // ---- 5. You're both here: hold up your phones; Found them! becomes the review on the same screen ----
+  // both here: the faces to hold up, and the review right below (no separate Found them step)
   function beacon(c) {
-    if (stage === 'bc' || stage === 'rev') return;
+    if (stage === 'bc') return;
     clearFlow(); stage = 'bc'; lastCard = c;
     const them = c.partner_alias || 'them';
     $('bc-me').src = avatarBare(me.avatar_seed || me.alias); $('bc-them').src = avatarBare(c.partner_avatar || c.partner_alias);
     $('bc-h').textContent = 'You\'re both here!'; $('bc-sub').textContent = 'Hold up your phone. ' + them + '\'s screen matches yours.';
-    $('s-bc').classList.remove('rev'); rating = 0; $('rv-txt').value = '';
+    $('s-bc').classList.add('rev'); rating = null; $('rv-txt').value = '';
     document.querySelectorAll('#rv-rate button').forEach(b => b.classList.remove('on'));
     show('bc'); try { navigator.vibrate && navigator.vibrate([80, 40, 80, 40, 160]); } catch (_) {}
-    // if they tap Found them! first, this phone moves to the review too
-    pollTimer = setInterval(async () => {
-      try { const c2 = await rpc('match_card', { p_match: match.id }); if (stage === 'bc' && c2.met_at) toReview(); } catch (_) {}
-    }, POLL_MS);
   }
-  function toReview() {
-    stopPolls(); stage = 'rev';
-    $('s-bc').classList.add('rev'); $('bc-h').textContent = 'How\'d it go?'; $('bc-sub').textContent = 'It helps us make better matches.';
-  }
-  $('bc-found').onclick = async () => { toReview(); try { await rpc('confirm_met', { p_match: match.id }); } catch (_) {} };
 
   // ---- 6. review: optional face + note; then match again or call it a night ----
-  let rating = 0;
+  let rating = null;   // 1-3 = how it went; 0 = no show; null = skipped
   document.querySelectorAll('#rv-rate button').forEach(b => b.onclick = () => {
     const on = !b.classList.contains('on');
     document.querySelectorAll('#rv-rate button').forEach(x => x.classList.toggle('on', on && x === b));
-    rating = on ? +b.dataset.r : 0;
+    rating = on ? +b.dataset.r : null;
   });
   async function saveReview() {
     const note = $('rv-txt').value.trim();
-    if (rating || note) { try { await rpc('review_match', { p_match: match.id, p_rating: rating || null, p_note: note || null }); } catch (_) {} }
+    if (rating === null && !note) return;
+    if (rating > 0) { try { await rpc('confirm_met', { p_match: match.id }); } catch (_) {} }   // they met
+    try { await rpc('review_match', { p_match: match.id, p_rating: rating > 0 ? rating : null, p_tags: rating === 0 ? ['no_show'] : [], p_note: note || null }); } catch (_) {}
   }
   // the match is over either way; 'passed' frees both people (there's no separate 'met' status)
   $('rv-again').onclick = async () => { await saveReview(); try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };

@@ -329,8 +329,34 @@ html,body{height:100%} body{display:block;overflow:hidden}
 #s-on .booth small{display:block;font-size:13px;font-weight:900;color:#e8463c;text-transform:uppercase;letter-spacing:.06em}
 #s-on .booth b{display:block;font-size:24px;font-weight:900;color:var(--ink);margin-top:2px} #s-on .booth span{color:var(--muted);font-size:15px}
 #s-on .grow{flex:1}
+
+#s-bc{position:fixed;inset:0;z-index:35;background:#fff;display:flex;flex-direction:column;text-align:center;padding:calc(env(safe-area-inset-top) + 34px) 16px calc(env(safe-area-inset-bottom) + 10px);opacity:0;pointer-events:none;transition:opacity .35s}
+#s-bc.on{opacity:1;pointer-events:auto}
+#s-bc .logo{width:58px;margin:0 auto 8px;display:block}
+#s-bc h1{font-size:34px;font-weight:900;margin:0;line-height:1.1}
+#s-bc .sub{color:var(--muted);font-size:16px;font-weight:700;margin-top:6px}
+.bc{--o:min(360px,calc(100vw - 20px));position:relative;width:var(--o);height:var(--o);margin:14px auto 0}
+.bc .ring{position:absolute;inset:0;border-radius:50%;border:2.5px dotted #f3a6c5;animation:spin 24s linear infinite}
+.bc .ring.r2{inset:9%;border-color:#e4e8ed;animation-duration:32s;animation-direction:reverse}
+.bc .pulse{position:absolute;inset:14%;border-radius:50%;border:3px solid rgba(255,107,160,.55);animation:beat 1.6s ease-out infinite}
+.bc .orb{position:absolute;inset:0;animation:spin 9s linear infinite}
+.bc .orb i{position:absolute;left:50%;top:-9px;width:18px;height:18px;margin-left:-9px;border-radius:50%;
+  background:radial-gradient(circle at 32% 28%,#fff 0 18%,rgba(255,255,255,0) 20%),radial-gradient(circle,rgba(255,236,244,.6) 55%,rgba(255,143,189,.7));border:1.5px solid #f06fa4}
+.bc .orb.o2{animation-duration:13s;animation-direction:reverse} .bc .orb.o2 i{top:auto;bottom:-7px;width:13px;height:13px;margin-left:-6px}
+.bc .duo2{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.bc .duo2 img{width:47%;height:auto;aspect-ratio:1/1;flex:none;filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25));animation:bob 2.4s ease-in-out infinite}
+.bc .duo2 img:first-child{rotate:-7deg;margin-right:-6%} .bc .duo2 img:last-child{rotate:7deg;margin-left:-6%;animation-delay:-1.2s}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes beat{0%{transform:scale(.9);opacity:.9}100%{transform:scale(1.18);opacity:0}}
+@keyframes bob{50%{translate:0 -6px}}
+@media (prefers-reduced-motion: reduce){.bc .ring,.bc .orb,.bc .pulse,.bc .duo2 img{animation:none}}
 .found .who b{display:block;font-size:24px;font-weight:900;color:var(--ink)}
-</style></head><body><section id="s-wait" class="screen on"><div class="wt-top"><h1>Finding your match…</h1><div class="status" id="cnt-top" style="margin-top:6px"></div></div><button type="button" class="back" aria-label="Back"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="status cnt-bot" id="cnt-bot"></div><div class="away" id="away"><b>Back to the welcome screen</b><span>In the app, they choose whether to rejoin.</span><button class="tbtn" id="away-ok" style="max-width:260px;margin-top:12px"><span class="lbl" style="justify-content:center"><span>Restart demo</span></span></button></div><section id="s-on"><img class="logo" src="../media/pop-logo-header.png" alt="pop"><h1>It's on!</h1>
+</style></head><body><section id="s-wait" class="screen on"><div class="wt-top"><h1>Finding your match…</h1><div class="status" id="cnt-top" style="margin-top:6px"></div></div><button type="button" class="back" aria-label="Back"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="status cnt-bot" id="cnt-bot"></div><section id="s-bc"><img class="logo" src="../media/pop-logo-header.png" alt="pop"><h1>You're both here!</h1><div class="sub">Hold up your phone. Sam's screen matches yours.</div>
+  <div class="bc"><div class="ring"></div><div class="ring r2"></div><div class="pulse"></div><div class="orb"><i></i></div><div class="orb o2"><i></i></div>
+    <div class="duo2"><img id="bc-me"><img id="bc-them"></div></div>
+  <div class="grow" style="flex:1"></div>
+  <button class="tbtn" id="bc-found"><span class="lbl" style="justify-content:center"><span>Found them!</span></span></button>
+</section><div class="away" id="away"><b>Back to the welcome screen</b><span>In the app, they choose whether to rejoin.</span><button class="tbtn" id="away-ok" style="max-width:260px;margin-top:12px"><span class="lbl" style="justify-content:center"><span>Restart demo</span></span></button></div><section id="s-on"><img class="logo" src="../media/pop-logo-header.png" alt="pop"><h1>It's on!</h1>
   <div class="pair2"><img id="on-me"><img id="on-them"></div><div class="names"><span>You</span><span>Sam</span></div>
   <div class="booth"><small>Meet at</small><b id="on-where"></b><span id="on-kind"></span></div>
   <div class="grow"></div>
@@ -395,10 +421,14 @@ document.getElementById('go-btn').onclick=()=>{ document.getElementById('go-t').
     const sp=SPOTS[Math.floor(Math.random()*SPOTS.length)]; document.getElementById('on-where').textContent=sp[0]; document.getElementById('on-kind').textContent=sp[1]; document.getElementById('on-me').src=me; document.getElementById('on-them').src=them; document.getElementById('s-on').classList.add('on');
     hereTm=fillTimer(document.getElementById('here-fill'), document.getElementById('here-c'), 420, toWelcome); }, 1600); };
 function backToBubbles(){ clearInterval(hereTm); document.getElementById('s-on').classList.remove('on'); document.getElementById('here-t').textContent="I'm here"; document.getElementById('here-fill').style.transform='scaleX(0)'; reset(); }
-function toWelcome(){ clearInterval(tm); backToBubbles(); document.getElementById('away').classList.add('on'); }
+function toWelcome(){ clearInterval(tm); backToBubbles(); document.querySelector('#away b').textContent='Back to the welcome screen'; document.querySelector('#away span').textContent='In the app, they choose whether to rejoin.'; document.getElementById('away').classList.add('on'); }
 document.getElementById('away-ok').onclick=()=>document.getElementById('away').classList.remove('on');
 document.getElementById('here-no').onclick=toWelcome;
-document.getElementById('here-btn').onclick=()=>{ document.getElementById('here-t').textContent='Waiting for Sam…'; };
+document.getElementById('here-btn').onclick=()=>{ document.getElementById('here-t').textContent='Waiting for Sam…';
+  setTimeout(()=>{ clearInterval(hereTm); document.getElementById('bc-me').src=document.getElementById('on-me').src; document.getElementById('bc-them').src=document.getElementById('on-them').src;
+    document.getElementById('s-bc').classList.add('on'); try{navigator.vibrate&&navigator.vibrate([80,40,80])}catch(_){} },1600); };
+document.getElementById('bc-found').onclick=()=>{ document.getElementById('s-bc').classList.remove('on'); toWelcome();
+  document.querySelector('#away b').textContent='Next: say hi + Done + review'; document.querySelector('#away span').textContent='(not built in this preview yet)'; };
 
 const gum=document.querySelector('.gum');
 function chew(){

@@ -680,7 +680,7 @@
     if (phone && (digits.length < 7 || digits.length > 15)) return err('wl-err', 'Please check your phone number.');
     $('wl-go').disabled = true;
     try { await session(); await rpc('join_waitlist', { p_email: email || null, p_phone: phone || null, p_role: wlRole, p_note: $('wl-note').value || null, p_source: wlSource });
-          $('wl-form').hidden = true; $('wl-done').hidden = false; }
+          $('wl-form').hidden = true; $('wl-done').hidden = false; try { localStorage.setItem('pop-waitlisted', '1'); } catch (_) {} }
     catch (e) { err('wl-err', e); }
     finally { $('wl-go').disabled = false; }
   };
@@ -875,7 +875,8 @@
   // the match is over either way; 'passed' frees both people (there's no separate 'met' status)
   $('rv-again').onclick = async () => { await saveReview(); try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
   let askedAfter = false;
-  $('rv-done').onclick = async () => { await saveReview(); await toWelcome('passed'); if (!askedAfter) { askedAfter = true; setTimeout(() => openWaitlist('attendee', 'after-match'), 500); } };
+  $('rv-done').onclick = async () => { await saveReview(); await toWelcome('passed'); let joined = false; try { joined = localStorage.getItem('pop-waitlisted') === '1'; } catch (_) {}
+    if (!askedAfter && !joined) { askedAfter = true; setTimeout(() => openWaitlist('attendee', 'after-match'), 500); } };   // already on the list: don't ask again
 
   // load screen: hide once the letters have landed (~2.2s) or the clip ends, and the app is ready; tap skips
   const splashDone = new Promise(res => {

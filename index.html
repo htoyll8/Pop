@@ -228,7 +228,7 @@
   .sheet .x:active { transform:none; background:#e4e9ee; }
   .sheet.dragging { transition:none; }
   .sheet.leaving { transition:transform .22s ease-in; }
-  .sheet h2 { font-size:clamp(17px, 5vw, 21px); font-weight:900; margin:0 0 14px; padding-right:40px; text-align:left; white-space:nowrap; }
+  .sheet h2 { font-size:26px; font-weight:900; margin:0 0 14px; padding-right:40px; text-align:left; white-space:nowrap; }
   .roles { display:flex; gap:8px; margin:0 0 12px; }
   .roles button { flex:1; margin:0; padding:11px 4px; font-size:15px; background:#fff; color:var(--ink); border:2px solid #e6ebef; box-shadow:none; }
   .roles button.on { border-color:var(--blue); color:var(--blue2); background:#eef6fc; }
@@ -390,7 +390,7 @@
 <div class="sheet" id="wl" hidden role="dialog" aria-modal="true" aria-labelledby="wl-title">
   <div class="grab"></div><button type="button" class="x" id="wl-x" aria-label="Close">×</button>
   <div id="wl-form">
-    <h2 id="wl-title">Bring Pop to your event</h2>
+    <h2 id="wl-title">Join the waitlist</h2>
     <div class="roles" id="wl-roles">
       <button type="button" data-role="attendee" class="on">Attendee</button><button type="button" data-role="organizer">Organizer</button><button type="button" data-role="vendor">Vendor</button>
     </div>
@@ -399,7 +399,7 @@
     <p class="wl-fine">Fill in either or both.</p>
     <p class="wl-fine" id="wl-sms" hidden>By adding your number, you agree to get texts from Pop about upcoming events. Msg &amp; data rates may apply. Reply STOP to opt out.</p>
     <textarea id="wl-note" rows="3" placeholder="Tell us about your event (optional)"></textarea>
-    <button id="wl-go">Join the waitlist</button>
+    <button id="wl-go">Count me in</button>
     <div class="err" id="wl-err"></div>
   </div>
   <div id="wl-done" hidden><h2>Thanks!</h2><p class="sub">We'll be in touch.</p><button id="wl-close">Done</button></div>
@@ -623,7 +623,6 @@
     wlRole = role; wlSource = source; err('wl-err');
     document.querySelectorAll('#wl-roles button').forEach(b => b.classList.toggle('on', b.dataset.role === role));
     $('wl-note').placeholder = role === 'organizer' ? 'Tell us about your event (optional)' : 'Anything you want us to know (optional)';
-    $('wl-title').textContent = role === 'organizer' ? 'Bring Pop to your event' : role === 'vendor' ? 'Bring Pop to your booth' : 'Want Pop at your next event?';
     $('wl-form').hidden = false; $('wl-done').hidden = true; $('wl-bg').hidden = false; $('wl').hidden = false;
   }
   function closeWaitlist() {

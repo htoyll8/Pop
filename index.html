@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pop</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Permanent+Marker&display=swap" rel="stylesheet">
 <style>
   :root { --ink:#2f3b45; --muted:#6b7a86; --green:#6cc070; --green2:#57a35b; --pink:#f28bb3; --purple:#6a7be8; --purple2:#5a6bd8; --blue:#318bcf; --blue2:#2873ab; --lav:#e6e9ff; --card:#f6f8fa; }
   * { box-sizing:border-box; }
@@ -44,10 +44,14 @@
   /* waiting: white, one sticker, faces orbiting on a faint ring */
   #s-wait { text-align:center; padding-top:calc(env(safe-area-inset-top) + 56px); }
   #s-wait h1 { font-size:31px; font-weight:800; margin:0; }
-  /* your name as a little tag stuck on the bottom of your sticker */
-  .name-tag { position:absolute; left:50%; top:50%; transform:translate(-50%, calc(var(--o) * .12)) rotate(-3deg); z-index:2; white-space:nowrap;
-              background:#fff; border:1.5px solid #e3e8ee; border-radius:999px; padding:4px 12px; font-size:14px; font-weight:800; color:var(--ink);
-              box-shadow:0 4px 10px rgba(47,59,69,.12); }
+  /* your name on a "HELLO my name is" sticker, stuck on the bottom of your face */
+  .name-tag { position:absolute; left:50%; top:50%; transform:translate(-50%, calc(var(--o) * .06)) rotate(-4deg); z-index:2;
+              min-width:128px; background:#fff; border:2.5px solid #e8463c; border-radius:10px; overflow:hidden; text-align:center;
+              box-shadow:0 6px 14px rgba(47,59,69,.18); }
+  .nt-band { background:#e8463c; color:#fff; padding:3px 12px 4px; line-height:1; }
+  .nt-band b { display:block; font-size:17px; font-weight:900; letter-spacing:.08em; }
+  .nt-band small { display:block; font-size:9.5px; font-weight:800; letter-spacing:.04em; margin-top:1px; }
+  .nt-name { font-family:"Permanent Marker", "Nunito", sans-serif; font-size:19px; color:#1f2a33; padding:5px 12px 6px; white-space:nowrap; }
   #wt-pool { font-size:18px; font-weight:700; }
   #wt-back { font-size:18px; }
   /* --o is the orbit's size; everything inside scales with it, capped so it fits small phones */
@@ -61,7 +65,7 @@
                           filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 5px 6px rgba(47,59,69,.22)); }
   @keyframes orbit { to { transform:rotate(360deg); } }
   @keyframes counter { from { transform:rotate(calc(-1 * var(--a))); } to { transform:rotate(calc(-1 * var(--a) - 360deg)); } }
-  .orbit-me { position:absolute; left:50%; top:50%; width:calc(var(--o) * .47); height:calc(var(--o) * .47); margin:calc(var(--o) * -.29) 0 0 calc(var(--o) * -.235);
+  .orbit-me { position:absolute; left:50%; top:50%; width:calc(var(--o) * .47); height:calc(var(--o) * .47); margin:calc(var(--o) * -.33) 0 0 calc(var(--o) * -.235);
               filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
   .wt-foot { padding-bottom:12px; }
   @media (prefers-reduced-motion: reduce) { .orbit .spin, .orbit .spin span img { animation:none; } }
@@ -250,12 +254,12 @@
 
   <!-- 2. Waiting: calm and white; your sticker in the middle, a few faces orbiting on a faint ring -->
   <section id="s-wait" class="screen">
-    <div class="wt-top"><h1>Finding someone…</h1></div>
+    <div class="wt-top"><h1>Finding your match…</h1></div>
     <div class="orbit" aria-hidden="true">
       <div class="ring"></div>
       <div class="spin" id="wt-spin"></div>
       <img class="orbit-me" id="wt-me" alt="">
-      <span class="name-tag" id="wt-alias"></span>
+      <div class="name-tag"><div class="nt-band"><b>HELLO</b><small>my name is</small></div><div class="nt-name" id="wt-alias"></div></div>
     </div>
     <div class="wt-foot">
       <div class="status" id="wt-pool"></div>

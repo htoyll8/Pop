@@ -350,12 +350,32 @@ html,body{height:100%} body{display:block;overflow:hidden}
 @keyframes beat{0%{transform:scale(.9);opacity:.9}100%{transform:scale(1.18);opacity:0}}
 @keyframes bob{50%{translate:0 -6px}}
 @media (prefers-reduced-motion: reduce){.bc .ring,.bc .orb,.bc .pulse,.bc .duo2 img{animation:none}}
+
+/* the subtitle wraps to exactly the heading's width */
+#s-bc .hd{display:table;margin:0 auto} #s-bc .hd .sub{display:table-caption;caption-side:bottom}
+#s-bc{padding-top:calc(env(safe-area-inset-top) + 64px)}
+.bc{transition:transform .5s cubic-bezier(.3,1.2,.5,1)}
+#s-bc.rev .bc{transform:scale(.72);margin-top:-30px;margin-bottom:-60px}
+#s-bc.rev .pulse,#s-bc.rev .orb{display:none}
+.revbox{display:none;width:100%;max-width:420px;margin:0 auto;animation:popin .4s cubic-bezier(.2,1.3,.4,1)}
+#s-bc.rev .revbox{display:block} #s-bc.rev #bc-found{display:none}
+.revbox .rate3{display:flex;gap:10px;margin:0 0 10px}
+.revbox .rate3 button{flex:1;margin:0;padding:8px 4px 6px;background:#f4f6f8;color:var(--ink);box-shadow:none;border:2px solid transparent;border-radius:18px;font-size:14px;font-weight:800}
+.revbox .rate3 button b{display:block;font-size:38px;line-height:1.15} .revbox .rate3 button.on{background:#fff;border-color:var(--blue)}
+.revbox textarea{width:100%;box-sizing:border-box;border:2px solid #e6ebef;border-radius:16px;padding:12px 14px;font:inherit;font-size:16px;resize:none;margin:0 0 10px;color:var(--ink)}
+.revbox textarea:focus{outline:none;border-color:var(--blue)}
+.revbox .tbtn:disabled{opacity:.5}
+.revbox .under{display:block;margin:4px auto 0;background:none;border:0;box-shadow:none;color:var(--muted);font-weight:800;font-size:16px;padding:8px;width:auto}
 .found .who b{display:block;font-size:24px;font-weight:900;color:var(--ink)}
-</style></head><body><section id="s-wait" class="screen on"><div class="wt-top"><h1>Finding your match…</h1><div class="status" id="cnt-top" style="margin-top:6px"></div></div><button type="button" class="back" aria-label="Back"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="status cnt-bot" id="cnt-bot"></div><section id="s-bc"><img class="logo" src="../media/pop-logo-header.png" alt="pop"><h1>You're both here!</h1><div class="sub">Hold up your phone. Sam's screen matches yours.</div>
+</style></head><body><section id="s-wait" class="screen on"><div class="wt-top"><h1>Finding your match…</h1><div class="status" id="cnt-top" style="margin-top:6px"></div></div><button type="button" class="back" aria-label="Back"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="status cnt-bot" id="cnt-bot"></div><section id="s-bc"><div class="hd"><h1 id="bc-h">You're both here!</h1><div class="sub" id="bc-sub">Hold up your phone. Sam's screen matches yours.</div></div>
   <div class="bc"><div class="ring"></div><div class="ring r2"></div><div class="pulse"></div><div class="orb"><i></i></div><div class="orb o2"><i></i></div>
     <div class="duo2"><img id="bc-me"><img id="bc-them"></div></div>
   <div class="grow" style="flex:1"></div>
   <button class="tbtn" id="bc-found"><span class="lbl" style="justify-content:center"><span>Found them!</span></span></button>
+  <div class="revbox"><div class="rate3"><button><b>😕</b>Meh</button><button><b>🙂</b>Good</button><button><b>🤩</b>Amazing</button></div>
+    <textarea id="rv-txt" rows="2" placeholder="Anything else? (optional)"></textarea>
+    <button class="tbtn" id="rv-done" disabled><span class="lbl" style="justify-content:center"><span>Done</span></span></button>
+    <button class="under" id="rv-skip">Skip</button></div>
 </section><div class="away" id="away"><b>Back to the welcome screen</b><span>In the app, they choose whether to rejoin.</span><button class="tbtn" id="away-ok" style="max-width:260px;margin-top:12px"><span class="lbl" style="justify-content:center"><span>Restart demo</span></span></button></div><section id="s-on"><img class="logo" src="../media/pop-logo-header.png" alt="pop"><h1>It's on!</h1>
   <div class="pair2"><img id="on-me"><img id="on-them"></div><div class="names"><span>You</span><span>Sam</span></div>
   <div class="booth"><small>Meet at</small><b id="on-where"></b><span id="on-kind"></span></div>
@@ -427,8 +447,14 @@ document.getElementById('here-no').onclick=toWelcome;
 document.getElementById('here-btn').onclick=()=>{ document.getElementById('here-t').textContent='Waiting for Sam…';
   setTimeout(()=>{ clearInterval(hereTm); document.getElementById('bc-me').src=document.getElementById('on-me').src; document.getElementById('bc-them').src=document.getElementById('on-them').src;
     document.getElementById('s-bc').classList.add('on'); try{navigator.vibrate&&navigator.vibrate([80,40,80])}catch(_){} },1600); };
-document.getElementById('bc-found').onclick=()=>{ document.getElementById('s-bc').classList.remove('on'); toWelcome();
-  document.querySelector('#away b').textContent='Next: say hi + Done + review'; document.querySelector('#away span').textContent='(not built in this preview yet)'; };
+// Found them! turns this same screen into the review
+document.getElementById('bc-found').onclick=()=>{ const b=document.getElementById('s-bc'); b.classList.add('rev');
+  document.getElementById('bc-h').textContent='How was meeting Sam?'; document.getElementById('bc-sub').textContent='One tap. It helps us make better matches.'; };
+document.querySelectorAll('.rate3 button').forEach(x=>x.onclick=()=>{ document.querySelectorAll('.rate3 button').forEach(y=>y.classList.toggle('on',y===x)); document.getElementById('rv-done').disabled=false; });
+function endReview(){ const b=document.getElementById('s-bc'); b.classList.remove('on','rev'); document.getElementById('bc-h').textContent="You're both here!";
+  document.getElementById('bc-sub').textContent="Hold up your phone. Sam's screen matches yours."; document.querySelectorAll('.rate3 button').forEach(y=>y.classList.remove('on'));
+  document.getElementById('rv-done').disabled=true; document.getElementById('rv-txt').value=''; backToBubbles(); }
+document.getElementById('rv-done').onclick=endReview; document.getElementById('rv-skip').onclick=endReview;
 
 const gum=document.querySelector('.gum');
 function chew(){

@@ -303,8 +303,9 @@ html,body{height:100%} body{display:block;overflow:hidden}
 .found{transition:top .6s cubic-bezier(.3,1.2,.5,1)}
 .found .who .where{display:block;margin-top:2px;font-size:16px;font-weight:700;color:var(--muted)}
 .found .who .where em{font-style:normal;font-weight:900;color:var(--ink)}
-.go{position:absolute;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom) + 10px);z-index:9;transform:translateY(140%);transition:transform .5s cubic-bezier(.3,1.3,.5,1)}
-#s-wait.matched .go{transform:none}
+.go{position:absolute;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom) + 10px);z-index:9;transform:translateY(calc(100% + 160px));opacity:0;visibility:hidden;
+  transition:transform .5s cubic-bezier(.3,1.3,.5,1),opacity .25s,visibility 0s .5s}
+#s-wait.matched .go{transform:none;opacity:1;visibility:visible;transition:transform .5s cubic-bezier(.3,1.3,.5,1),opacity .25s,visibility 0s}
 .tbtn{position:relative;overflow:hidden;width:100%;max-width:420px;margin:0 auto;display:block;border:0;border-radius:18px;padding:0;height:62px;background:#2f3b45;box-shadow:0 8px 20px rgba(47,59,69,.25)}
 .tbtn .fill{position:absolute;inset:0;background:rgba(255,255,255,.22);transform:scaleX(0);transform-origin:left center}
 .tbtn .lbl{position:relative;display:flex;justify-content:space-between;align-items:center;height:100%;padding:0 22px;color:#fff;font-size:20px;font-weight:900}
@@ -359,7 +360,7 @@ function match(){
     b.style.left=(sx+(tx-sx)*e)+'px'; b.style.top=(sy+(ty-sy)*e)+'px'; b.style.transform=`scale(${1+e*1.6})`;
     if(k<1) return setTimeout(()=>step(performance.now()),16);
     burst(tx,ty,b._s*2.6); const src=b.querySelector('img').src; b.remove();
-    const f=document.createElement('div'); f.className='found'; f.innerHTML='<div class="who"><img src="'+src+'"><b>Found them!</b><span class="where">Say yes to meet Sam</span></div>';
+    const f=document.createElement('div'); f.className='found'; f.innerHTML='<div class="who"><img src="'+src+'"><b>Found them!</b></div>';
     // sit in the space between the heading and your head (shrinks on short phones)
     f.style.cssText='display:block;inset:auto;left:0;right:0;top:'+(sk.top-document.getElementById('s-wait').getBoundingClientRect().top+ty)+'px;height:0';
     f.firstChild.style.cssText='position:absolute;left:0;right:0;top:0;translate:0 -50%;scale:'+fit;

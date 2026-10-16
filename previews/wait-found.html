@@ -374,8 +374,8 @@ html,body{height:100%} body{display:block;overflow:hidden}
   <button class="tbtn" id="bc-found"><span class="lbl" style="justify-content:center"><span>Found them!</span></span></button>
   <div class="revbox"><div class="rate3"><button><b>😕</b>Meh</button><button><b>🙂</b>Good</button><button><b>🤩</b>Amazing</button></div>
     <textarea id="rv-txt" rows="2" placeholder="Anything else? (optional)"></textarea>
-    <button class="tbtn" id="rv-done" disabled><span class="lbl" style="justify-content:center"><span>Done</span></span></button>
-    <button class="under" id="rv-skip">Skip</button></div>
+    <button class="tbtn" id="rv-done"><span class="lbl" style="justify-content:center"><span>Match again</span></span></button>
+    <button class="under" id="rv-skip">I'm done for now</button></div>
 </section><div class="away" id="away"><b>Back to the welcome screen</b><span>In the app, they choose whether to rejoin.</span><button class="tbtn" id="away-ok" style="max-width:260px;margin-top:12px"><span class="lbl" style="justify-content:center"><span>Restart demo</span></span></button></div><section id="s-on"><img class="logo" src="../media/pop-logo-header.png" alt="pop"><h1>It's on!</h1>
   <div class="pair2"><img id="on-me"><img id="on-them"></div><div class="names"><span>You</span><span>Sam</span></div>
   <div class="booth"><small>Meet at</small><b id="on-where"></b><span id="on-kind"></span></div>
@@ -450,11 +450,11 @@ document.getElementById('here-btn').onclick=()=>{ document.getElementById('here-
 // Found them! turns this same screen into the review
 document.getElementById('bc-found').onclick=()=>{ const b=document.getElementById('s-bc'); b.classList.add('rev');
   document.getElementById('bc-h').textContent='How\'d it go?'; document.getElementById('bc-sub').textContent='One tap. It helps us make better matches.'; };
-document.querySelectorAll('.rate3 button').forEach(x=>x.onclick=()=>{ document.querySelectorAll('.rate3 button').forEach(y=>y.classList.toggle('on',y===x)); document.getElementById('rv-done').disabled=false; });
+document.querySelectorAll('.rate3 button').forEach(x=>x.onclick=()=>{ document.querySelectorAll('.rate3 button').forEach(y=>y.classList.toggle('on',y===x)); });
 function endReview(){ const b=document.getElementById('s-bc'); b.classList.remove('on','rev'); document.getElementById('bc-h').textContent="You're both here!";
   document.getElementById('bc-sub').textContent="Hold up your phone. Sam's screen matches yours."; document.querySelectorAll('.rate3 button').forEach(y=>y.classList.remove('on'));
-  document.getElementById('rv-done').disabled=true; document.getElementById('rv-txt').value=''; backToBubbles(); }
-document.getElementById('rv-done').onclick=endReview; document.getElementById('rv-skip').onclick=endReview;
+  document.getElementById('rv-txt').value=''; backToBubbles(); }
+document.getElementById('rv-done').onclick=endReview; document.getElementById('rv-skip').onclick=()=>{ endReview(); toWelcome(); };
 
 const gum=document.querySelector('.gum');
 function chew(){

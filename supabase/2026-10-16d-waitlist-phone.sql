@@ -1,6 +1,8 @@
 -- Run once in the SQL editor (after 2026-10-15b-waitlist.sql).
--- The waitlist takes a phone number, an email, or both.
+-- The waitlist takes a phone number, an email, or both. A phone number comes with consent to texts
+-- (the sheet shows the wording); sms_opt_in_at records when they agreed.
 alter table waitlist add column if not exists phone text;
+alter table waitlist add column if not exists sms_opt_in_at timestamptz;
 alter table waitlist alter column email drop not null;
 alter table waitlist drop constraint if exists waitlist_email_check;
 alter table waitlist drop constraint if exists waitlist_email_ok;
@@ -22,10 +24,12 @@ begin
   if ph is not null and ph !~ '^\+?[0-9]{7,15}$' then raise exception 'please enter a valid phone number'; end if;
   -- one sign-up per contact + role; a repeat just fills in what's new
   if exists (select 1 from waitlist where role = p_role and ((e is not null and lower(email) = e) or (ph is not null and phone = ph))) then
-    update waitlist set email = coalesce(email, e), phone = coalesce(phone, ph), note = coalesce(nullif(trim(p_note), ''), note)
+    update waitlist set email = coalesce(email, e), phone = coalesce(phone, ph), note = coalesce(nullif(trim(p_note), ''), note),
+           sms_opt_in_at = case when ph is not null then coalesce(sms_opt_in_at, now()) else sms_opt_in_at end
      where role = p_role and ((e is not null and lower(email) = e) or (ph is not null and phone = ph));
   else
-    insert into waitlist (email, phone, role, note, source, person_id) values (e, ph, p_role, nullif(trim(p_note), ''), p_source, auth.uid());
+    insert into waitlist (email, phone, role, note, source, person_id, sms_opt_in_at)
+    values (e, ph, p_role, nullif(trim(p_note), ''), p_source, auth.uid(), case when ph is not null then now() end);
   end if;
 end $fn$;
 grant execute on function join_waitlist(text, text, text, text, text) to authenticated;

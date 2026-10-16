@@ -395,7 +395,8 @@
     </div>
     <input id="wl-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Phone number">
     <input id="wl-email" type="email" inputmode="email" autocomplete="email" placeholder="Email">
-    <p class="wl-fine">Fill in either or both. We'll only reach out about Pop.</p>
+    <p class="wl-fine">Fill in either or both.</p>
+    <p class="wl-fine" id="wl-sms" hidden>By adding your number, you agree to get texts from Pop about upcoming events. Msg &amp; data rates may apply. Reply STOP to opt out.</p>
     <textarea id="wl-note" rows="3" placeholder="Tell us about your event (optional)"></textarea>
     <button id="wl-go">Join the waitlist</button>
     <div class="err" id="wl-err"></div>
@@ -672,6 +673,7 @@
   };
   $('wl-bg').onclick = closeWaitlist; $('wl-close').onclick = closeWaitlist; $('wl-x').onclick = closeWaitlist;
   document.querySelectorAll('#wl-roles button').forEach(b => b.onclick = () => openWaitlist(b.dataset.role, wlSource));
+  $('wl-phone').oninput = () => { $('wl-sms').hidden = !$('wl-phone').value.trim(); };   // texting consent shows as soon as they type a number
   $('wl-go').onclick = async () => {
     const email = $('wl-email').value.trim(), phone = $('wl-phone').value.trim(), digits = phone.replace(/[^0-9]/g, ''); err('wl-err');
     if (!email && !phone) return err('wl-err', 'Add a phone number or an email.');

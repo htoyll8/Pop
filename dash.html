@@ -72,7 +72,7 @@
   <div class="cols">
     <div>
       <h2>To text <span class="pill" id="tx-n">0</span></h2>
-      <p class="hint">Text them when someone new is searching. Each person drops off the list once you tap Text.</p>
+      <p class="hint">When someone shows "Matched", tap Text right away: they have 8 minutes to say Let's go.</p>
       <div id="txlist"></div>
       <h2>Latest matches</h2>
       <table><thead><tr><th>When</th><th>Who</th><th>Where</th><th>Status</th></tr></thead><tbody id="recent"></tbody></table>
@@ -125,7 +125,8 @@
     $('gate').hidden = true; $('dash').hidden = false; last = Date.now(); $('live').classList.remove('stale'); render(data);
     const tx = await sb.rpc('dash_text_list', { p_key: key }); if (!tx.error) renderTx(tx.data);
   }
-  const TXT = "Someone's looking for a match on Pop right now 🫧 Tap to jump in: https://htoyll8.github.io/Pop/?find";
+  const TXT = "You've got a match on Pop! 🫧 Tap to see who (you have 8 minutes): https://htoyll8.github.io/Pop/?find";
+  const baseTitle = document.title;
   // rows you've tapped stay hidden even if the page reloads before the server hears about it
   const sent = new Set(JSON.parse((() => { try { return localStorage.getItem('pop-dash-sent'); } catch (_) {} })() || '[]'));
   function markSent(id) {
@@ -138,9 +139,13 @@
   function renderTx(all) {
     const list = all.filter(t => !sent.has(t.id));
     $('tx-n').textContent = list.length;
-    if (!list.length) { $('txlist').innerHTML = '<p class="empty">Nobody waiting for a text.</p>'; return; }
-    $('txlist').innerHTML = list.map(t => `<div class="txr"><span><b>${esc(t.name || 'Someone')}</b> ${esc(t.phone)}<br><small>asked ${ago(t.at)} ago</small></span>`
-      + `<a href="sms:${esc(t.phone)}?&body=${encodeURIComponent(TXT)}" data-id="${t.id}">Text</a></div>`).join('');
+    const ready = list.filter(t => t.matched).length;
+    document.title = ready ? `(${ready}) Text now · ${baseTitle}` : baseTitle;
+    if (!list.length) { $('txlist').innerHTML = '<p class="empty">Nobody in the text queue.</p>'; return; }
+    $('txlist').innerHTML = list.map(t => t.matched
+      ? `<div class="txr"><span><b>${esc(t.name || 'Someone')}</b> ${esc(t.phone)} <span class="pill on">Matched with ${esc(t.with || '?')}</span><br><small>matched ${ago(t.matched_at)} ago</small></span>`
+        + `<a href="sms:${esc(t.phone)}?&body=${encodeURIComponent(TXT)}" data-id="${t.id}">Text</a></div>`
+      : `<div class="txr"><span><b>${esc(t.name || 'Someone')}</b> ${esc(t.phone)}<br><small>in the queue ${ago(t.at)}</small></span></div>`).join('');
     $('txlist').querySelectorAll('a').forEach(a => a.onclick = () => { markSent(+a.dataset.id); a.closest('.txr').remove(); $('tx-n').textContent = $('txlist').children.length; });
   }
   function gate(msg) { clearInterval(timer); timer = null; $('dash').hidden = true; $('gate').hidden = false; $('err').textContent = msg || ''; }

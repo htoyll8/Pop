@@ -141,6 +141,7 @@
   #s-wait.matched .wt-top, #s-wait.matched #wt-pool, #s-wait.matched .back { opacity:0; pointer-events:none; }
   .me { transition:transform .6s cubic-bezier(.3,1.2,.5,1); }
   .found { transition:top .6s cubic-bezier(.3,1.2,.5,1); }
+  .go-note { margin:2px 0 0; text-align:center; color:var(--muted); font-size:14px; font-weight:700; }
   .go { position:absolute; left:16px; right:16px; bottom:calc(env(safe-area-inset-bottom) + 10px); z-index:9; transform:translateY(calc(100% + 160px)); opacity:0; visibility:hidden;
         transition:transform .5s cubic-bezier(.3,1.3,.5,1), opacity .25s, visibility 0s .5s; }
   #s-wait.matched .go { transform:none; opacity:1; visibility:visible; transition:transform .5s cubic-bezier(.3,1.3,.5,1), opacity .25s, visibility 0s; }
@@ -451,7 +452,7 @@
     </div>
     <div class="status" id="wt-pool"></div>
     <div class="wt-still" id="wt-still" hidden>Nobody's free yet.<button type="button" class="link" id="tx-open">Text me when someone joins</button></div>
-    <div class="go" id="go"><button class="tbtn" id="go-btn"><i class="fill" id="go-fill"></i><span class="lbl"><span id="go-t">Let's go</span><small id="go-c">2:00</small></span></button><button class="under" id="go-no">Not this time</button><div class="err" id="go-err"></div></div>
+    <div class="go" id="go"><button class="tbtn" id="go-btn"><i class="fill" id="go-fill"></i><span class="lbl"><span id="go-t">Let's go</span><small id="go-c">2:00</small></span></button><button class="under" id="go-no">Not this time</button><p class="go-note" id="go-note" hidden>They stepped away. We're texting them now.</p><div class="err" id="go-err"></div></div>
   </section>
 
   <!-- 3. It's on: both said yes; now the spot -->
@@ -496,13 +497,13 @@
   <div class="grab"></div><button type="button" class="x" id="tx-x" aria-label="Close">×</button>
   <div id="tx-form">
     <h2 id="tx-title">Get a text</h2>
-    <p class="sub">We'll text you once when someone's looking for a match. Then just open Pop.</p>
+    <p class="sub">We'll text you once when we find you a match. Tap the link to see who.</p>
     <input id="tx-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Phone number">
     <p class="wl-fine">One text from Pop. Msg &amp; data rates may apply.</p>
     <button id="tx-go">Text me</button>
     <div class="err" id="tx-err"></div>
   </div>
-  <div id="tx-done" hidden><h2>You're on the list!</h2><p class="sub">We'll text you when someone's looking. You can close Pop until then.</p><button id="tx-close">Done</button></div>
+  <div id="tx-done" hidden><h2>You're in the queue!</h2><p class="sub">We'll text you when you've got a match. You can close Pop until then.</p><button id="tx-close">Done</button></div>
 </div>
 <div class="sheet-bg" id="wl-bg" hidden></div>
 <div class="sheet" id="wl" hidden role="dialog" aria-modal="true" aria-labelledby="wl-title">
@@ -556,7 +557,7 @@
     }
     setTimeout(() => { if (box) box.innerHTML = ''; }, 5500);
   }
-  const YES_SECS = 120, WALK_SECS = 420, POLL_MS = 3000;   // 2 min to say yes, 7 min to get to the spot
+  const YES_SECS = 120, QUEUED_SECS = 480, WALK_SECS = 420, POLL_MS = 3000;   // 2 min to say yes, 7 min to get to the spot
   const ANIMAL = { Otter:'🦦', Heron:'🪶', Lynx:'🐱', Falcon:'🦅', Fox:'🦊', Badger:'🦡', Ibis:'🦩', Marten:'🐾', Puffin:'🐧', Stoat:'🐿️', Wren:'🐦', Yak:'🐂' };
   const emojiFor = alias => ANIMAL[(alias || '').split(' ').pop()] || '🫧';
   // hairstyles whose artwork stays inside the frame (8 of 45 run off the edge and look boxed as stickers)
@@ -1002,7 +1003,9 @@
     stage = 'found'; lastCard = c; err('go-err');
     $('s-wait').classList.add('matched'); layoutFound(f);
     $('go-t').textContent = 'Let\'s go'; $('go-btn').disabled = false;
-    fillTimer($('go-fill'), $('go-c'), YES_SECS, Date.parse(c.created_at) || Date.now(), () => toWelcome('timed_out'));
+    // matches from the text queue: the other person has to see the text first, so 8 minutes instead of 2
+    $('go-note').hidden = !(c.queued && c.my_slot === 2);
+    fillTimer($('go-fill'), $('go-c'), c.queued ? QUEUED_SECS : YES_SECS, Date.parse(c.created_at) || Date.now(), () => toWelcome('timed_out'));
     pollTimer = setInterval(async () => {
       try {
         const c2 = await rpc('match_card', { p_match: match.id });

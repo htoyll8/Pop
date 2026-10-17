@@ -146,6 +146,22 @@
   /* the big bottom button; a timer fills it left to right */
   button.tbtn { position:relative; overflow:hidden; width:100%; max-width:420px; margin:0 auto; display:block; padding:0; height:62px; border-radius:18px; }
   button.tbtn:disabled { opacity:.85; box-shadow:0 5px 0 var(--blue2); }
+  /* buttons and text never get squeezed when a screen is short; the pictures give way instead */
+  button.tbtn, button.under, .revbox, .rv-q, .rate3, #s-on .booth, #s-on .names, .flow h1, .flow .hd { flex-shrink:0; }
+  .flow.on { overflow-y:auto; }
+  /* short screens (e.g. Safari with the "From …" bar, or opened inside another app) */
+  @media (max-height:720px) {
+    #s-on h1 { font-size:40px; }
+    #s-on .logo { width:50px; margin-bottom:4px; }
+    .pair2 { margin-top:14px; }
+    .pair2 img { width:min(40vw, 150px); }
+    .flow .grow { min-height:12px; }
+    #s-on .booth { margin-top:14px; padding:12px 16px; }
+    #s-bc { padding-top:calc(env(safe-area-inset-top) + 26px); }
+    #s-bc h1 { font-size:30px; }
+    #s-bc.rev .bc { transform:scale(.56); margin-top:-62px; margin-bottom:-92px; }
+    .rv-q { margin-top:16px; }
+  }
   .tbtn .fill { position:absolute; top:0; right:0; bottom:0; left:0; background:rgba(255,255,255,.22); transform:scaleX(0); transform-origin:left center; }
   .tbtn .lbl { position:relative; display:flex; justify-content:space-between; align-items:center; height:100%; padding:0 22px; font-size:20px; font-weight:900; }
   .tbtn .lbl.mid { justify-content:center; }

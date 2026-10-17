@@ -91,11 +91,10 @@
   @media (prefers-reduced-motion: reduce) { .found .who, #wt-pool b.bump { animation:none; } }
 
   /* How Pop works + fine print (for anyone not signed up yet) */
-  #s-rules.on, #s-tour.on { position:fixed; top:0; right:0; bottom:0; left:0; background:#fff; z-index:6; display:flex; flex-direction:column; min-height:0;
+  #s-rules.on, #s-tour.on { position:fixed; top:0; right:0; bottom:0; left:0; background:#fff; z-index:6; display:flex; flex-direction:column; min-height:0; overflow-y:auto;
                 padding:calc(env(safe-area-inset-top) + 34px) 24px calc(env(safe-area-inset-bottom) + 14px); }
-  #s-rules h1.howh { display:flex; justify-content:center; align-items:center; gap:10px; padding-top:28px; white-space:nowrap; }
-  #s-rules .h-logo { height:1.65em; width:auto; margin-top:-.1em; }
-  #s-rules h1 { font-size:clamp(33px, 9.6vw, 38px); font-weight:900; text-align:center; margin:0 0 46px; line-height:1.1; }
+  #s-rules .w-logo { display:block; width:96px; height:auto; margin:10px auto 6px; flex-shrink:0; }
+  #s-rules h1 { font-size:clamp(26px, 8.4vw, 36px); font-weight:900; text-align:center; margin:0 0 30px; line-height:1.1; white-space:nowrap; flex-shrink:0; }
   .steps { list-style:none; margin:0 auto; padding:0; max-width:380px; width:100%; display:flex; flex-direction:column; gap:18px; }
   .steps li { display:flex; gap:14px; align-items:flex-start; font-size:19px; font-weight:900; line-height:1.3; color:var(--ink); }
   .steps li i { font-style:normal; font-size:30px; line-height:1; flex:none; width:38px; text-align:center; }
@@ -104,7 +103,8 @@
   #s-rules .grow { flex:1; min-height:16px; }
   .fine-box { max-width:400px; width:100%; margin:0 auto 12px; padding:12px 14px; border-radius:14px; background:#f4f6f8; color:var(--muted); font-size:13.5px; font-weight:600; line-height:1.4; }
   .fine-box b { display:block; color:var(--ink); font-size:13px; font-weight:900; text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px; }
-  #s-rules .fine { text-align:center; color:var(--muted); font-size:12.5px; font-weight:600; margin:8px 0 0; }
+  #s-rules .fine { text-align:center; color:var(--muted); font-size:12.5px; font-weight:600; line-height:1.4; max-width:360px; margin:0 auto 12px; flex-shrink:0; }
+  #s-rules .tour-link { margin-top:12px; flex-shrink:0; }
   /* the tour: three swipeable cards */
   button.link.tour-skip { position:absolute; top:calc(env(safe-area-inset-top) + 8px); right:10px; z-index:2; color:var(--muted); font-weight:800; margin:0; }
   .tour { flex:1; display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; margin:0 -24px; }
@@ -151,6 +151,7 @@
   .flow.on { overflow-y:auto; }
   /* short screens (e.g. Safari with the "From …" bar, or opened inside another app) */
   @media (max-height:720px) {
+    #s-rules .w-logo { width:64px; margin:-14px auto 4px; } #s-rules h1 { margin-bottom:16px; } .steps { gap:10px; } .steps li { font-size:18px; } .steps li small { font-size:15px; }
     #s-on h1 { font-size:40px; }
     #s-on .logo { width:50px; margin-bottom:4px; }
     .pair2 { margin-top:14px; }
@@ -383,19 +384,18 @@
   <!-- 1. Welcome: logo on top, avatar as the star, name pre-filled, one button -->
   <!-- 0.5 How Pop works + the fine print: for anyone not signed up yet -->
   <section id="s-rules" class="screen">
-    <h1 class="howh">How <img class="h-logo" src="media/pop-logo-header.png" alt="Pop"> works</h1>
+    <img class="w-logo" src="media/pop-logo-header.png" alt="Pop">
+    <h1>Welcome to the mix</h1>
     <ul class="steps">
-      <li><i>🫧</i><span>Pop searches for a match<small>Keep Pop open while it looks.</small></span></li>
-      <li><i>📍</i><span>You both say "Let's go"<small>Then meet at a booth or activation.</small></span></li>
-      <li><i>👋</i><span>Say hi<small>Then tell us how it went.</small></span></li>
+      <li><i>🫧</i><span>Pick an avatar<small>No photos, no profile. Just you.</small></span></li>
+      <li><i>🔍</i><span>Pop finds you a match<small>Someone here, right now, also looking to meet.</small></span></li>
+      <li><i>📍</i><span>Meet at a booth<small>Only tap Let's go if you'll go. They're on their way too.</small></span></li>
+      <li><i>💛</i><span>Be kind<small>Tell us if anything feels off.</small></span></li>
     </ul>
-    <button type="button" class="link tour-link" id="tour-open">Check out the tutorial</button>
     <div class="grow"></div>
-    <div class="fine-box">
-      <span>Meet only at the spot Pop picks. Be kind. Leave anytime. We only keep your nickname, avatar, and matches.</span>
-    </div>
-    <button class="tbtn" id="rules-ok"><span class="lbl mid"><span>Got it, let's go</span></span></button>
-    <p class="fine">By continuing, you agree to the fine print.</p>
+    <p class="fine">By entering, you agree to meet only at the spot Pop picks. Leave anytime. We only keep your nickname, avatar, and matches.</p>
+    <button class="tbtn" id="rules-ok"><span class="lbl mid"><span>Enter the mix</span></span></button>
+    <button type="button" class="link tour-link" id="tour-open">Check out the tutorial</button>
   </section>
 
   <!-- 0.6 The tour: swipe through the three steps -->

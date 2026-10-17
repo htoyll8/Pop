@@ -93,7 +93,7 @@
   /* How Pop works + fine print (for anyone not signed up yet) */
   #s-rules.on, #s-tour.on { position:fixed; top:0; right:0; bottom:0; left:0; background:#fff; z-index:6; display:flex; flex-direction:column; min-height:0; overflow-y:auto;
                 padding:calc(env(safe-area-inset-top) + 34px) 24px calc(env(safe-area-inset-bottom) + 14px); }
-  #s-rules .w-logo { display:block; width:96px; height:auto; margin:10px auto 6px; flex-shrink:0; }
+  #s-rules .w-logo { display:block; width:96px; height:auto; margin:34px auto 8px; flex-shrink:0; }
   #s-rules h1 { font-size:clamp(26px, 8.4vw, 36px); font-weight:900; text-align:center; margin:0 0 30px; line-height:1.1; white-space:nowrap; flex-shrink:0; }
   .steps { list-style:none; margin:0 auto; padding:0; max-width:380px; width:100%; display:flex; flex-direction:column; gap:18px; }
   .steps li { display:flex; gap:14px; align-items:flex-start; font-size:19px; font-weight:900; line-height:1.3; color:var(--ink); }
@@ -151,7 +151,7 @@
   .flow.on { overflow-y:auto; }
   /* short screens (e.g. Safari with the "From …" bar, or opened inside another app) */
   @media (max-height:720px) {
-    #s-rules .w-logo { width:64px; margin:-14px auto 4px; } #s-rules h1 { margin-bottom:16px; } .steps { gap:10px; } .steps li { font-size:18px; } .steps li small { font-size:15px; }
+    #s-rules .w-logo { width:64px; margin:0 auto 4px; } #s-rules h1 { margin-bottom:16px; } .steps { gap:10px; } .steps li { font-size:18px; } .steps li small { font-size:15px; }
     #s-on h1 { font-size:40px; }
     #s-on .logo { width:50px; margin-bottom:4px; }
     .pair2 { margin-top:14px; }
@@ -330,6 +330,7 @@
   .toast.show { transform:translateY(0); }
   .toast[hidden] { display:none; }
   .toast img { width:56px; height:56px; border-radius:50%; flex:none; }
+  .toast-btn { margin:0 0 0 auto; flex:none; width:auto; padding:10px 16px; border-radius:999px; background:var(--blue); color:#fff; font-weight:900; font-size:15px; box-shadow:none; }
   .toast-t { font-weight:900; font-size:18px; } .toast-s { color:var(--muted); font-size:15px; }
   .purple .arrived { background:#fff; color:var(--purple2); border-radius:20px; padding:16px; text-align:center; font-weight:900; font-size:20px; margin:0 0 14px; animation:popin .5s cubic-bezier(.2,.9,.3,1.3); }
   @keyframes popin { from { transform:scale(.6); opacity:0; } to { transform:scale(1); opacity:1; } }
@@ -370,7 +371,7 @@
 </head>
 <body>
 <div id="splash" class="splash"><img id="splash-v" alt="pop" src="media/pop-intro.gif"></div>
-<div id="toast" class="toast" hidden><img id="toast-av" alt=""><div><div class="toast-t" id="toast-t"></div><div class="toast-s" id="toast-s"></div></div></div>
+<div id="toast" class="toast" hidden><img id="toast-av" alt=""><div><div class="toast-t" id="toast-t"></div><div class="toast-s" id="toast-s"></div></div><button type="button" class="toast-btn" id="toast-reload" hidden>Reload</button></div>
 <main>
   <!-- 0. Front door: logo, tagline, Join the mix; organizers find the waitlist here -->
   <section id="s-intro" class="screen">
@@ -483,7 +484,7 @@
     <button id="bug-go">Send</button>
     <div class="err" id="bug-err"></div>
   </div>
-  <div id="bug-done" hidden><h2>Thank you!</h2><p class="sub">That helps a lot.</p><button id="bug-close">Done</button></div>
+  <div id="bug-done" hidden><h2>Thank you!</h2><p class="sub">That helps a lot. If Pop is still stuck, try reloading the page.</p><button id="bug-close">Done</button></div>
 </div>
 <div class="sheet-bg" id="wl-bg" hidden></div>
 <div class="sheet" id="wl" hidden role="dialog" aria-modal="true" aria-labelledby="wl-title">
@@ -813,7 +814,8 @@
   };
   // after an automatic report: a small note at the top; tapping it opens the bug sheet
   function bugToast() {
-    $('toast-av').hidden = true; $('toast-t').textContent = 'Something went wrong'; $('toast-s').textContent = 'Tap to tell us what happened.';
+    $('toast-av').hidden = true; $('toast-t').textContent = 'Something went wrong'; $('toast-s').textContent = 'Reload, or tap here to tell us.'; $('toast-reload').hidden = false;
+    $('toast-reload').onclick = e => { e.stopPropagation(); location.reload(); };
     $('toast').hidden = false; requestAnimationFrame(() => $('toast').classList.add('show'));
     $('toast').onclick = () => { $('toast').classList.remove('show'); openBug(true); };
     setTimeout(() => { $('toast').classList.remove('show'); setTimeout(() => $('toast').hidden = true, 400); }, 7000);

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Pop live</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#2f3b45; --muted:#6b7a86; --blue:#318bcf; --card:#f4f6f8; --red:#e8463c; --green:#57a35b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Nunito, system-ui, sans-serif; color:var(--ink); background:#fff; padding:20px 16px 40px; max-width:1100px; margin:0 auto; }
+  header { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  header img { height:40px; }
+  header h1 { font-size:26px; font-weight:900; margin:0; }
+  #live { margin-left:auto; font-size:14px; font-weight:800; color:var(--muted); display:flex; align-items:center; gap:6px; }
+  #live i { width:10px; height:10px; border-radius:50%; background:var(--green); display:inline-block; }
+  #live.stale i { background:var(--red); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; }
+  .stat { background:var(--card); border-radius:16px; padding:14px 16px; }
+  .stat b { display:block; font-size:34px; font-weight:900; line-height:1.1; }
+  .stat span { font-size:14px; font-weight:800; color:var(--muted); }
+  .stat.hi { background:#e6f1fa; } .stat.hi b { color:var(--blue); }
+  h2 { font-size:18px; font-weight:900; margin:26px 0 10px; }
+  .cols { display:grid; grid-template-columns:1fr; gap:0 24px; }
+  @media (min-width:860px) { .cols { grid-template-columns:2fr 1fr; } }
+  table { width:100%; border-collapse:collapse; font-size:15px; }
+  td, th { text-align:left; overflow-wrap:anywhere; padding:8px 6px; border-bottom:1px solid #e6ebef; vertical-align:top; }
+  th { white-space:nowrap; font-size:13px; color:var(--muted); font-weight:800; }
+  td.t { color:var(--muted); white-space:nowrap; font-weight:700; }
+  .pill { display:inline-block; padding:2px 9px; border-radius:999px; font-size:13px; font-weight:900; background:var(--card); color:var(--muted); white-space:nowrap; }
+  .pill.on { background:#e6f1fa; color:var(--blue); } .pill.met { background:#e5f4e6; color:var(--green); } .pill.no { background:#fde8e6; color:var(--red); }
+  .list p { margin:0 0 10px; background:var(--card); border-radius:12px; padding:10px 12px; font-size:15px; }
+  .list small { display:block; color:var(--muted); font-weight:800; font-size:12.5px; }
+  .bar { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:800; margin-bottom:6px; }
+  .bar u { text-decoration:none; height:10px; border-radius:5px; background:var(--blue); min-width:4px; }
+  .empty { color:var(--muted); font-weight:700; }
+  #gate { max-width:360px; margin:80px auto; text-align:center; }
+  #gate input { width:100%; font:inherit; font-size:17px; padding:14px; border-radius:14px; border:2px solid #dde3e8; margin:14px 0 10px; }
+  #gate button { width:100%; font:inherit; font-size:18px; font-weight:900; padding:14px; border:0; border-radius:14px; background:var(--blue); color:#fff; }
+  #err { color:var(--red); font-weight:800; margin-top:10px; }
+</style>
+</head>
+<body>
+<div id="gate" hidden>
+  <h1>Pop live</h1>
+  <p class="empty">Enter the dashboard key.</p>
+  <input id="key" type="password" autocomplete="off">
+  <button id="go">Open</button>
+  <div id="err"></div>
+</div>
+<div id="dash" hidden>
+  <header><img src="media/pop-logo-header.png" alt="Pop"><h1>Live</h1><div id="live"><i></i><span id="ago">connecting…</span></div></header>
+  <div class="grid">
+    <div class="stat hi"><b id="searching">–</b><span>searching now</span></div>
+    <div class="stat"><b id="here_now">–</b><span>in the app (2 min)</span></div>
+    <div class="stat"><b id="people">–</b><span>joined</span></div>
+    <div class="stat"><b id="matches">–</b><span>matches</span></div>
+    <div class="stat hi"><b id="its_on">–</b><span>both said let's go</span></div>
+    <div class="stat"><b id="met">–</b><span>met at the booth</span></div>
+    <div class="stat"><b id="declined">–</b><span>not this time / can't make it</span></div>
+    <div class="stat"><b id="timed_out">–</b><span>timed out</span></div>
+    <div class="stat"><b id="rv">–</b><span id="rv-s">reviews</span></div>
+    <div class="stat"><b id="waitlist">–</b><span>waitlist sign-ups</span></div>
+    <div class="stat"><b id="reports_hour">–</b><span>error reports (1 hr)</span></div>
+  </div>
+  <div class="cols">
+    <div>
+      <h2>Latest matches</h2>
+      <table><thead><tr><th>When</th><th>Who</th><th>Where</th><th>Status</th></tr></thead><tbody id="recent"></tbody></table>
+    </div>
+    <div>
+      <h2>Busiest spots</h2><div id="spots"></div>
+      <h2>Review notes</h2><div class="list" id="notes"></div>
+      <h2>Error reports</h2><div class="list" id="reports"></div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+  const cfg = window.POP_CONFIG, sb = supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey, { auth: { persistSession: false } });
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const ago = t => { const s = Math.max(0, (Date.now() - Date.parse(t)) / 1000 | 0); return s < 60 ? s + 's' : s < 3600 ? (s / 60 | 0) + 'm' : (s / 3600 | 0) + 'h ' + ((s % 3600) / 60 | 0) + 'm'; };
+  const FACE = { 0: '👻', 1: '😕', 2: '🙂', 3: '🤩' };
+  let key = (location.hash.match(/key=([^&]+)/) || [])[1];
+  try { key = key ? decodeURIComponent(key) : localStorage.getItem('pop-dash-key'); } catch (_) {}
+  if (location.hash) history.replaceState(null, '', location.pathname);
+  let last = 0, timer = null;
+
+  function status(m) {
+    const st = [m.s1, m.s2];
+    if (m.met || m.here === 2) return '<span class="pill met">met' + (m.ratings ? ' ' + m.ratings.map(r => FACE[r] || '·').join('') : '') + '</span>';
+    if (st.includes('passed')) return '<span class="pill no">declined</span>';
+    if (st.includes('timed_out')) return '<span class="pill no">timed out</span>';
+    if (m.s1 === 'confirmed' && m.s2 === 'confirmed') return '<span class="pill on">on' + (m.here ? ' · ' + m.here + ' here' : '') + '</span>';
+    return '<span class="pill">deciding</span>';
+  }
+  function render(d) {
+    for (const k of ['searching', 'here_now', 'people', 'matches', 'its_on', 'met', 'declined', 'timed_out', 'waitlist', 'reports_hour']) $(k).textContent = d[k];
+    const r = d.reviews; $('rv').textContent = r.n; $('rv-s').textContent = r.n ? `🤩 ${r.amazing}  🙂 ${r.good}  😕 ${r.meh}  👻 ${r.no_show}` : 'reviews';
+    $('recent').innerHTML = d.recent.length ? d.recent.map(m => `<tr><td class="t">${ago(m.at)}</td><td>${esc(m.a)} + ${esc(m.b || '?')}</td><td>${esc(m.spot)}</td><td>${status(m)}</td></tr>`).join('')
+      : '<tr><td colspan="4" class="empty">No matches yet.</td></tr>';
+    const top = d.per_spot.length ? d.per_spot[0].n : 1;
+    $('spots').innerHTML = d.per_spot.length ? d.per_spot.slice(0, 8).map(s => `<div class="bar"><u style="width:${Math.round(120 * s.n / top)}px"></u>${s.n} ${esc(s.name)}</div>`).join('') : '<p class="empty">None yet.</p>';
+    $('notes').innerHTML = d.notes.length ? d.notes.map(n => `<p><small>${ago(n.at)} ago ${n.rating ? FACE[n.rating] : ''}</small>${esc(n.note)}</p>`).join('') : '<p class="empty">None yet.</p>';
+    $('reports').innerHTML = d.reports.length ? d.reports.map(n => `<p><small>${ago(n.at)} ago · ${esc(n.kind)} · ${esc(n.v)}</small>${esc(n.msg)}</p>`).join('') : '<p class="empty">None. 🎉</p>';
+  }
+  async function load() {
+    const { data, error } = await sb.rpc('event_dashboard', { p_key: key });
+    if (error) {
+      if (/bad key/.test(error.message)) { try { localStorage.removeItem('pop-dash-key'); } catch (_) {} return gate('That key didn\'t work.'); }
+      $('live').classList.add('stale'); $('ago').textContent = 'retrying…'; return;
+    }
+    try { localStorage.setItem('pop-dash-key', key); } catch (_) {}
+    $('gate').hidden = true; $('dash').hidden = false; last = Date.now(); $('live').classList.remove('stale'); render(data);
+  }
+  function gate(msg) { clearInterval(timer); timer = null; $('dash').hidden = true; $('gate').hidden = false; $('err').textContent = msg || ''; }
+  function start() { load(); if (!timer) timer = setInterval(load, 5000); }
+  setInterval(() => { if (last) { const s = (Date.now() - last) / 1000 | 0; $('ago').textContent = 'updated ' + s + 's ago'; $('live').classList.toggle('stale', s > 20); } }, 1000);
+  $('go').onclick = () => { key = $('key').value.trim(); if (key) start(); };
+  $('key').onkeydown = e => { if (e.key === 'Enter') $('go').click(); };
+  key ? start() : gate();
+</script>
+</body>
+</html>

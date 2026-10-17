@@ -5,3 +5,4 @@
 supabase/.temp/
 # OS / editor
 .DS_Store
+.dash-key

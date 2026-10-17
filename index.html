@@ -649,8 +649,12 @@
   // ---- identity: anonymous session persisted in this browser ----
   async function session() {
     let { data: { session } } = await sb.auth.getSession();
-    if (!session) ({ data: { session } } = await sb.auth.signInAnonymously());
-    if (!session) throw new Error('could not sign in');
+    if (!session) {
+      const r = await sb.auth.signInAnonymously();
+      if (r.error) { report('auto', 'sign-in failed: ' + r.error.message); throw new Error('Couldn\'t connect. Try again in a moment.'); }
+      session = r.data.session;
+    }
+    if (!session) throw new Error('Couldn\'t connect. Try again in a moment.');
     return session;
   }
 
@@ -821,12 +825,18 @@
     unlockSound(); $('w-go').disabled = true; err('w-err');
     const typed = $('w-name').value.trim();
     const ownName = typed && typed !== myAlias ? typed : null;   // empty box = keep the nickname; anything typed is their name
+    const join = () => me ? rpc('update_profile', { p_name: ownName, p_avatar: mySeed, p_alias: myAlias })
+                          : rpc('join_event', { p_name: ownName, p_avatar: mySeed, p_alias: myAlias });
     try {
-      me = me ? await rpc('update_profile', { p_name: ownName, p_avatar: mySeed, p_alias: myAlias })
-              : await rpc('join_event', { p_name: ownName, p_avatar: mySeed, p_alias: myAlias });
+      await session();
+      try { me = await join(); }
+      catch (e) {
+        if (!/permission denied|jwt|not signed in/i.test(e.message)) throw e;
+        await sb.auth.signOut().catch(() => {}); me = null; await session(); me = await join();   // stale or missing sign-in: start fresh once
+      }
       search();
     }
-    catch (e) { err('w-err', e); $('w-go').disabled = false; }
+    catch (e) { err('w-err', /permission denied|jwt/i.test(e.message) ? 'Couldn\'t connect. Try again in a moment.' : e); $('w-go').disabled = false; }
   };
 
   // "N pop stars here": a plain number that pops when it changes

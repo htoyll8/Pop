@@ -237,10 +237,9 @@
   .dice { position:absolute; z-index:3; right:40px; bottom:54px; font-size:40px; line-height:1; transform:rotate(-14deg);
           filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff)
                   drop-shadow(0 5px 6px rgba(47,59,69,.30)); }
-  .undo { position:absolute; z-index:3; left:40px; bottom:54px; width:48px; height:48px; padding:0; margin:0; background:none; box-shadow:none; color:var(--ink);
-          display:flex; align-items:center; justify-content:center; transform:rotate(-8deg);
-          filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff); }
-  .undo[hidden] { display:none; } .undo svg { width:40px; height:40px; stroke-width:3; } .undo:active { transform:rotate(-8deg) scale(.9); }
+  .undo { position:absolute; z-index:3; left:44px; bottom:58px; width:38px; height:38px; padding:0; margin:0; border-radius:50%; background:#fff; color:var(--ink);
+          display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(47,59,69,.25); }
+  .undo[hidden] { display:none; } .undo svg { width:20px; height:20px; } .undo:active { transform:scale(.92); }
   .dice.roll { animation:roll .5s cubic-bezier(.3,1.4,.5,1); }
   /* "Tap to pick your avatar" with a hand-drawn arrow at the dice; fades in after the demo roll, gone after the first tap */
   .tap-hint { position:absolute; z-index:4; right:8px; bottom:100px; color:#3a4550; pointer-events:none; opacity:0; transition:opacity .35s; display:flex; flex-direction:column; align-items:flex-end; }

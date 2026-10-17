@@ -498,7 +498,7 @@
     <h2 id="tx-title">Get a text</h2>
     <p class="sub">We'll text you once when someone's looking for a match. Then just open Pop.</p>
     <input id="tx-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Phone number">
-    <p class="wl-fine">One text from Tyler at Pop. Msg &amp; data rates may apply.</p>
+    <p class="wl-fine">One text from Pop. Msg &amp; data rates may apply.</p>
     <button id="tx-go">Text me</button>
     <div class="err" id="tx-err"></div>
   </div>
@@ -702,6 +702,8 @@
       if (rows && rows[0]) {
         // joined before: mid-match? go back to it. Otherwise land on the avatar page, out of the queue, one tap to rejoin.
         me = rows[0];
+        // came from a "someone's looking" text (link ends in ?find): straight back to searching
+        if (/[?&]find\b/.test(location.search)) { history.replaceState(null, '', location.pathname); return search(); }
         const { data: ms } = await sb.from('matches').select('id,created_at,status_1,status_2,person_1,met_at').order('created_at', { ascending: false }).limit(1);
         const m = ms && ms[0], gone = st => st === 'passed' || st === 'timed_out';
         if (m && !m.met_at && Date.now() - Date.parse(m.created_at) < 12 * 60 * 1000

@@ -38,8 +38,8 @@
   #gate { max-width:360px; margin:80px auto; text-align:center; }
   #gate input { width:100%; font:inherit; font-size:17px; padding:14px; border-radius:14px; border:2px solid #dde3e8; margin:14px 0 10px; }
   #gate button { width:100%; font:inherit; font-size:18px; font-weight:900; padding:14px; border:0; border-radius:14px; background:var(--blue); color:#fff; }
-  #txbox { background:#fff7e0; border-radius:16px; padding:14px 16px; margin-bottom:14px; }
-  .txr { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #f0e3bd; font-size:15px; }
+  .hint { color:var(--muted); font-weight:700; font-size:14px; margin:-4px 0 6px; }
+  .txr { display:flex; align-items:center; gap:10px; padding:8px 6px; border-bottom:1px solid #e6ebef; font-size:15px; }
   .txr:last-child { border-bottom:0; }
   .txr span { flex:1; } .txr small { color:var(--muted); font-weight:800; }
   .txr a { text-decoration:none; background:var(--blue); color:#fff; font-weight:900; padding:8px 16px; border-radius:999px; }
@@ -56,10 +56,6 @@
 </div>
 <div id="dash" hidden>
   <header><img src="media/pop-logo-header.png" alt="Pop"><h1>Live</h1><div id="live"><i></i><span id="ago">connecting…</span></div></header>
-  <div id="txbox" hidden>
-    <h2 style="margin-top:0">Text when someone's searching <span class="pill on" id="tx-n"></span></h2>
-    <div id="txlist"></div>
-  </div>
   <div class="grid">
     <div class="stat hi"><b id="searching">–</b><span>searching now</span></div>
     <div class="stat"><b id="here_now">–</b><span>in the app (2 min)</span></div>
@@ -75,6 +71,9 @@
   </div>
   <div class="cols">
     <div>
+      <h2>To text <span class="pill" id="tx-n">0</span></h2>
+      <p class="hint">Text them when someone new is searching. Each person drops off the list once you tap Text.</p>
+      <div id="txlist"></div>
       <h2>Latest matches</h2>
       <table><thead><tr><th>When</th><th>Who</th><th>Where</th><th>Status</th></tr></thead><tbody id="recent"></tbody></table>
     </div>
@@ -126,12 +125,23 @@
     $('gate').hidden = true; $('dash').hidden = false; last = Date.now(); $('live').classList.remove('stale'); render(data);
     const tx = await sb.rpc('dash_text_list', { p_key: key }); if (!tx.error) renderTx(tx.data);
   }
-  const TXT = "Hi! It's Tyler from Pop 🫧 Someone's looking for a match right now: htoyll8.github.io/Pop";
-  function renderTx(list) {
-    $('txbox').hidden = !list.length; $('tx-n').textContent = list.length;
+  const TXT = "Someone's looking for a match on Pop right now 🫧 Tap to jump in: https://htoyll8.github.io/Pop/?find";
+  // rows you've tapped stay hidden even if the page reloads before the server hears about it
+  const sent = new Set(JSON.parse((() => { try { return localStorage.getItem('pop-dash-sent'); } catch (_) {} })() || '[]'));
+  function markSent(id) {
+    sent.add(id); try { localStorage.setItem('pop-dash-sent', JSON.stringify([...sent])); } catch (_) {}
+    // keepalive: the request finishes even though tapping Text switches to the Messages app
+    fetch(cfg.supabaseUrl + '/rest/v1/rpc/dash_texted', { method: 'POST', keepalive: true,
+      headers: { apikey: cfg.supabaseKey, Authorization: 'Bearer ' + cfg.supabaseKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_key: key, p_id: id }) }).catch(() => {});
+  }
+  function renderTx(all) {
+    const list = all.filter(t => !sent.has(t.id));
+    $('tx-n').textContent = list.length;
+    if (!list.length) { $('txlist').innerHTML = '<p class="empty">Nobody waiting for a text.</p>'; return; }
     $('txlist').innerHTML = list.map(t => `<div class="txr"><span><b>${esc(t.name || 'Someone')}</b> ${esc(t.phone)}<br><small>asked ${ago(t.at)} ago</small></span>`
       + `<a href="sms:${esc(t.phone)}?&body=${encodeURIComponent(TXT)}" data-id="${t.id}">Text</a></div>`).join('');
-    $('txlist').querySelectorAll('a').forEach(a => a.onclick = () => { sb.rpc('dash_texted', { p_key: key, p_id: +a.dataset.id }); setTimeout(load, 1500); });
+    $('txlist').querySelectorAll('a').forEach(a => a.onclick = () => { markSent(+a.dataset.id); a.closest('.txr').remove(); $('tx-n').textContent = $('txlist').children.length; });
   }
   function gate(msg) { clearInterval(timer); timer = null; $('dash').hidden = true; $('gate').hidden = false; $('err').textContent = msg || ''; }
   function start() { load(); if (!timer) timer = setInterval(load, 5000); }

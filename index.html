@@ -85,7 +85,8 @@
   .wt-still { position:absolute; left:24px; right:24px; bottom:calc(env(safe-area-inset-bottom) + 36px); z-index:6; text-align:center; color:var(--muted); font-size:14px; font-weight:700; animation:popin .4s ease both; }
   #s-wait.matched .wt-still { display:none; }
   #wt-box { transition:transform .6s cubic-bezier(.3,1.2,.5,1), bottom .4s; }
-  #s-wait.long .me { bottom:calc(env(safe-area-inset-bottom) + 62px); }
+  #s-wait.long .me { bottom:calc(env(safe-area-inset-bottom) + 92px); }
+  .wt-still button.link { display:block; width:auto; margin:4px auto 0; padding:6px 10px; font-size:16px; font-weight:900; color:var(--blue2); background:none; box-shadow:none; }
   #wt-pool b { display:inline-block; font-weight:900; color:var(--ink); }
   #wt-pool b.bump { animation:popin .4s cubic-bezier(.2,1.6,.4,1); }
   @media (prefers-reduced-motion: reduce) { .found .who, #wt-pool b.bump { animation:none; } }
@@ -449,7 +450,7 @@
       <div class="gum" id="wt-gum"></div>
     </div>
     <div class="status" id="wt-pool"></div>
-    <div class="wt-still" id="wt-still" hidden>Still looking. Keep Pop open and we'll let you know.</div>
+    <div class="wt-still" id="wt-still" hidden>Nobody's free yet.<button type="button" class="link" id="tx-open">Text me when someone joins</button></div>
     <div class="go" id="go"><button class="tbtn" id="go-btn"><i class="fill" id="go-fill"></i><span class="lbl"><span id="go-t">Let's go</span><small id="go-c">2:00</small></span></button><button class="under" id="go-no">Not this time</button><div class="err" id="go-err"></div></div>
   </section>
 
@@ -489,6 +490,19 @@
     <div class="err" id="bug-err"></div>
   </div>
   <div id="bug-done" hidden><h2>Thank you!</h2><p class="sub">That helps a lot. If Pop is still stuck, try reloading the page.</p><button id="bug-close">Done</button></div>
+</div>
+<div class="sheet-bg" id="tx-bg" hidden></div>
+<div class="sheet" id="tx" hidden role="dialog" aria-modal="true" aria-labelledby="tx-title">
+  <div class="grab"></div><button type="button" class="x" id="tx-x" aria-label="Close">×</button>
+  <div id="tx-form">
+    <h2 id="tx-title">Get a text</h2>
+    <p class="sub">We'll text you once when someone's looking for a match. Then just open Pop.</p>
+    <input id="tx-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Phone number">
+    <p class="wl-fine">One text from Tyler at Pop. Msg &amp; data rates may apply.</p>
+    <button id="tx-go">Text me</button>
+    <div class="err" id="tx-err"></div>
+  </div>
+  <div id="tx-done" hidden><h2>You're on the list!</h2><p class="sub">We'll text you when someone's looking. You can close Pop until then.</p><button id="tx-close">Done</button></div>
 </div>
 <div class="sheet-bg" id="wl-bg" hidden></div>
 <div class="sheet" id="wl" hidden role="dialog" aria-modal="true" aria-labelledby="wl-title">
@@ -812,6 +826,16 @@
   };
   function openBug(auto) { $('bug-form').hidden = false; $('bug-done').hidden = true; err('bug-err'); $('bug-bg').hidden = false; $('bug').hidden = false;
     $('bug-txt').placeholder = auto ? 'Something went wrong on our end. What were you doing?' : 'What went wrong? What were you doing?'; }
+  // "Text me when someone joins": leave a number, Tyler texts by hand from the dashboard
+  function openTx() { $('tx-form').hidden = false; $('tx-done').hidden = true; err('tx-err'); $('tx-bg').hidden = false; $('tx').hidden = false; }
+  function closeTx() { $('tx').hidden = true; $('tx-bg').hidden = true; }
+  $('tx-open').onclick = openTx; $('tx-x').onclick = $('tx-bg').onclick = $('tx-close').onclick = closeTx;
+  $('tx-go').onclick = async () => {
+    const ph = $('tx-phone').value.trim(); if (ph.replace(/\D/g, '').length < 10) return err('tx-err', 'Add your phone number.');
+    $('tx-go').disabled = true;
+    try { await session(); await rpc('request_text', { p_phone: ph }); $('tx-form').hidden = true; $('tx-done').hidden = false; }
+    catch (e) { err('tx-err', e); } finally { $('tx-go').disabled = false; }
+  };
   function closeBug() { $('bug').hidden = true; $('bug-bg').hidden = true; }
   $('bug-x').onclick = $('bug-bg').onclick = $('bug-close').onclick = closeBug;
   $('bug-go').onclick = async () => {
@@ -877,7 +901,7 @@
     poolN = n;
   }
   // ---- keeping people in the loop while they wait ----
-  const STILL_MS = 90 * 1000;   // after this long without a match, say we're still looking
+  const STILL_MS = 60 * 1000;   // after this long without a match, offer a text when someone joins
   let wakeLock = null, stillTimer = null, audio = null, titleTimer = null;
   const baseTitle = document.title;
   async function stayAwake() { try { if ('wakeLock' in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => wakeLock = null); } } catch (_) {} }

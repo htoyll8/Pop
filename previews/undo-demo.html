@@ -1092,11 +1092,8 @@
     gif.style.visibility = 'hidden'; sp.classList.add('out');
     flyLogo(from, target, () => sp.remove());
   }
-  Promise.all([splashDone, boot()]).finally(() => { placeCaret(); endSplash(); if ($('s-welcome').classList.contains('on')) setTimeout(startNudge, 700); });
+  Promise.all([splashDone, (async () => { shuffle(); shuffleName(); show('welcome'); $('w-go').onclick = () => alert('Demo only'); })()]).finally(() => { placeCaret(); endSplash(); if ($('s-welcome').classList.contains('on')) setTimeout(startNudge, 700); });
 })();
 </script>
-<script>/* demo: jump straight to the avatar page, no sign-in */
-setTimeout(()=>{document.querySelectorAll('.screen').forEach(e=>e.classList.remove('on'));document.querySelectorAll('.splash').forEach(e=>e.remove());
-const t=document.getElementById('toast');t.hidden=true;t.classList.remove('show');
-document.getElementById('s-welcome').classList.add('on');document.getElementById('w-go').onclick=()=>alert('Demo only');},1200)</script></body>
+</body>
 </html>

@@ -240,8 +240,7 @@
   .sheet textarea { width:100%; padding:14px 16px; border-radius:16px; border:2px solid #e6ebef; font:inherit; font-size:16px; margin:0 0 14px; resize:none; color:var(--ink); }
   .sheet input { text-align:left; }
   .sheet input + input { margin-top:-4px; }
-  .ig { position:absolute; top:calc(env(safe-area-inset-top) + 22px); right:18px; z-index:3; display:block; line-height:0; }
-  .ig svg { filter:drop-shadow(0 2px 4px rgba(47,59,69,.18)); }
+  .follow { display:flex; justify-content:center; align-items:center; gap:6px; margin:2px auto 0; padding:6px; width:max-content; color:var(--ink); font-size:14px; font-weight:800; text-decoration:none; }
   .minor { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:2px; font-size:14px; font-weight:800; color:var(--muted); }
   .minor a { display:inline-flex; align-items:center; gap:6px; color:var(--ink); text-decoration:none; }
   .minor button.link { margin:0; padding:6px 2px; font-size:14px; font-weight:800; color:var(--muted); }
@@ -347,7 +346,6 @@
   </section>
   <section id="s-welcome" class="screen">
     <div class="brand" id="w-brand"><img class="w-logo" id="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
-    <a class="ig" href="https://www.instagram.com/popmeeter/" target="_blank" rel="noopener" aria-label="Pop on Instagram (@popmeeter)"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><defs><radialGradient id="igg" cx="30%" cy="107%" r="150%"><stop offset="0" stop-color="#fdf497"/><stop offset=".05" stop-color="#fdf497"/><stop offset=".45" stop-color="#fd5949"/><stop offset=".6" stop-color="#d6249f"/><stop offset=".9" stop-color="#285AEB"/></radialGradient></defs><rect x="1" y="1" width="22" height="22" rx="6.5" fill="url(#igg)"/><rect x="5.5" y="5.5" width="13" height="13" rx="4" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="3.1" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="16.3" cy="7.7" r="1" fill="#fff"/></svg></a>
     <div class="stage"><div class="sticker" id="w-shuffle" role="button" tabindex="0" aria-label="Change your look"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><span class="dice" id="w-tapme" aria-hidden="true">🎲</span><span class="tap-hint" id="w-hint" aria-hidden="true"><span class="tap-word">Tap to pick<br>your avatar</span><svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M42 4 C 50 22, 44 40, 26 54"/><path d="M38 53 L 26 54 L 30 43"/></svg></span></div></div>
     <div class="bottom">
       <div class="hint">This is the name others will see.</div>
@@ -394,6 +392,7 @@
       <textarea id="rv-txt" rows="2" placeholder="Anything else? (optional)"></textarea>
       <button class="tbtn" id="rv-again"><span class="lbl mid"><span>Match again</span></span></button>
       <button class="under" id="rv-done">I'm done for now</button>
+      <a class="follow" href="https://www.instagram.com/popmeeter/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><defs><radialGradient id="iggr" cx="30%" cy="107%" r="150%"><stop offset="0" stop-color="#fdf497"/><stop offset=".05" stop-color="#fdf497"/><stop offset=".45" stop-color="#fd5949"/><stop offset=".6" stop-color="#d6249f"/><stop offset=".9" stop-color="#285AEB"/></radialGradient></defs><rect x="1" y="1" width="22" height="22" rx="6.5" fill="url(#iggr)"/><rect x="5.5" y="5.5" width="13" height="13" rx="4" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="3.1" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="16.3" cy="7.7" r="1" fill="#fff"/></svg>Follow @popmeeter</a>
     </div>
   </section>
 
@@ -423,6 +422,7 @@
     <p class="wl-fine" id="wl-sms" hidden>By adding your number, you agree to get texts from Pop about upcoming events. Msg &amp; data rates may apply. Reply STOP to opt out.</p>
     <textarea id="wl-note" rows="3" placeholder="Tell us about your event (optional)"></textarea>
     <button id="wl-go">Count me in</button>
+    <a class="follow" href="https://www.instagram.com/popmeeter/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><defs><radialGradient id="iggw" cx="30%" cy="107%" r="150%"><stop offset="0" stop-color="#fdf497"/><stop offset=".05" stop-color="#fdf497"/><stop offset=".45" stop-color="#fd5949"/><stop offset=".6" stop-color="#d6249f"/><stop offset=".9" stop-color="#285AEB"/></radialGradient></defs><rect x="1" y="1" width="22" height="22" rx="6.5" fill="url(#iggw)"/><rect x="5.5" y="5.5" width="13" height="13" rx="4" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="3.1" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="16.3" cy="7.7" r="1" fill="#fff"/></svg>Follow @popmeeter</a>
     <div class="err" id="wl-err"></div>
   </div>
   <div id="wl-done" hidden><h2>Thanks!</h2><p class="sub">We'll be in touch. Follow <a href="https://www.instagram.com/popmeeter/" target="_blank" rel="noopener">@popmeeter</a> for updates.</p><button id="wl-close">Done</button></div>

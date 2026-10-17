@@ -94,7 +94,7 @@
   #s-rules.on, #s-tour.on { position:fixed; inset:0; background:#fff; z-index:6; display:flex; flex-direction:column; min-height:0;
                 padding:calc(env(safe-area-inset-top) + 34px) 24px calc(env(safe-area-inset-bottom) + 14px); }
   #s-rules .logo { width:58px; margin:0 auto 8px; display:block; }
-  #s-rules h1 { font-size:34px; font-weight:900; text-align:center; margin:0 0 20px; line-height:1.1; }
+  #s-rules h1 { font-size:34px; font-weight:900; text-align:center; margin:0 0 34px; line-height:1.1; }
   .steps { list-style:none; margin:0 auto; padding:0; max-width:380px; width:100%; display:flex; flex-direction:column; gap:18px; }
   .steps li { display:flex; gap:14px; align-items:flex-start; font-size:19px; font-weight:900; line-height:1.3; color:var(--ink); }
   .steps li i { font-style:normal; font-size:30px; line-height:1; flex:none; width:38px; text-align:center; }
@@ -113,7 +113,7 @@
   .card-t p { color:var(--muted); font-size:17px; font-weight:600; line-height:1.45; margin:0; max-width:320px; }
   .pic { position:relative; width:260px; height:260px; }
   .pic img { filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 6px 8px rgba(47,59,69,.2)); }
-  .pic1 .you { position:absolute; left:50%; bottom:0; width:150px; margin-left:-75px; }
+  .pic1 .you { position:absolute; left:50%; bottom:0; width:150px; margin-left:-75px; animation:floatt 2.4s ease-in-out infinite; }
   .pic1 .gum-t { position:absolute; left:calc(50% - 21px); bottom:28px; width:46px; height:46px; border-radius:50%; background:#ff8fbd; border:2px solid #111; box-shadow:inset -3px -3px 0 #f06fa4; animation:gumt 2.6s ease-in-out infinite; }
   .pic1 .b { position:absolute; width:58px; height:58px; border-radius:50%; border:1.5px solid rgba(240,111,164,.6);
              background:radial-gradient(circle at 32% 28%, #fff 0 9%, rgba(255,255,255,0) 10%), radial-gradient(circle, rgba(255,236,244,.45) 58%, rgba(255,143,189,.45) 100%); animation:floatt 3s ease-in-out infinite; }
@@ -132,7 +132,7 @@
   .dots-t { display:flex; justify-content:center; gap:8px; margin:10px 0 14px; }
   .dots-t i { width:8px; height:8px; border-radius:50%; background:#d9dee3; transition:width .25s, background .25s; }
   .dots-t i.on { width:22px; border-radius:4px; background:var(--blue); }
-  @media (prefers-reduced-motion: reduce) { .pic1 .b, .pic1 .gum-t { animation:none; } }
+  @media (prefers-reduced-motion: reduce) { .pic1 .b, .pic1 .you { animation:none; } }
 
   /* match found: stays on the bubble screen; the heading and count fade, you shift up, Let's go slides in */
   #s-wait .wt-top, #wt-pool { transition:opacity .4s; }
@@ -367,14 +367,13 @@
     <img class="logo" src="media/pop-logo-header.png" alt="pop">
     <h1>How Pop works</h1>
     <ul class="steps">
-      <li><i>🫧</i><span>Pop finds you someone<small>Someone who's here right now.</small></span></li>
+      <li><i>🫧</i><span>Pop searches for a match<small>Keep Pop open while it looks.</small></span></li>
       <li><i>📍</i><span>You both say "Let's go"<small>Then meet at a booth or activation.</small></span></li>
       <li><i>👋</i><span>Say hi<small>Then tell us how it went.</small></span></li>
     </ul>
-    <button type="button" class="link tour-link" id="tour-open">Show me how it works</button>
+    <button type="button" class="link tour-link" id="tour-open">Check out the tutorial</button>
     <div class="grow"></div>
     <div class="fine-box">
-      <b>The fine print</b>
       <span>Meet only at the spot Pop picks. Be kind. Leave anytime. We only keep your nickname, avatar, and matches.</span>
     </div>
     <button class="tbtn" id="rules-ok"><span class="lbl mid"><span>Got it, let's go</span></span></button>
@@ -387,8 +386,8 @@
     <div class="tour" id="tour">
       <div class="card-t">
         <div class="pic pic1"><div class="b b1"><img alt="" data-seed="tour-a"></div><div class="b b2"><img alt="" data-seed="tour-b"></div><div class="b b3"><img alt="" data-seed="tour-c"></div>
-          <img class="you" alt="" data-seed="tour-me" data-o="1"><i class="gum-t"></i></div>
-        <h2>Pop finds you someone</h2><p>While you wait, people here float by in bubbles. When there's a match, their bubble pops.</p>
+          <img class="you" alt="" data-seed="tour-me"></div>
+        <h2>Pop searches for a match</h2><p>Keep Pop open while it looks. When there's a match, their bubble pops.</p>
       </div>
       <div class="card-t">
         <div class="pic pic2"><div class="duo-t"><img alt="" data-seed="tour-me"><img alt="" data-seed="tour-b"></div>
@@ -712,7 +711,8 @@
   const toAvatarPage = () => { show('welcome'); placeCaret(); setTimeout(startNudge, 500); };
   $('rules-ok').onclick = toAvatarPage;
   // the tour: swipe or tap Next through three cards, then the avatar page
-  document.querySelectorAll('#tour img[data-seed]').forEach(im => { im.src = avatarBare(im.dataset.seed) + (im.dataset.o ? '&mouth=variant18' : ''); });
+  const HAPPY = '&mouth=variant05,variant25,variant26,variant27&eyes=variant01,variant02,variant03,variant23,variant24,variant26&eyebrows=variant06,variant09,variant10,variant11,variant12';
+  document.querySelectorAll('#tour img[data-seed]').forEach(im => { im.src = avatarBare(im.dataset.seed) + HAPPY; });
   const tour = $('tour'), tourCards = () => tour.children.length;
   const tourIdx = () => Math.round(tour.scrollLeft / tour.clientWidth);
   function tourDots() { const i = tourIdx(); [...$('tour-dots').children].forEach((d, k) => d.classList.toggle('on', k === i)); $('tour-next-t').textContent = i === tourCards() - 1 ? 'Let\'s go' : 'Next'; }

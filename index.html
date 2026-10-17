@@ -904,7 +904,7 @@
     poolN = n;
   }
   // ---- keeping people in the loop while they wait ----
-  const STILL_MS = 60 * 1000;   // after this long without a match, offer a text when someone joins
+  const STILL_MS = 15 * 1000;   // after this long without a match, offer a text when someone joins
   let wakeLock = null, stillTimer = null, audio = null, titleTimer = null;
   const baseTitle = document.title;
   async function stayAwake() { try { if ('wakeLock' in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => wakeLock = null); } } catch (_) {} }

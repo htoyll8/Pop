@@ -207,7 +207,9 @@
   .found.out .who { animation:none; } .found.out .who img { opacity:.35; filter:grayscale(1); transition:opacity .4s, filter .4s; }
   #s-wait.out .go { transform:translateY(calc(100% + 160px)); opacity:0; }
   #s-on.out .booth, #s-on.out .tbtn, #s-on.out .under, #s-on.out .names { animation:none; opacity:0; transition:opacity .4s; pointer-events:none; }
-  #s-on.out h1 { font-size:30px; }
+  #s-on.out h1 { visibility:hidden; }   /* the "can't make it" line goes under the avatars instead */
+  #s-on .outmsg { display:none; margin:-22px 0 0; text-align:center; font-size:30px; font-weight:900; color:var(--ink); line-height:1.1; flex-shrink:0; }
+  #s-on.out .outmsg { display:block; animation:popin .4s cubic-bezier(.2,1.4,.4,1) both; }
   #s-on.out .pair2 img:last-child { animation:none; opacity:.35; filter:grayscale(1); transition:opacity .4s, filter .4s; }
   /* laptops and tall screens: keep the button close under the content instead of at the far bottom */
   @media (min-width:700px), (min-height:900px) {
@@ -449,12 +451,11 @@
   <!-- 3. It's on: both said yes; now the spot -->
   <section id="s-on" class="screen flow">
     <img class="logo" src="media/pop-logo-header.png" alt="pop"><h1>It's on!</h1>
-    <div class="pair2"><img id="on-me" alt=""><img id="on-them" alt=""></div><div class="names"><span>You</span><span id="on-name"></span></div>
-    <button class="under" id="here-no">Can't make it</button>
+    <div class="pair2"><img id="on-me" alt=""><img id="on-them" alt=""></div><div class="names"><span>You</span><span id="on-name"></span></div><p class="outmsg" id="on-out"></p>
     <div class="booth"><small>Meet at</small><b id="on-where"></b><span id="on-kind"></span></div>
     <div class="grow"></div>
     <button class="tbtn" id="here-btn"><i class="fill" id="here-fill"></i><span class="lbl"><span id="here-t">I'm here</span><small id="here-c">7:00</small></span></button>
-    <div class="err" id="on-err"></div>
+    <button class="under" id="here-no">Can't make it</button><div class="err" id="on-err"></div>
   </section>
 
   <!-- 4. You're both here: hold up your phone; Found them! turns this screen into the review -->
@@ -953,7 +954,7 @@
     clearFlow(); stage = 'out';
     const who = (c2 && c2.partner_alias) || (lastCard && lastCard.partner_alias) || 'They';
     if ($('s-on').classList.contains('on')) {
-      $('s-on').classList.add('out'); $('s-on').querySelector('h1').textContent = who + ' can\'t make it';
+      $('s-on').classList.add('out'); $('on-out').textContent = who + ' can\'t make it';
     } else {
       $('s-wait').classList.add('out'); const f = $('s-wait').querySelector('.found');
       if (f) { f.classList.add('out'); f.querySelector('b').textContent = who + ' can\'t make it'; }

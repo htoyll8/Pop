@@ -12,7 +12,7 @@ insert into vendors (name, location) values
   ('Silkscreen Demos', 'Activation'),
   ('New Haven Advocate', 'Activation'),
   ('New England Arts and Rhythm', 'Activation'),
-  ('Elli Fotopoulou', 'Activation'),
+  ('Hygro Receptions', 'Activation'),
   ('Helix Commons', 'Activation'),
   ('"This Is Not Ai" - Robotic Art', 'Activation'),
   ('The Kitchen', 'Vendor'),

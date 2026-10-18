@@ -134,8 +134,8 @@
   .clock .trk { fill:#fff5f9; stroke:#f6e3ec; stroke-width:5; }
   .clock .left { fill:none; stroke:#f28bb3; stroke-width:5; stroke-linecap:round; stroke-dasharray:289; transition:stroke .4s; }
   .clock.low .left { stroke:#e8463c; }
-  .clock .duo { position:relative; margin-top:-4%; }
-  .acc .duo img { width:calc(min(74vw, 270px, 34vh) * .42); }
+  .clock .duo { position:relative; margin-top:-10%; align-items:flex-start; }
+  .acc .duo img { width:calc(min(74vw, 270px, 34vh) * .38); display:block; }
   .time { position:absolute; left:50%; bottom:-16px; translate:-50% 0; display:flex; align-items:center; gap:6px; padding:6px 14px 6px 10px; border-radius:20px; background:#fff;
           border:2.5px solid #f28bb3; box-shadow:0 4px 10px rgba(47,59,69,.12); }
   .clock.low .time { border-color:#e8463c; }
@@ -143,8 +143,13 @@
   .time b { font-size:20px; font-weight:900; font-variant-numeric:tabular-nums; }
   @keyframes tip { 0%,85% { rotate:0deg; } 100% { rotate:180deg; } }
   .who2 { position:relative; display:inline-block; }
-  .who2:first-child { rotate:-8deg; margin-right:-10px; } .who2:last-child { rotate:8deg; margin-left:-10px; }
-  .who2 img { rotate:0deg !important; margin:0 !important; animation:none !important; }
+  .acc .duo { gap:10px; }
+  .who2 img { margin:0 !important; animation:none !important; }
+  .who2:first-child img { rotate:-7deg !important; } .who2:last-child img { rotate:7deg !important; }
+  .who2 { display:inline-flex; flex-direction:column; align-items:center; }
+  .mini { margin-top:8px; padding:5px 11px; min-width:76px; text-align:center; border-radius:11px; background:var(--blue); color:#fff; font-size:13.5px; font-weight:900; box-shadow:0 3px 0 var(--blue2); white-space:nowrap; transition:background .25s, box-shadow .25s; }
+  .mini.press { transform:translateY(3px); box-shadow:none; }
+  .mini.on { background:#6cc070; box-shadow:0 3px 0 #57a35b; }
   .ok { position:absolute; right:0; bottom:4px; font-style:normal; font-size:28px; scale:0; transition:scale .4s cubic-bezier(.2,1.6,.4,1);
         filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff); }
   .ok.on { scale:1; }
@@ -163,7 +168,7 @@
   .rate span.on { background:#fff; border-color:var(--blue); transform:scale(1.1); }
   .kind { font-size:min(34vw, 140px); line-height:1; animation:floatt 2.6s ease-in-out infinite; }
 
-  @media (max-height:700px) { .cd h1 { font-size:30px; } .cd p { font-size:16px; } .cd { padding-bottom:calc(env(safe-area-inset-bottom) + 108px); } }
+  @media (max-height:700px) { .mini { font-size:12px; padding:4px 9px; min-width:66px; } .cd h1 { font-size:30px; } .cd p { font-size:16px; } .cd { padding-bottom:calc(env(safe-area-inset-bottom) + 108px); } }
   @media (prefers-reduced-motion: reduce) { * { animation:none !important; } }
 </style>
 </head>
@@ -200,9 +205,8 @@
   <section class="cd c3b">
     <div class="art"><div class="acc">
       <div class="clock"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" class="trk"/><circle cx="50" cy="50" r="46" class="left" id="ring"/></svg>
-        <div class="duo"><span class="who2"><img class="stk" data-seed="tour-me" alt=""><i class="ok" id="ok1">✅</i></span><span class="who2"><img class="stk" data-seed="pal-4" alt=""><i class="ok" id="ok2">✅</i></span></div>
+        <div class="duo"><span class="who2"><img class="stk" data-seed="tour-me" alt=""><b class="mini" id="ok1">Accept</b></span><span class="who2"><img class="stk" data-seed="pal-4" alt=""><b class="mini" id="ok2">Accept</b></span></div>
         <div class="time"><span class="ce">⏳</span><b id="clock-t">2:00</b></div></div>
-      <div class="pill acc-b" id="acc-b"><span>Accept</span></div>
     </div></div>
     <div class="num">Step 3</div>
     <h1>You both tap Accept</h1>
@@ -339,14 +343,15 @@
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) cycle();
   // card 3: the 2-minute clock runs (sped up); you accept, then they do
   (async () => {
-    const ring = document.getElementById('ring'), t = document.getElementById('clock-t'), clock = ring.closest('.clock'), btn = document.getElementById('acc-b');
+    const ring = document.getElementById('ring'), t = document.getElementById('clock-t'), clock = ring.closest('.clock'), btn = null;
     const show = sec => { t.textContent = Math.floor(sec / 60) + ':' + String(Math.floor(sec % 60)).padStart(2, '0'); ring.style.strokeDashoffset = 289 * (1 - sec / 120); clock.classList.toggle('low', sec < 30); };
     for (;;) {
-      ['ok1', 'ok2'].forEach(id => document.getElementById(id).classList.remove('on')); show(120); await wait(500);
+      const tap = async id => { const b = document.getElementById(id); b.classList.add('press'); await wait(150); b.classList.remove('press'); b.classList.add('on'); b.textContent = '✓ Accepted'; };
+      ['ok1', 'ok2'].forEach(id => { const b = document.getElementById(id); b.classList.remove('on'); b.textContent = 'Accept'; }); show(120); await wait(500);
       await anim(1800, k => show(120 - k * 7));
-      btn.classList.add('press'); await wait(160); btn.classList.remove('press'); document.getElementById('ok1').classList.add('on');
+      await tap('ok1');
       await anim(2200, k => show(113 - k * 9));
-      document.getElementById('ok2').classList.add('on');
+      await tap('ok2');
       await anim(1800, k => show(104 - k * 7));
     }
   })();

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head><base href="../">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#2f3b45; --muted:#6b7a86; --green:#6cc070; --green2:#57a35b; --pink:#f28bb3; --blue:#318bcf; --blue2:#2873ab; --red:#e8463c; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; height:100%; }
+  body { background:#fff; color:var(--ink); font:17px/1.45 "Nunito",-apple-system,BlinkMacSystemFont,sans-serif; font-weight:600; }
+  .scr { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; text-align:center; padding:calc(env(safe-area-inset-top) + 26px) 22px calc(env(safe-area-inset-bottom) + 50px); overflow-y:auto; }
+  .scr[hidden], .ticket[hidden], .note[hidden] { display:none; }
+  h1 { font-size:34px; font-weight:900; margin:0; line-height:1.08; }
+  .sub { color:var(--muted); font-size:16px; font-weight:700; margin-top:4px; }
+  .stk { filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 8px 10px rgba(47,59,69,.22)); }
+  @keyframes popin { 0% { transform:scale(.3); opacity:0; } 100% { transform:scale(1); opacity:1; } }
+
+  /* the two of you, each with a status badge for their own question */
+  .duo { display:flex; justify-content:center; gap:34px; margin:14px 0 4px; }
+  .duo > div { position:relative; display:flex; flex-direction:column; align-items:center; }
+  .duo img { width:min(28vw, 108px); }
+  .duo > div:first-child img { rotate:-6deg; } .duo > div:last-child img { rotate:6deg; }
+  .duo b { font-size:15px; font-weight:900; margin-top:2px; }
+  .st { position:absolute; right:-6px; top:-4px; font-size:26px; line-height:1; animation:popin .4s cubic-bezier(.2,1.6,.4,1) both;
+        filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff); }
+  .st.wait { animation:popin .4s both, tip 2s ease-in-out infinite; }
+  @keyframes tip { 0%,85% { rotate:0deg; } 100% { rotate:180deg; } }
+
+  /* the question card */
+  .qcard { width:100%; max-width:360px; margin-top:12px; padding:16px 16px 14px; border-radius:22px; background:#fff5f9; border:2px solid #f6dbe7; animation:popin .5s .1s cubic-bezier(.2,1.4,.4,1) both; }
+  .qcard small { display:block; font-size:13px; font-weight:900; color:var(--red); text-transform:uppercase; letter-spacing:.07em; }
+  .qcard .q { font-size:21px; font-weight:900; line-height:1.25; margin:4px 0 12px; }
+  .opts { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .opts button { padding:12px 8px; border-radius:14px; border:2px solid #e6ebef; background:#fff; font:inherit; font-size:16px; font-weight:800; color:var(--ink); box-shadow:0 3px 0 #e6ebef; }
+  .opts button:active { transform:translateY(2px); box-shadow:none; }
+  .opts button.right { background:var(--green); border-color:var(--green); color:#fff; box-shadow:0 3px 0 var(--green2); }
+  .opts button.wrong { background:var(--red); border-color:var(--red); color:#fff; box-shadow:0 3px 0 #c2352d; }
+  .opts.done button:not(.right):not(.wrong) { opacity:.45; }
+  .note { margin-top:12px; color:var(--muted); font-size:14.5px; font-weight:700; line-height:1.4; max-width:330px; }
+  .note b { color:var(--ink); }
+  .msg { min-height:1.4em; margin-top:10px; font-size:17px; font-weight:900; }
+
+  /* the prize: a ticket with a live clock and a moving shine, so a screenshot can't pass for it */
+  .ticket { position:relative; width:100%; max-width:340px; margin-top:16px; padding:22px 18px 18px; border-radius:24px; color:#fff; overflow:hidden;
+            background:linear-gradient(135deg, #f28bb3, #6a7be8); box-shadow:0 12px 24px rgba(106,123,232,.3); animation:popin .6s cubic-bezier(.2,1.5,.4,1) both; }
+  .ticket::after { content:""; position:absolute; top:0; bottom:0; width:60%; left:-80%; background:linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent); animation:shine 2.4s ease-in-out infinite; }
+  @keyframes shine { to { left:130%; } }
+  .ticket small { display:block; font-size:13px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; opacity:.9; }
+  .ticket .big { font-size:52px; font-weight:900; line-height:1; margin:6px 0 2px; }
+  .ticket .at { font-size:18px; font-weight:800; }
+  .ticket .live { display:inline-flex; align-items:center; gap:7px; margin-top:14px; padding:6px 12px; border-radius:12px; background:rgba(255,255,255,.22); font-size:15px; font-weight:900; font-variant-numeric:tabular-nums; }
+  .ticket .live i { width:9px; height:9px; border-radius:50%; background:#7dff9a; animation:blink 1s ease-in-out infinite; }
+  @keyframes blink { 50% { opacity:.25; } }
+  .ticket.small-prize { background:linear-gradient(135deg, #9fb0c0, #6b7a86); box-shadow:0 12px 24px rgba(47,59,69,.2); }
+  .confetti { position:fixed; inset:0; pointer-events:none; overflow:hidden; }
+  .confetti i { position:absolute; top:-20px; width:9px; height:14px; border-radius:2px; animation:fall linear forwards; }
+  @keyframes fall { to { transform:translateY(110vh) rotate(720deg); } }
+
+  .grow { flex:1; min-height:16px; }
+  .tbtn { width:100%; max-width:420px; height:58px; border:0; border-radius:18px; font:inherit; font-size:19px; font-weight:900; color:#fff; background:var(--blue); box-shadow:0 5px 0 var(--blue2); flex-shrink:0; }
+  .under { background:none; border:0; font:inherit; font-size:16px; font-weight:800; color:var(--muted); padding:12px; }
+  .demo { position:fixed; left:0; right:0; bottom:0; z-index:20; display:flex; justify-content:center; gap:8px; padding:6px; background:rgba(47,59,69,.85); color:#fff; font-size:12px; font-weight:800; }
+  .demo button { background:#fff; border:0; border-radius:8px; padding:4px 8px; font:inherit; font-size:12px; }
+  .demo button.on { background:#7dff9a; }
+</style>
+</head>
+<body>
+
+<!-- after "I'm here": each of you gets a different question about this booth -->
+<section class="scr" id="q">
+  <h1>You're both here!</h1>
+  <div class="sub">at <b>Hygro Receptions</b></div>
+  <div class="duo">
+    <div><img class="stk" data-seed="tour-me" alt=""><b>You</b><span class="st wait" id="st-me">⏳</span></div>
+    <div><img class="stk" data-seed="pal-4" alt=""><b>Sam</b><span class="st wait" id="st-them">⏳</span></div>
+  </div>
+  <div class="qcard">
+    <small>Ask the vendor</small>
+    <div class="q">What's Hygro Receptions' best-selling item?</div>
+    <div class="opts" id="opts">
+      <button data-ok="0">Candles</button><button data-ok="1">Plant mister</button>
+      <button data-ok="0">Tote bags</button><button data-ok="0">Air plants</button>
+    </div>
+    <div class="msg" id="msg"></div>
+  </div>
+  <p class="note">Sam has a <b>different question</b> about this booth. Get both right for <b>10% off</b>.</p>
+  <div class="grow"></div>
+  <button class="under" id="skip">Skip the trivia</button>
+</section>
+
+<!-- the prize -->
+<section class="scr" id="p" hidden>
+  <h1 id="p-h">You both got it! 🎉</h1>
+  <div class="sub" id="p-sub">Show this at the booth</div>
+  <div class="ticket" id="ticket">
+    <small>Pop prize</small>
+    <div class="big" id="p-big">10% off</div>
+    <div class="at">at Hygro Receptions</div>
+    <div class="live"><i></i><span id="clock"></span></div>
+  </div>
+  <p class="note" id="p-note">The live clock shows the vendor it's real.</p>
+  <div class="grow"></div>
+  <button class="tbtn" id="next">How'd it go?</button>
+</section>
+
+<div class="confetti" id="confetti"></div>
+<div class="demo">Demo: Sam's answer is <button id="d-right" class="on">right</button><button id="d-wrong">wrong</button> <button id="d-reset">↺ restart</button></div>
+
+<script>
+  const HAIR = 'long01,long02,long03,long04,long05,long07,long08,long10,long11,long12,long13,long14,long15,long19,long20,long21,long23,long24,long25,long26,short01,short02,short03,short04,short05,short06,short07,short08,short09,short10,short11,short12,short13,short14,short17,short18,short19';
+  const HAPPY = '&mouth=variant05,variant25,variant26,variant27&eyes=variant01,variant02,variant03,variant23,variant24,variant26&eyebrows=variant06,variant09,variant10,variant11,variant12';
+  const av = s => 'https://api.dicebear.com/9.x/adventurer/svg?hair=' + HAIR + '&seed=' + encodeURIComponent(s) + HAPPY;
+  document.querySelectorAll('img[data-seed]').forEach(im => im.src = av(im.dataset.seed));
+  const $ = id => document.getElementById(id), wait = ms => new Promise(r => setTimeout(r, ms));
+  let samRight = true, mine = null;
+
+  $('opts').onclick = async e => {
+    const b = e.target.closest('button'); if (!b || mine !== null) return;
+    mine = b.dataset.ok === '1'; $('opts').classList.add('done');
+    b.classList.add(mine ? 'right' : 'wrong');
+    if (!mine) $('opts').querySelector('[data-ok="1"]').classList.add('right');
+    $('st-me').className = 'st'; $('st-me').textContent = mine ? '✅' : '❌';
+    $('msg').textContent = mine ? 'You got it! Waiting for Sam…' : 'Not quite! Waiting for Sam…';
+    await wait(1600);
+    $('st-them').className = 'st'; $('st-them').textContent = samRight ? '✅' : '❌';
+    await wait(900);
+    prize(mine && samRight, mine || samRight);
+  };
+  function prize(both, one) {
+    $('q').hidden = true; $('p').hidden = false;
+    $('ticket').classList.toggle('small-prize', !both); $('ticket').hidden = !one; $('p-note').hidden = !one;
+    $('p-h').textContent = both ? 'You both got it! 🎉' : one ? 'One of you got it!' : 'So close!';
+    $('p-big').textContent = both ? '10% off' : '5% off';
+    $('p-sub').textContent = one ? 'Show this at the booth' : 'No prize this time, but say hi to the vendor anyway.';
+    if (both) confetti();
+  }
+  function confetti() {
+    const c = $('confetti'), cols = ['#f28bb3', '#6a7be8', '#6cc070', '#ffd166', '#318bcf'];
+    c.innerHTML = Array.from({ length: 70 }, () => `<i style="left:${Math.random() * 100}%;background:${cols[Math.floor(Math.random() * 5)]};animation-duration:${1.8 + Math.random() * 1.6}s;animation-delay:${Math.random() * .5}s"></i>`).join('');
+    setTimeout(() => c.innerHTML = '', 4500);
+  }
+  const tick = () => { $('clock').textContent = 'Live · ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }); };
+  tick(); setInterval(tick, 1000);
+  function reset() {
+    mine = null; $('q').hidden = false; $('p').hidden = true; $('opts').className = 'opts'; $('msg').textContent = '';
+    $('opts').querySelectorAll('button').forEach(b => b.className = '');
+    ['st-me', 'st-them'].forEach(id => { $(id).className = 'st wait'; $(id).textContent = '⏳'; });
+  }
+  $('d-right').onclick = () => { samRight = true; $('d-right').className = 'on'; $('d-wrong').className = ''; };
+  $('d-wrong').onclick = () => { samRight = false; $('d-wrong').className = 'on'; $('d-right').className = ''; };
+  $('d-reset').onclick = reset; $('skip').onclick = () => prize(false, false); $('next').onclick = reset;
+  const sp = new URLSearchParams(location.search);
+  if (sp.get('show') === 'prize') prize(true, true);
+</script>
+</body>
+</html>

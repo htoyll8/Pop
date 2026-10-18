@@ -127,6 +127,27 @@
   @keyframes press { 0%,60%,100% { transform:none; } 70% { transform:translateY(4px); box-shadow:none; } }
   .booth.big { padding:18px 26px; display:block; }
   .booth.big b { font-size:24px; display:block; } .booth span { display:block; font-size:15px; color:var(--muted); font-weight:700; margin-top:4px; }
+  .acc { display:flex; flex-direction:column; align-items:center; }
+  .clock { position:relative; width:128px; height:128px; margin-bottom:-6px; z-index:3; }
+  .clock svg { width:100%; height:100%; rotate:-90deg; }
+  .clock circle { fill:#fff; stroke-width:9; }
+  .clock .trk { stroke:#f1f3f6; }
+  .clock .left { fill:none; stroke:#f28bb3; stroke-linecap:round; stroke-dasharray:276.5; }
+  .clock .ce { position:absolute; left:0; right:0; top:24px; text-align:center; font-size:30px; line-height:1; animation:tip 1s ease-in-out infinite; }
+  .clock b { position:absolute; left:0; right:0; top:62px; text-align:center; font-size:24px; font-weight:900; font-variant-numeric:tabular-nums; }
+  .clock.low .left { stroke:#e8463c; }
+  @keyframes tip { 0%,80% { rotate:0deg; } 90% { rotate:180deg; } 100% { rotate:180deg; } }
+  .acc .duo img { width:min(30vw, 118px); }
+  .who2 { position:relative; display:inline-block; }
+  .who2:first-child { rotate:-8deg; margin-right:-10px; } .who2:last-child { rotate:8deg; margin-left:-10px; }
+  .who2 img { rotate:0deg !important; margin:0 !important; animation:none !important; }
+  .ok { position:absolute; right:4px; bottom:6px; font-style:normal; font-size:30px; scale:0; transition:scale .4s cubic-bezier(.2,1.6,.4,1);
+        filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff); }
+  .ok.on { scale:1; }
+  .acc-b { position:relative; overflow:hidden; margin-top:14px; animation:none; }
+  .acc-b span { position:relative; }
+  .acc-b .fill { position:absolute; left:0; top:0; bottom:0; width:0; background:rgba(255,255,255,.28); }
+  .acc-b.press { transform:translateY(4px); box-shadow:none; }
   .meet { display:flex; flex-direction:column; align-items:center; gap:22px; }
   .meet .phone { width:min(36vw, 140px); }
   .phone { position:relative; width:min(42vw, 170px); aspect-ratio:9/17; border-radius:28px; background:#2f3b45; padding:10px; rotate:-6deg; box-shadow:0 14px 24px rgba(47,59,69,.25); animation:floatt 2.6s ease-in-out infinite; }
@@ -173,11 +194,15 @@
   </section>
 
   <section class="cd c3b">
-    <div class="art"><div><div class="duo"><span class="spark">🫧</span><img class="stk" data-seed="tour-me" alt=""><img class="stk" data-seed="pal-4" alt=""></div>
-      <div class="pill">Let's go</div></div></div>
+    <div class="art"><div class="acc">
+      <div class="clock"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" class="trk"/><circle cx="50" cy="50" r="44" class="left" id="ring"/></svg>
+        <span class="ce">⏳</span><b id="clock-t">2:00</b></div>
+      <div class="duo"><span class="who2"><img class="stk" data-seed="tour-me" alt=""><i class="ok" id="ok1">✅</i></span><span class="who2"><img class="stk" data-seed="pal-4" alt=""><i class="ok" id="ok2">✅</i></span></div>
+      <div class="pill acc-b" id="acc-b"><span>Accept</span></div>
+    </div></div>
     <div class="num">Step 3</div>
-    <h1>You both say Let's go</h1>
-    <p>You each have 2 minutes. Only tap it if you'll go. They're on their way too.</p>
+    <h1>You both tap Accept</h1>
+    <p>You each have 2 minutes. Only accept if you'll go, because they're on their way too.</p>
   </section>
 
   <section class="cd c4">
@@ -308,6 +333,20 @@
     cycle();
   }
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) cycle();
+  // card 3: the 2-minute clock runs (sped up); you accept, then they do
+  (async () => {
+    const ring = document.getElementById('ring'), t = document.getElementById('clock-t'), clock = ring.closest('.clock'), btn = document.getElementById('acc-b');
+    const show = sec => { t.textContent = Math.floor(sec / 60) + ':' + String(Math.floor(sec % 60)).padStart(2, '0'); ring.style.strokeDashoffset = 276.5 * (1 - sec / 120); clock.classList.toggle('low', sec < 30); };
+    for (;;) {
+      ['ok1', 'ok2'].forEach(id => document.getElementById(id).classList.remove('on')); show(120); await wait(600);
+      await anim(1500, k => show(120 - k * 40));
+      btn.classList.add('press'); await wait(160); btn.classList.remove('press'); document.getElementById('ok1').classList.add('on');
+      await anim(1500, k => show(80 - k * 45));
+      document.getElementById('ok2').classList.add('on');
+      await wait(2200);
+    }
+  })();
+
 </script>
 </body>
 </html>

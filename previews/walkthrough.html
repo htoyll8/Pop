@@ -1,0 +1,1478 @@
+<!doctype html>
+<html lang="en">
+<head><base href="../">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#2f3b45; --muted:#6b7a86; --green:#6cc070; --green2:#57a35b; --pink:#f28bb3; --purple:#6a7be8; --purple2:#5a6bd8; --blue:#318bcf; --blue2:#2873ab; --lav:#e6e9ff; --card:#f6f8fa; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#fff; color:var(--ink); font:17px/1.45 "Nunito",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; font-weight:600; min-height:100dvh; display:flex; flex-direction:column; }
+  main { flex:1; display:flex; flex-direction:column; padding:28px 22px; max-width:440px; margin:0 auto; width:100%; }
+  .screen { display:none; } .screen.on { display:flex; flex-direction:column; min-height:calc(100dvh - 56px); }
+  .top { text-align:center; padding-top:30px; }
+  h1 { font-size:32px; line-height:1.12; margin:0 0 8px; font-weight:900; letter-spacing:-.01em; }
+  .sub { color:var(--muted); font-size:18px; margin:0 0 10px; font-weight:600; }
+  .alias { font-weight:900; color:var(--ink); }
+  .stage { flex:1; display:grid; place-items:center; position:relative; min-height:240px; }
+  .bottom { padding-bottom:12px; }
+  input { width:100%; padding:15px 16px; border-radius:16px; border:2px solid #e6ebef; background:#fff; color:var(--ink); font:inherit; font-size:17px; margin:0 0 14px; text-align:center; }
+  input:focus { outline:none; border-color:var(--blue); }
+  button { width:100%; padding:17px; border:0; border-radius:18px; font:inherit; font-size:19px; font-weight:900; color:#fff; background:var(--blue); margin:0 0 12px; box-shadow:0 5px 0 var(--blue2); letter-spacing:.01em; }
+  button.link.inline { padding:2px 8px; margin:0; font-size:18px; vertical-align:baseline; }
+  button.link { width:auto; display:inline-block; background:transparent; color:var(--blue2); box-shadow:none; padding:10px 14px; font-size:16px; margin-top:8px; }
+  button.secondary { background:#fff; color:var(--muted); box-shadow:0 5px 0 #e6ebef; border:2px solid #e6ebef; }
+  button:active { transform:translateY(3px); box-shadow:none; }
+  button:disabled { opacity:.45; box-shadow:none; transform:none; }
+  .status { font-size:15px; color:var(--muted); min-height:1.4em; text-align:center; }
+  .err { color:#d64a5a; font-size:14px; margin-top:8px; min-height:1.2em; text-align:center; }
+  footer { text-align:center; color:#9aa7b1; font-size:12px; padding:12px; }
+  /* welcome: big character, flat */
+  .hero { font-size:120px; line-height:1; filter:drop-shadow(0 12px 12px rgba(0,0,0,.12)); position:relative; z-index:1; }
+  /* waiting: character bobs, dots bounce */
+  .bob { animation:bob 2.2s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform:translateY(0) rotate(-4deg); } 50% { transform:translateY(-16px) rotate(4deg); } }
+  .dots { display:flex; gap:10px; justify-content:center; margin-top:18px; }
+  .dots i { width:12px; height:12px; border-radius:50%; background:var(--blue); animation:bounce 1.2s ease-in-out infinite; }
+  .dots i:nth-child(2) { animation-delay:.15s; } .dots i:nth-child(3) { animation-delay:.3s; }
+  @keyframes bounce { 0%,100% { transform:translateY(0); opacity:.5; } 50% { transform:translateY(-10px); opacity:1; } }
+  .avatar { width:150px; height:150px; border-radius:50%; background:#f1f3ff; object-fit:cover; }
+  .hero-img { position:relative; z-index:1; filter:drop-shadow(0 12px 12px rgba(0,0,0,.12)); }
+  .faces img { width:64px; height:64px; border-radius:50%; background:#fff; margin:0 6px; }
+  /* waiting: you (big, at the bottom) blow bubble gum; each pop sends people up in pink bubbles */
+  #s-wait.on { position:fixed; top:0; right:0; bottom:0; left:0; background:#fff; overflow:hidden; text-align:center; min-height:0; padding-top:calc(env(safe-area-inset-top) + 72px); }
+  #s-wait h1 { font-size:31px; font-weight:800; margin:0; }
+  #s-wait .wt-top { position:relative; z-index:6; padding:0 22px; }
+  #s-wait .back { position:absolute; left:6px; top:calc(env(safe-area-inset-top) + 2px); z-index:9; width:44px; height:44px; padding:0; margin:0;
+                  border-radius:50%; background:transparent; box-shadow:none; color:var(--ink); display:grid; place-items:center; }
+  .sky { position:absolute; top:100px; right:0; bottom:0; left:0; z-index:1; pointer-events:none; }
+  .bub { position:absolute; width:var(--s); height:var(--s); margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2); border-radius:50%;
+         background:radial-gradient(circle at 32% 28%, rgba(255,255,255,.95) 0 9%, rgba(255,255,255,0) 10%), radial-gradient(circle, rgba(255,236,244,.45) 58%, rgba(255,143,189,.45) 100%);
+         border:1.5px solid rgba(240,111,164,.6); box-shadow:inset 0 0 10px rgba(255,255,255,.7); }
+  .bub img { position:absolute; top:12%; right:12%; bottom:12%; left:12%; width:76%; height:76%; }
+  .pop { position:absolute; width:var(--s); height:var(--s); margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2); pointer-events:none; }
+  .pop i { position:absolute; left:50%; top:50%; width:4px; height:12px; margin:-6px -2px; border-radius:2px; background:#ff8fbd; transform:rotate(var(--a)); animation:spark .45s ease-out forwards; }
+  .pop b { position:absolute; top:0; right:0; bottom:0; left:0; border-radius:50%; border:2px solid rgba(240,111,164,.8); animation:ring .35s ease-out forwards; }
+  @keyframes spark { to { transform:rotate(var(--a)) translateY(calc(var(--s) * -.75)); opacity:0; } }
+  @keyframes ring { to { transform:scale(1.5); opacity:0; } }
+  .me { position:absolute; left:50%; bottom:calc(env(safe-area-inset-bottom) + 40px); width:240px; height:300px; margin-left:-120px; z-index:4; }
+  .me .fig { position:relative; filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 8px 10px rgba(47,59,69,.22)); }
+  .me .face { display:block; position:relative; z-index:2; width:240px; height:240px; }
+  .me .face.o { position:absolute; left:0; top:0; opacity:0; }
+  .me.blowing .face:not(.o) { opacity:0; } .me.blowing .face.o { opacity:1; }
+  .me .collar { position:absolute; left:50%; top:172px; width:230px; margin-left:-115px; z-index:1; }
+  .me .collar svg { display:block; width:100%; height:auto; overflow:visible; }
+  /* your name on a "HELLO my name is" sticker, clipped to your collar */
+  .name-tag { position:absolute; left:56%; top:204px; z-index:3; transform:rotate(-6deg) scale(.66); transform-origin:0 0; overflow:visible;
+              min-width:80px; background:#fff; border:2px solid #e8463c; border-radius:8px; text-align:center; box-shadow:0 6px 14px rgba(47,59,69,.18); }
+  .nt-band { background:#e8463c; color:#fff; padding:2px 8px 3px; line-height:1; border-radius:5px 5px 0 0; }
+  .nt-band b { display:block; font-size:11px; font-weight:900; letter-spacing:.08em; }
+  .nt-band small { display:block; font-size:6.3px; font-weight:800; letter-spacing:.04em; margin-top:1px; }
+  .nt-name { font-family:"Caveat", "Nunito", sans-serif; font-weight:700; font-size:18.5px; line-height:1; color:#1f2a33; padding:2px 9px 3px; white-space:nowrap; }
+  .name-tag .clip { position:absolute; left:50%; top:-11px; width:20px; height:13px; margin-left:-10px; border-radius:3px; background:linear-gradient(#e6eaee, #b9c1c9); border:2px solid #111; box-sizing:border-box; z-index:2; }
+  .name-tag .clip::after { content:""; position:absolute; left:50%; top:-8px; width:8px; height:8px; margin-left:-4px; border:2px solid #111; border-bottom:0; border-radius:6px 6px 0 0; box-sizing:border-box; }
+  .gum { position:absolute; left:39%; top:160px; width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%; z-index:5; transform:scale(0); overflow:hidden;
+         background:#ff8fbd; border:.4px solid #111; box-shadow:inset -1.2px -1.2px 0 #f06fa4; }
+  .gum::before { content:""; position:absolute; left:22%; top:18%; width:26%; height:16%; border-radius:50%; background:#fff; transform:rotate(-30deg); }
+  .gum::after { content:""; position:absolute; left:52%; top:20%; width:8%; height:8%; border-radius:50%; background:#fff; }
+  .found { position:absolute; left:0; right:0; height:0; z-index:8; pointer-events:none; }
+  .found .who { position:absolute; left:0; right:0; top:0; translate:0 -50%; text-align:center; animation:popin .5s cubic-bezier(.2,1.6,.4,1) both; }
+  .found .who img { width:180px; filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
+  .found .who b { display:block; font-size:24px; font-weight:900; color:var(--ink); }
+  #wt-pool { position:absolute; left:0; right:0; bottom:calc(env(safe-area-inset-bottom) + 12px); z-index:6; margin:0; font-size:15px; font-weight:700; }
+  .wt-still { position:absolute; left:24px; right:24px; bottom:calc(env(safe-area-inset-bottom) + 36px); z-index:6; text-align:center; color:var(--muted); font-size:14px; font-weight:700; animation:popin .4s ease both; }
+  #s-wait.matched .wt-still { display:none; }
+  #wt-box { transition:transform .6s cubic-bezier(.3,1.2,.5,1), bottom .4s; }
+  #s-wait.long .me { bottom:calc(env(safe-area-inset-bottom) + 92px); }
+  .wt-still button.link { display:block; width:auto; margin:4px auto 0; padding:6px 10px; font-size:16px; font-weight:900; color:var(--blue2); background:none; box-shadow:none; }
+  #wt-pool b { display:inline-block; font-weight:900; color:var(--ink); }
+  #wt-pool b.bump { animation:popin .4s cubic-bezier(.2,1.6,.4,1); }
+  @media (prefers-reduced-motion: reduce) { .found .who, #wt-pool b.bump { animation:none; } }
+
+  /* How Pop works + fine print (for anyone not signed up yet) */
+  #s-rules.on { position:fixed; top:0; right:0; bottom:0; left:0; background:#fff; z-index:6; display:flex; flex-direction:column; min-height:0; overflow-y:auto;
+                padding:calc(env(safe-area-inset-top) + 34px) 24px calc(env(safe-area-inset-bottom) + 14px); }
+  #s-rules .w-logo { display:block; width:96px; height:auto; margin:34px auto 8px; flex-shrink:0; }
+  #s-rules h1 { font-size:clamp(26px, 8.4vw, 36px); font-weight:900; text-align:center; margin:0 0 30px; line-height:1.1; white-space:nowrap; flex-shrink:0; }
+  .steps { list-style:none; margin:0 auto; padding:0; max-width:380px; width:100%; display:flex; flex-direction:column; gap:18px; }
+  .steps li { display:flex; gap:14px; align-items:flex-start; font-size:19px; font-weight:900; line-height:1.3; color:var(--ink); }
+  .steps li i { font-style:normal; font-size:30px; line-height:1; flex:none; width:38px; text-align:center; }
+  .steps li small { display:block; font-size:16px; font-weight:600; color:var(--muted); margin-top:2px; }
+  button.link.tour-link { display:block; margin:18px auto 0; color:var(--blue2); font-weight:800; font-size:16px; }
+  #s-rules .grow { flex:1; min-height:16px; }
+  .fine-box { max-width:400px; width:100%; margin:0 auto 12px; padding:12px 14px; border-radius:14px; background:#f4f6f8; color:var(--muted); font-size:13.5px; font-weight:600; line-height:1.4; }
+  .fine-box b { display:block; color:var(--ink); font-size:13px; font-weight:900; text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px; }
+  #s-rules .fine { text-align:center; color:var(--muted); font-size:12.5px; font-weight:600; line-height:1.4; max-width:360px; margin:0 auto 12px; flex-shrink:0; }
+  #s-rules .tour-link { margin-top:12px; flex-shrink:0; }
+  /* the tour: three swipeable cards */
+  button.link.tour-skip { position:absolute; top:calc(env(safe-area-inset-top) + 8px); right:10px; z-index:2; color:var(--muted); font-weight:800; margin:0; }
+  .tour { flex:1; display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; margin:0 -24px; }
+  .tour::-webkit-scrollbar { display:none; }
+  .card-t { flex:0 0 100%; scroll-snap-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 28px; box-sizing:border-box; }
+  .card-t h2 { font-size:28px; font-weight:900; margin:18px 0 6px; line-height:1.15; }
+  .card-t p { color:var(--muted); font-size:17px; font-weight:600; line-height:1.45; margin:0; max-width:320px; }
+  .pic { position:relative; width:260px; height:260px; }
+  .pic img { filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 6px 8px rgba(47,59,69,.2)); }
+  .pic1 .you { position:absolute; left:50%; bottom:0; width:150px; margin-left:-75px; animation:floatt 2.4s ease-in-out infinite; }
+  .pic1 .gum-t { position:absolute; left:calc(50% - 21px); bottom:28px; width:46px; height:46px; border-radius:50%; background:#ff8fbd; border:2px solid #111; box-shadow:inset -3px -3px 0 #f06fa4; animation:gumt 2.6s ease-in-out infinite; }
+  .pic1 .b { position:absolute; width:58px; height:58px; border-radius:50%; border:1.5px solid rgba(240,111,164,.6);
+             background:radial-gradient(circle at 32% 28%, #fff 0 9%, rgba(255,255,255,0) 10%), radial-gradient(circle, rgba(255,236,244,.45) 58%, rgba(255,143,189,.45) 100%); animation:floatt 3s ease-in-out infinite; }
+  .pic1 .b img { position:absolute; top:12%; right:12%; bottom:12%; left:12%; width:76%; filter:none; }
+  .pic1 .b1 { left:6px; top:40px; } .pic1 .b2 { left:110px; top:0; animation-delay:-1s; } .pic1 .b3 { right:4px; top:56px; animation-delay:-2s; }
+  @keyframes floatt { 50% { translate:0 -8px; } }
+  @keyframes gumt { 0%,100% { transform:scale(.55); } 60% { transform:scale(1.15); } }
+  .duo-t { display:flex; justify-content:center; margin-top:10px; }
+  .duo-t img { width:124px; } .duo-t img:first-child { rotate:-7deg; margin-right:-10px; } .duo-t img:last-child { rotate:7deg; margin-left:-10px; }
+  .mini-booth { margin:16px auto 0; padding:10px 14px; border-radius:16px; background:#f4f6f8; width:210px; }
+  .mini-booth small { display:block; font-size:12px; font-weight:900; color:#e8463c; text-transform:uppercase; letter-spacing:.06em; }
+  .mini-booth b { font-size:18px; font-weight:900; }
+  .mini-rate { display:flex; justify-content:center; gap:8px; margin-top:20px; }
+  .mini-rate span { font-size:28px; width:50px; height:50px; display:grid; place-items:center; border-radius:14px; background:#f4f6f8; border:2px solid transparent; }
+  .mini-rate span.on { background:#fff; border-color:var(--blue); }
+  .dots-t { display:flex; justify-content:center; gap:8px; margin:10px 0 14px; }
+  .dots-t i { width:8px; height:8px; border-radius:50%; background:#d9dee3; transition:width .25s, background .25s; }
+  .dots-t i.on { width:22px; border-radius:4px; background:var(--blue); }
+  @media (prefers-reduced-motion: reduce) { .pic1 .b, .pic1 .you { animation:none; } }
+
+  /* the tutorial: one full-screen card per step, swipe sideways (replaces the rules list) */
+  #s-tour.on { position:fixed; top:0; right:0; bottom:0; left:0; background:#fff; z-index:6; display:block; min-height:0; overflow:hidden; padding:0; }
+  #s-tour .k-deck { position:absolute; inset:0; display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; }
+  #s-tour .k-deck::-webkit-scrollbar { display:none; }
+  #s-tour .k-cd { flex:0 0 100%; height:100%; scroll-snap-align:center; scroll-snap-stop:always; position:relative; display:flex; flex-direction:column; align-items:center; text-align:center;
+        padding:calc(env(safe-area-inset-top) + 64px) 28px calc(env(safe-area-inset-bottom) + 118px); overflow:hidden; }
+  #s-tour .k-art { flex:1; width:100%; display:grid; place-items:center; position:relative; min-height:0; }
+  #s-tour .k-cd h1 { font-size:clamp(30px, 9vw, 40px); font-weight:900; line-height:1.08; margin:0 0 10px; letter-spacing:-.01em; }
+  #s-tour .k-cd p { font-size:18px; font-weight:700; line-height:1.4; margin:0 auto; max-width:320px; color:var(--muted); }
+  #s-tour .k-num { font-size:13px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; opacity:.55; margin-bottom:8px; }
+  #s-tour .k-cd.k-last { padding-bottom:calc(env(safe-area-inset-bottom) + 176px); }
+  #s-tour .k-chrome { position:absolute; inset:0; pointer-events:none; z-index:5; }
+  #s-tour .k-bars { position:absolute; top:calc(env(safe-area-inset-top) + 16px); left:20px; right:20px; display:flex; gap:6px; }
+  #s-tour .k-bars i { flex:1; height:5px; border-radius:3px; background:rgba(47,59,69,.16); overflow:hidden; position:relative; }
+  #s-tour .k-bars i b { position:absolute; inset:0; width:0; background:var(--ink); border-radius:3px; transition:width .35s; }
+  #s-tour .k-bars i.done b { width:100%; }
+  #s-tour button.k-skip { position:absolute; top:calc(env(safe-area-inset-top) + 30px); right:14px; width:auto; margin:0; pointer-events:auto; background:none; box-shadow:none; border:0; font-weight:800; font-size:16px; color:var(--ink); opacity:.6; padding:8px 10px; }
+  #s-tour button.k-back { position:absolute; top:calc(env(safe-area-inset-top) + 28px); left:6px; width:44px; height:44px; padding:0; margin:0; border:0; background:none; box-shadow:none; color:var(--ink); pointer-events:auto; display:grid; place-items:center; }
+  #s-tour .k-next { position:absolute; left:20px; right:20px; bottom:calc(env(safe-area-inset-bottom) + 22px); pointer-events:auto; max-width:420px; margin:0 auto; }
+  #s-tour .k-fine { font-size:12.5px; font-weight:700; color:var(--muted); line-height:1.4; max-width:330px; margin:0 auto 12px; text-align:center; opacity:0; transition:opacity .3s; }
+  #s-tour .k-chrome.last .k-fine { opacity:1; }
+  #s-tour .k-stk { filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 8px 10px rgba(47,59,69,.22)); }
+  @keyframes k-float { 50% { translate:0 -10px; } }
+  /* 1. pick an avatar */
+  #s-tour .k-pick { position:relative; width:min(66vw, 260px); }
+  #s-tour .k-pick img { width:100%; display:block; transition:opacity .18s; }
+  #s-tour .k-dice { position:absolute; right:-4px; bottom:6px; font-size:48px; rotate:12deg; animation:k-roll 2.4s ease-in-out infinite;
+          filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff) drop-shadow(0 5px 6px rgba(47,59,69,.30)); }
+  @keyframes k-roll { 0%,70%,100% { rotate:12deg; } 80% { rotate:-30deg; } 90% { rotate:40deg; } }
+  /* 2. the waiting screen in miniature: you blow gum, people float up, one comes back and pops */
+  #s-tour .k-sky { position:absolute; inset:0; pointer-events:none; }
+  #s-tour .k-mw { position:absolute; left:50%; bottom:0; width:240px; height:300px; margin-left:-120px; transform:scale(.8); transform-origin:50% 100%; }
+  #s-tour .k-me { position:absolute; inset:0; }
+  #s-tour .k-me .fig { position:relative; filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 8px 10px rgba(47,59,69,.22)); }
+  #s-tour .k-me .face { display:block; position:relative; z-index:2; width:240px; height:240px; }
+  #s-tour .k-me .face.o { position:absolute; left:0; top:0; opacity:0; }
+  #s-tour .k-me.blowing .face:not(.o) { opacity:0; } #s-tour .k-me.blowing .face.o { opacity:1; }
+  #s-tour .k-me .collar { position:absolute; left:50%; top:172px; width:230px; margin-left:-115px; z-index:1; }
+  #s-tour .k-me .collar svg { display:block; width:100%; height:auto; overflow:visible; }
+  #s-tour .k-me .gum { position:absolute; left:39%; top:160px; }
+  #s-tour .k-sky .bub { margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2); }
+  #s-tour .k-sky .pop { position:absolute; width:var(--s); height:var(--s); margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2); }
+  #s-tour .k-who { position:absolute; z-index:10; left:0; right:0; text-align:center; translate:0 -50%; animation:popin .5s cubic-bezier(.2,1.6,.4,1) both; transition:opacity .4s; }
+  #s-tour .k-who img { width:170px; filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
+  #s-tour .k-who b { display:block; font-size:20px; font-weight:900; color:var(--ink); margin-top:-4px; }
+  /* 3. the 2-minute clock wraps both of you; the time sits on the ring like a tag */
+  #s-tour .k-clock { position:relative; width:min(74vw, 270px, 34vh); aspect-ratio:1; display:grid; place-items:center; }
+  #s-tour .k-clock svg { position:absolute; inset:0; width:100%; height:100%; rotate:-90deg; }
+  #s-tour .k-clock .trk { fill:#fff5f9; stroke:#f6e3ec; stroke-width:5; }
+  #s-tour .k-clock .left { fill:none; stroke:#f28bb3; stroke-width:5; stroke-linecap:round; stroke-dasharray:289; transition:stroke .4s; }
+  #s-tour .k-clock.low .left { stroke:#e8463c; }
+  #s-tour .k-pair { position:relative; display:flex; justify-content:center; align-items:flex-start; gap:10px; margin-top:-10%; }
+  #s-tour .k-pair > span { display:inline-flex; flex-direction:column; align-items:center; }
+  #s-tour .k-pair img { width:calc(min(74vw, 270px, 34vh) * .38); display:block; }
+  #s-tour .k-pair > span:first-child img { rotate:-7deg; } #s-tour .k-pair > span:last-child img { rotate:7deg; }
+  #s-tour .k-mini { margin-top:8px; padding:5px 11px; min-width:76px; text-align:center; border-radius:11px; background:var(--blue); color:#fff; font-size:13.5px; font-weight:900; box-shadow:0 3px 0 var(--blue2); white-space:nowrap; transition:background .25s, box-shadow .25s; }
+  #s-tour .k-mini.press { transform:translateY(3px); box-shadow:none; }
+  #s-tour .k-mini.on { background:var(--green); box-shadow:0 3px 0 var(--green2); }
+  #s-tour .k-time { position:absolute; left:50%; bottom:-16px; translate:-50% 0; display:flex; align-items:center; gap:6px; padding:6px 14px 6px 10px; border-radius:20px; background:#fff;
+          border:2.5px solid #f28bb3; box-shadow:0 4px 10px rgba(47,59,69,.12); }
+  #s-tour .k-clock.low .k-time { border-color:#e8463c; }
+  #s-tour .k-time i { font-style:normal; font-size:22px; line-height:1; display:inline-block; animation:k-tip 2s ease-in-out infinite; }
+  #s-tour .k-time b { font-size:20px; font-weight:900; font-variant-numeric:tabular-nums; }
+  @keyframes k-tip { 0%,85% { rotate:0deg; } 100% { rotate:180deg; } }
+  /* 4. meet at a booth */
+  #s-tour .k-meet { display:flex; flex-direction:column; align-items:center; gap:18px; }
+  #s-tour .k-booth { padding:12px 18px; border-radius:18px; background:#f4f6f8; display:inline-block; }
+  #s-tour .k-booth small { display:block; font-size:12px; font-weight:900; color:#e8463c; text-transform:uppercase; letter-spacing:.08em; }
+  #s-tour .k-booth b { font-size:20px; font-weight:900; }
+  #s-tour .k-phone { position:relative; width:min(28vw, 112px, 15vh); aspect-ratio:9/17; border-radius:20px; background:#2f3b45; padding:7px; rotate:-6deg; box-shadow:0 14px 24px rgba(47,59,69,.25); animation:k-float 2.6s ease-in-out infinite; }
+  #s-tour .k-phone img { width:100%; height:100%; object-fit:contain; border-radius:14px; background:var(--purple); padding:8px; }
+  #s-tour .k-wave { position:absolute; right:-30px; top:-10px; font-size:40px; transform-origin:70% 90%; animation:k-wave 1.6s ease-in-out infinite; }
+  @keyframes k-wave { 0%,100% { rotate:0deg; } 25% { rotate:-18deg; } 50% { rotate:12deg; } }
+  /* 5. tell us how it went */
+  #s-tour .k-duo { display:flex; justify-content:center; align-items:flex-end; }
+  #s-tour .k-duo img { width:min(38vw, 150px); }
+  #s-tour .k-duo img:first-child { rotate:-8deg; margin-right:-14px; animation:k-float 2.8s ease-in-out infinite; }
+  #s-tour .k-duo img:last-child { rotate:8deg; margin-left:-14px; animation:k-float 2.8s ease-in-out infinite -1.4s; }
+  #s-tour .k-rate { display:flex; justify-content:center; gap:10px; margin-top:20px; }
+  #s-tour .k-rate span { font-size:32px; width:58px; height:58px; display:grid; place-items:center; border-radius:16px; background:#f4f6f8; border:2px solid transparent; }
+  #s-tour .k-rate span.on { background:#fff; border-color:var(--blue); transform:scale(1.1); }
+  /* 6. be kind */
+  #s-tour .k-kind { font-size:min(34vw, 140px); line-height:1; animation:k-float 2.6s ease-in-out infinite; }
+  @media (max-height:700px) { #s-tour .k-mini { font-size:12px; padding:4px 9px; min-width:66px; } #s-tour .k-cd h1 { font-size:30px; } #s-tour .k-cd p { font-size:16px; }
+    #s-tour .k-cd { padding-bottom:calc(env(safe-area-inset-bottom) + 108px); } }
+  @media (prefers-reduced-motion: reduce) { #s-tour * { animation:none !important; } }
+
+  /* match found: stays on the bubble screen; the heading and count fade, you shift up, Let's go slides in */
+  #s-wait .wt-top, #wt-pool { transition:opacity .4s; }
+  #s-wait.matched .wt-top, #s-wait.matched #wt-pool, #s-wait.matched .back { opacity:0; pointer-events:none; }
+  .me { transition:transform .6s cubic-bezier(.3,1.2,.5,1); }
+  .found { transition:top .6s cubic-bezier(.3,1.2,.5,1); }
+  .go-note { margin:2px 0 0; text-align:center; color:var(--muted); font-size:14px; font-weight:700; }
+  .go { position:absolute; left:16px; right:16px; bottom:calc(env(safe-area-inset-bottom) + 10px); z-index:9; transform:translateY(calc(100% + 160px)); opacity:0; visibility:hidden;
+        transition:transform .5s cubic-bezier(.3,1.3,.5,1), opacity .25s, visibility 0s .5s; }
+  #s-wait.matched .go { transform:none; opacity:1; visibility:visible; transition:transform .5s cubic-bezier(.3,1.3,.5,1), opacity .25s, visibility 0s; }
+  /* the big bottom button; a timer fills it left to right */
+  button.tbtn { position:relative; overflow:hidden; width:100%; max-width:420px; margin:0 auto; display:block; padding:0; height:62px; border-radius:18px; }
+  button.tbtn:disabled { opacity:.85; box-shadow:0 5px 0 var(--blue2); }
+  /* buttons and text never get squeezed when a screen is short; the pictures give way instead */
+  button.tbtn, button.under, .revbox, .rv-q, .rate3, #s-on .booth, #s-on .names, .flow h1, .flow .hd { flex-shrink:0; }
+  .flow.on { overflow-y:auto; }
+  /* short screens (e.g. Safari with the "From …" bar, or opened inside another app) */
+  @media (max-height:720px) {
+    #s-rules .w-logo { width:64px; margin:0 auto 4px; } #s-rules h1 { margin-bottom:16px; } .steps { gap:10px; } .steps li { font-size:18px; } .steps li small { font-size:15px; }
+    #s-on h1 { font-size:40px; }
+    #s-on .logo { width:50px; margin-bottom:4px; }
+    .pair2 { margin-top:14px; }
+    .pair2 img { width:min(40vw, 150px); }
+    .flow .grow { min-height:12px; }
+    #s-on .booth { margin-top:14px; padding:12px 16px; }
+    #s-bc { padding-top:calc(env(safe-area-inset-top) + 26px); }
+    #s-bc h1 { font-size:30px; }
+    #s-bc.rev .bc { transform:scale(.56); margin-top:-62px; margin-bottom:-92px; }
+    .rv-q { margin-top:16px; }
+  }
+  .tbtn .fill { position:absolute; top:0; right:0; bottom:0; left:0; background:rgba(255,255,255,.22); transform:scaleX(0); transform-origin:left center; }
+  .tbtn .lbl { position:relative; display:flex; justify-content:space-between; align-items:center; height:100%; padding:0 22px; font-size:20px; font-weight:900; }
+  .tbtn .lbl.mid { justify-content:center; }
+  .tbtn .lbl small { font-size:17px; font-weight:800; opacity:.85; font-variant-numeric:tabular-nums; }
+  button.under { display:block; width:auto; margin:6px auto 0; padding:8px; background:none; box-shadow:none; color:var(--muted); font-weight:800; font-size:16px; }
+  /* It's on! and You're both here!: white, full screen */
+  .flow.on { position:fixed; top:0; right:0; bottom:0; left:0; background:#fff; z-index:5; display:flex; flex-direction:column; text-align:center; min-height:0;
+             padding:calc(env(safe-area-inset-top) + 34px) 16px calc(env(safe-area-inset-bottom) + 10px); }
+  .flow .grow { flex:1; }
+  #s-on .logo { width:58px; margin:0 auto 8px; display:block; }
+  #s-on h1 { font-size:48px; font-weight:900; margin:0; line-height:1.05; }
+  .pair2 { display:flex; justify-content:center; align-items:flex-end; margin:26px 0 0; }
+  .pair2 img { width:min(50vw, 206px); height:auto; aspect-ratio:1 / 1; animation:popin .5s cubic-bezier(.2,1.6,.4,1) both;
+               filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
+  .pair2 img:first-child { rotate:-7deg; margin-right:-18px; } .pair2 img:last-child { rotate:7deg; margin-left:-18px; animation-delay:.12s; }
+  #s-on .names { display:flex; justify-content:center; gap:120px; font-weight:900; font-size:17px; margin-top:2px; }
+  #s-on .booth { margin:22px auto 0; padding:16px 18px; border-radius:20px; background:#f4f6f8; width:100%; max-width:340px; animation:popin .5s .25s cubic-bezier(.2,1.4,.4,1) both; }
+  #s-on .booth small { display:block; font-size:15px; font-weight:900; color:#e8463c; text-transform:uppercase; letter-spacing:.06em; }
+  #s-on .booth b { display:block; font-size:24px; font-weight:900; color:var(--ink); margin-top:2px; }
+  #s-on .booth span { color:var(--muted); font-size:17px; font-weight:700; }
+  #s-bc { padding-top:calc(env(safe-area-inset-top) + 64px); }
+  #s-bc .hd { display:table; margin:0 auto; }   /* the line under the heading wraps to the heading's width */
+  #s-bc .hd .sub { display:table-caption; caption-side:bottom; color:var(--muted); font-size:16px; font-weight:700; margin-top:6px; }
+  #s-bc h1 { font-size:34px; font-weight:900; margin:0; line-height:1.1; }
+  .bc { --o:min(400px, calc(100vw - 8px)); position:relative; width:var(--o); height:var(--o); margin:14px auto 0; transition:transform .5s cubic-bezier(.3,1.2,.5,1); }
+  .bc .duo2 { position:absolute; top:0; right:0; bottom:0; left:0; display:flex; align-items:center; justify-content:center; }
+  .bc .duo2 img { width:52%; height:auto; aspect-ratio:1 / 1; flex:none; animation:bob2 2.4s ease-in-out infinite;
+                  filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
+  .bc .duo2 img:first-child { rotate:-7deg; margin-right:-6%; } .bc .duo2 img:last-child { rotate:7deg; margin-left:-6%; animation-delay:-1.2s; }
+  @keyframes bob2 { 50% { translate:0 -6px; } }
+  #s-bc.rev .bc { transform:scale(.72); margin-top:-30px; margin-bottom:-60px; }
+  .revbox { display:none; width:100%; max-width:420px; margin:0 auto; animation:popin .4s cubic-bezier(.2,1.3,.4,1); }
+  #s-bc.rev .revbox { display:block; }
+  .rv-q { font-size:20px; font-weight:900; color:var(--ink); text-align:left; margin:0 2px 8px; }
+  .rate3 { display:flex; gap:8px; margin:0 0 10px; }
+  .rate3 button { flex:1; margin:0; padding:8px 4px 6px; background:#f4f6f8; color:var(--ink); box-shadow:none; border:2px solid transparent; border-radius:18px; font-size:14px; font-weight:800; }
+  .rate3 button b { display:block; font-size:34px; line-height:1.15; } .rate3 button.on { background:#fff; border-color:var(--blue); }
+  .revbox textarea { width:100%; box-sizing:border-box; border:2px solid #e6ebef; border-radius:16px; padding:12px 14px; font:inherit; font-size:16px; resize:none; margin:0 0 10px; color:var(--ink); }
+  .revbox textarea:focus { outline:none; border-color:var(--blue); }
+  @media (prefers-reduced-motion: reduce) { .bc .duo2 img, .pair2 img { animation:none; } }
+
+  /* the other person backed out: say so, then keep looking */
+  .found.out .who { animation:none; } .found.out .who img { opacity:.35; filter:grayscale(1); transition:opacity .4s, filter .4s; }
+  #s-wait.out .go { transform:translateY(calc(100% + 160px)); opacity:0; }
+  #s-on.out .booth, #s-on.out .tbtn, #s-on.out .under, #s-on.out .names { animation:none; opacity:0; transition:opacity .4s; pointer-events:none; }
+  #s-on.out h1 { visibility:hidden; }   /* the "can't make it" line goes under the avatars instead */
+  #s-on .outmsg { display:none; margin:-22px 0 0; text-align:center; font-size:30px; font-weight:900; color:var(--ink); line-height:1.1; flex-shrink:0; }
+  #s-on.out .outmsg { display:block; animation:popin .4s cubic-bezier(.2,1.4,.4,1) both; }
+  #s-on.out .pair2 img:last-child { animation:none; opacity:.35; filter:grayscale(1); transition:opacity .4s, filter .4s; }
+  /* laptops and tall screens: keep the button close under the content instead of at the far bottom */
+  @media (min-width:700px), (min-height:900px) {
+    .flow.on { justify-content:center; padding-top:24px; }
+    .flow .grow { flex:0 0 40px; }
+    .bc { --o:min(380px, calc(100vw - 8px)); }
+  }
+
+  .over { position:relative; z-index:2; }
+  .panel { background:rgba(255,255,255,.86); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); border-radius:24px; padding:22px 20px; text-align:center; box-shadow:0 14px 40px rgba(47,59,69,.14); max-width:360px; }
+  .panel h1 { margin-bottom:6px; }
+
+  /* welcome */
+  .brand { position:absolute; top:calc(env(safe-area-inset-top) + 16px); left:18px; display:flex; align-items:flex-start; gap:2px; z-index:3; }
+  .w-logo { width:88px; height:auto; display:block; }
+  .tm { font-size:11px; font-weight:800; color:var(--muted); line-height:1; margin-top:2px; }
+  #s-welcome { position:relative; padding-top:calc(env(safe-area-inset-top) + 64px); }
+  #s-welcome .stage { padding:0 0 12px; }
+  .fakecaret { position:absolute; top:50%; width:2px; height:24px; margin-top:-12px; background:var(--ink); animation:blink 1.05s steps(1) infinite; pointer-events:none; }
+  @keyframes blink { 50% { opacity:0; } }
+  .namebox input::placeholder { color:#b3bcc4; font-weight:800; }
+  .sticker { position:relative; display:inline-block; overflow:visible; padding:24px; margin:-24px; cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; }
+  .sticker:active { transform:scale(.96); }
+  .dice { position:absolute; z-index:3; right:38px; bottom:54px; font-size:40px; line-height:1; transform:rotate(-14deg);
+          filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff)
+                  drop-shadow(0 5px 6px rgba(47,59,69,.30)); }
+  .undo { position:absolute; z-index:3; left:52px; bottom:56px; width:auto; height:auto; padding:0; margin:0; background:none; box-shadow:none; transform:rotate(10deg);
+          filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff)
+                  drop-shadow(0 5px 6px rgba(47,59,69,.30)); }
+  .undo[hidden] { display:none; } .undo span { font-size:36px; line-height:1; display:block; } .undo:active { transform:rotate(10deg) scale(.9); }
+  .dice.roll { animation:roll .5s cubic-bezier(.3,1.4,.5,1); }
+  /* "Tap to pick your avatar" with a hand-drawn arrow at the dice; fades in after the demo roll, gone after the first tap */
+  .tap-hint { position:absolute; z-index:4; right:8px; bottom:100px; color:#3a4550; pointer-events:none; opacity:0; transition:opacity .35s; display:flex; flex-direction:column; align-items:flex-end; }
+  .tap-hint.show { opacity:1; animation:bob 1.6s ease-in-out infinite; }
+  .tap-word { font-weight:900; font-size:15px; line-height:1.15; text-align:right; transform:rotate(8deg); margin-right:-28px; white-space:nowrap; }
+  @media (max-width:370px) { .tap-word { font-size:13.5px; margin-right:-14px; } }
+  .tap-hint svg { width:46px; height:46px; margin-top:-2px; margin-right:6px; }
+  @keyframes bob { 0%,100% { transform:translate(0,0); } 50% { transform:translate(-3px,4px); } }
+  @media (prefers-reduced-motion: reduce) { .tap-hint.show { animation:none; } }
+  @keyframes roll { from { transform:rotate(-14deg) scale(.8); } to { transform:rotate(346deg) scale(1); } }
+  .sticker.wiggle .w-hero { animation:wiggle .7s ease-in-out; }
+  @keyframes wiggle { 0%,100% { transform:rotate(0); } 20% { transform:rotate(-7deg); } 40% { transform:rotate(6deg); } 60% { transform:rotate(-4deg); } 80% { transform:rotate(2deg); } }
+  @media (prefers-reduced-motion: reduce) { .sticker.wiggle .w-hero { animation:none; } }
+  .w-hero { display:block; margin:-24px auto; padding:24px; box-sizing:content-box; width:230px; height:230px; background:none; border-radius:0;
+            will-change:transform; transform:translateZ(0);
+            filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff)
+                    drop-shadow(0 10px 12px rgba(47,59,69,.28)); }
+  .namebox { position:relative; margin:0 0 14px; }
+  .hint { font-size:14px; color:var(--muted); text-align:left; margin:0 0 6px 4px; }
+  .namebox input { margin:0; padding-right:52px; font-weight:800; font-size:19px; text-align:left; }
+  .namebox button { position:absolute; right:6px; top:50%; transform:translateY(-50%); }
+  .back { position:absolute; top:calc(env(safe-area-inset-top) + 14px); left:14px; z-index:4; width:auto; padding:10px 16px; margin:0; font-size:16px; background:rgba(255,255,255,.9); color:var(--ink); box-shadow:0 4px 14px rgba(0,0,0,.10); border-radius:999px; }
+  /* waitlist */
+  /* front door: big logo, one line, one button */
+  #s-intro.on { min-height:calc(100dvh - 56px); }
+  #s-intro .mid { flex:1; }
+  /* the logo sits exactly where the intro animation leaves it (placed by placeIntro) */
+  #s-intro .i-logo { position:fixed; height:auto; display:block; z-index:2; }
+  #s-intro .tag { position:fixed; left:0; right:0; padding:0 24px; color:var(--muted); font-size:19px; font-weight:800; text-align:center; z-index:2; }
+  #s-intro .bottom { text-align:center; position:relative; z-index:3; }
+  /* Join the mix: words + a bouncing arrow, not a second big button */
+  button.cta-down { width:auto; display:inline-flex; flex-direction:column; align-items:center; gap:8px; background:transparent; box-shadow:none; color:var(--blue2); font-size:21px; padding:8px 24px; margin:0 0 10px; }
+  button.cta-down:active { transform:none; }
+  .cta-down .chev { width:46px; height:46px; border-radius:50%; background:var(--blue); display:grid; place-items:center; box-shadow:0 4px 0 var(--blue2); animation:nudge 1.6s ease-in-out infinite; }
+  .cta-down .chev svg { width:22px; height:22px; }
+  @keyframes nudge { 0%,100% { transform:translateY(0); } 50% { transform:translateY(7px); } }
+  #s-welcome.rise { animation:rise .45s cubic-bezier(.2,.8,.2,1); }
+  @keyframes rise { from { transform:translateY(60px); opacity:0; } to { transform:none; opacity:1; } }
+  button.link#w-bring, button.link#i-bring { display:block; margin:6px auto 0; color:var(--muted); font-weight:800; font-size:15px; }
+  .sheet-bg { position:fixed; top:0; right:0; bottom:0; left:0; background:rgba(20,24,40,.35); z-index:60; }
+  .sheet { position:fixed; left:0; right:0; bottom:0; z-index:61; background:#fff; border-radius:24px 24px 0 0; padding:10px 22px calc(env(safe-area-inset-bottom) + 20px);
+           max-width:480px; margin:0 auto; box-shadow:0 -10px 40px rgba(0,0,0,.18); animation:sheetup .3s cubic-bezier(.2,.9,.3,1); }
+  @keyframes sheetup { from { transform:translateY(100%); } to { transform:translateY(0); } }
+  .sheet .grab { width:40px; height:5px; border-radius:3px; background:#d9dee3; margin:0 auto 14px; }
+  .sheet .x { position:absolute; top:12px; right:12px; width:36px; height:36px; padding:0; margin:0; border-radius:50%; background:#f0f3f6; color:var(--muted); box-shadow:none; font-size:22px; line-height:36px; font-weight:800; }
+  .sheet .x:active { transform:none; background:#e4e9ee; }
+  .sheet.dragging { transition:none; }
+  .sheet.leaving { transition:transform .22s ease-in; }
+  .sheet h2 { font-size:26px; font-weight:900; margin:0 0 14px; padding-right:40px; text-align:left; white-space:nowrap; }
+  .roles { display:flex; gap:8px; margin:0 0 12px; }
+  .roles button { flex:1; margin:0; padding:11px 4px; font-size:15px; background:#fff; color:var(--ink); border:2px solid #e6ebef; box-shadow:none; }
+  .roles button.on { border-color:var(--blue); color:var(--blue2); background:#eef6fc; }
+  .sheet textarea { width:100%; padding:14px 16px; border-radius:16px; border:2px solid #e6ebef; font:inherit; font-size:16px; margin:0 0 14px; resize:none; color:var(--ink); }
+  .sheet input { text-align:left; }
+  .sheet input + input { margin-top:-4px; }
+  .follow { display:flex; justify-content:center; align-items:center; gap:6px; margin:2px auto 0; padding:6px; width:max-content; color:var(--ink); font-size:14px; font-weight:800; text-decoration:none; }
+  .minor { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:2px; font-size:14px; font-weight:800; color:var(--muted); }
+  .minor a { display:inline-flex; align-items:center; gap:6px; color:var(--ink); text-decoration:none; }
+  .minor button.link { margin:0; padding:6px 2px; font-size:14px; font-weight:800; color:var(--muted); }
+  .sheet .sub a { color:var(--blue2); font-weight:800; }
+  .wl-fine { color:var(--muted); font-size:13px; font-weight:600; margin:-4px 2px 12px; }
+  .sheet textarea:focus { outline:none; border-color:var(--blue); }
+  /* load screen */
+  .splash { position:fixed; top:0; right:0; bottom:0; left:0; z-index:100; background:#fff; display:grid; place-items:center; transition:opacity .45s ease; }
+  .splash.out { opacity:0; pointer-events:none; }
+  .splash { overflow:hidden; }
+  .splash img { position:absolute; left:50%; top:45%; /* lifted 5%; placeIntro matches */ transform:translate(-50%,-50%); width:130vw; max-width:none; height:auto;
+    -webkit-mask-image:linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%);
+            mask-image:linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%); }
+  @media (min-width:700px) { .splash img { width:min(130vw, 820px); } }
+  /* purple screens: logo + paired stickers */
+  .purple .brand .w-logo { filter: drop-shadow(0 4px 6px rgba(20,24,60,.35)); }
+  .purple .brand .tm { color:rgba(255,255,255,.85); }
+  .screen.purple .top { padding-top:calc(env(safe-area-inset-top) + 70px); }
+  .screen.purple .stage { flex:1 0 auto; min-height:230px; }
+  .duo { display:flex; align-items:flex-start; justify-content:center; gap:0; position:relative; }
+  .duo .who { display:flex; flex-direction:column; align-items:center; width:150px; animation:popin .55s cubic-bezier(.2,1.5,.4,1) both; }
+  .duo .who:nth-child(1) { transform-origin:bottom right; animation-delay:.05s; }
+  .duo .who:nth-child(3) { transform-origin:bottom left; animation-delay:.18s; }
+  .duo .who img { width:140px; height:140px;
+                  filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(20,24,60,.30)); }
+  .duo .who:nth-child(1) img { transform:rotate(-7deg); }
+  .duo .who:nth-child(3) img { transform:rotate(7deg); }
+  .duo .who span { margin-top:2px; font-weight:900; font-size:17px; color:#fff; text-align:center; line-height:1.15; }
+  .duo .shake { font-size:44px; line-height:1; align-self:center; margin:-30px -14px 0; z-index:2; transform:rotate(-12deg);
+                animation:popin .5s .32s cubic-bezier(.2,1.6,.4,1) both;
+                filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff) drop-shadow(0 5px 6px rgba(20,24,60,.30)); }
+  /* faux push notification */
+  .toast { position:fixed; top:calc(env(safe-area-inset-top) + 12px); left:12px; right:12px; z-index:50; display:flex; gap:14px; align-items:center;
+           background:#fff; color:var(--ink); border-radius:20px; padding:14px 16px; box-shadow:0 18px 50px rgba(0,0,0,.28); transform:translateY(-140%); transition:transform .35s cubic-bezier(.2,.9,.3,1.2); }
+  .toast.show { transform:translateY(0); }
+  .toast[hidden] { display:none; }
+  .toast img { width:56px; height:56px; border-radius:50%; flex:none; }
+  .toast-btn { margin:0 0 0 auto; flex:none; width:auto; padding:10px 16px; border-radius:999px; background:var(--blue); color:#fff; font-weight:900; font-size:15px; box-shadow:none; }
+  .toast-t { font-weight:900; font-size:18px; } .toast-s { color:var(--muted); font-size:15px; }
+  .purple .arrived { background:#fff; color:var(--purple2); border-radius:20px; padding:16px; text-align:center; font-weight:900; font-size:20px; margin:0 0 14px; animation:popin .5s cubic-bezier(.2,.9,.3,1.3); }
+  @keyframes popin { from { transform:scale(.6); opacity:0; } to { transform:scale(1); opacity:1; } }
+  /* purple screens (match, booth) */
+  .screen.purple.on { position:fixed; top:0; right:0; bottom:0; left:0; background:var(--purple); color:#fff; padding:20px 22px calc(env(safe-area-inset-bottom) + 16px); overflow-y:auto; display:flex; flex-direction:column; }
+  .purple .stage { min-height:150px; }
+  .purple .top { padding-top:18px; }
+  .purple button { padding:15px; margin-bottom:10px; }
+  .purple .sub, .purple .status { color:rgba(255,255,255,.85); }
+  .purple .alias { color:#fff; }
+  .purple .card { background:rgba(255,255,255,.14); color:#fff; }
+  .purple .card .loc { color:rgba(255,255,255,.8); }
+  .purple button { background:var(--lav); color:var(--purple2); box-shadow:0 5px 0 #b9c0f0; }
+  .purple button.secondary { background:transparent; color:#fff; border:0; box-shadow:none; font-weight:800; }
+  .purple .err { color:#ffd3d8; }
+  .rain { position:absolute; top:0; right:0; bottom:0; left:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .screen.purple .top, .screen.purple .stage, .screen.purple .bottom, .screen.purple .brand { position:relative; z-index:1; }
+  .screen.purple .brand { position:absolute; z-index:4; }
+  .rain i { position:absolute; top:-30px; display:block; opacity:.95; animation:fall var(--dur) var(--delay) cubic-bezier(.3,.1,.6,1) forwards; }
+  .rain i.sq { width:11px; height:11px; border-radius:2px; }
+  .rain i.strip { width:6px; height:16px; border-radius:2px; }
+  .rain i.dot { width:10px; height:10px; border-radius:50%; }
+  .rain i.tri { width:14px; height:12px; clip-path:polygon(50% 0, 100% 100%, 0 100%); }
+  .rain i.sq2 { width:20px; height:10px; background:none !important; border:3px solid var(--c); border-radius:10px 10px 0 0; border-bottom:0; }
+  @keyframes fall { 0% { transform:translate(0,0) rotate(0); opacity:1; }
+                    85% { opacity:.9; }
+                    100% { transform:translate(var(--dx), calc(100vh + 60px)) rotate(var(--rot)); opacity:0; } }
+  @media (prefers-reduced-motion: reduce) { .rain i { animation:none; display:none; } }
+  .confetti i { position:absolute; width:12px; height:12px; transform:rotate(45deg); border-radius:2px; opacity:.95; }
+  .pair { display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; z-index:1; }
+  .pair .heart { font-size:44px; line-height:1; }
+  .pair .names { font-size:22px; font-weight:800; text-align:center; }
+  .pair .faces { font-size:64px; line-height:1; letter-spacing:.2em; }
+  .card { background:var(--card); border-radius:22px; padding:18px 20px; margin:0 0 14px; text-align:center; }
+  .card .where { font-size:20px; font-weight:900; }
+  .card .loc { color:var(--muted); }
+
+  /* walkthrough: the trivia step after you're both here */
+  #s-trivia.on { position:fixed; inset:0; background:#fff; z-index:6; display:flex; flex-direction:column; align-items:center; text-align:center; min-height:0; overflow-y:auto;
+    padding:calc(env(safe-area-inset-top) + 26px) 22px calc(env(safe-area-inset-bottom) + 16px); }
+  #s-trivia h1 { font-size:34px; font-weight:900; margin:0; line-height:1.08; }
+  #s-trivia .t-sub { color:var(--muted); font-size:16px; font-weight:700; margin-top:4px; }
+  #s-trivia .t-duo { display:flex; justify-content:center; gap:22px; margin:12px 0 2px; }
+  #s-trivia .t-duo > div { position:relative; display:flex; flex-direction:column; align-items:center; }
+  #s-trivia .t-duo img { width:min(36vw, 140px); filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 8px 10px rgba(47,59,69,.22)); }
+  #s-trivia .t-duo > div:first-child img { rotate:-6deg; } #s-trivia .t-duo > div:last-child img { rotate:6deg; }
+  #s-trivia .t-duo b { font-size:15px; font-weight:900; margin-top:2px; }
+  #s-trivia .t-st { position:absolute; right:-4px; top:0; font-size:32px; line-height:1; animation:popin .4s cubic-bezier(.2,1.6,.4,1) both;
+    filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff); }
+  #s-trivia .t-card { flex:1 0 auto; display:flex; flex-direction:column; width:100%; max-width:380px; margin-top:12px; padding:20px 18px 16px; border-radius:22px; background:#6a7be8; color:#fff; box-shadow:0 10px 22px rgba(106,123,232,.35); animation:popin .5s .1s cubic-bezier(.2,1.4,.4,1) both; }
+  #s-trivia .t-card small { display:block; font-size:14px; font-weight:900; color:#ffd166; text-transform:uppercase; letter-spacing:.07em; }
+  #s-trivia .t-q { font-size:23px; font-weight:900; line-height:1.2; margin:6px 0 14px; }
+  #s-trivia .t-opts { flex:1; display:flex; flex-direction:column; justify-content:center; gap:12px; }
+  #s-trivia .t-opts button { width:100%; margin:0; padding:14px; border-radius:16px; border:3px solid transparent; font-size:19px; font-weight:900; color:var(--ink); text-align:center; }
+  #s-trivia .t-opts button:nth-child(1) { background:#ff9ec4; box-shadow:0 4px 0 #d9709b; }
+  #s-trivia .t-opts button:nth-child(2) { background:#ffd166; box-shadow:0 4px 0 #d9a93c; }
+  #s-trivia .t-opts button:nth-child(3) { background:#8fdc8a; box-shadow:0 4px 0 #64b45f; }
+  #s-trivia .t-opts button:nth-child(4) { background:#8cc8ff; box-shadow:0 4px 0 #5e9fd9; }
+  #s-trivia .t-opts button.right { border-color:#fff; transform:scale(1.03); } #s-trivia .t-opts button.right::before { content:'✓ '; }
+  #s-trivia .t-opts button.wrong { background:#e8463c !important; color:#fff; box-shadow:0 4px 0 #c2352d !important; } #s-trivia .t-opts button.wrong::before { content:'✗ '; }
+  #s-trivia .t-opts.done button:not(.right):not(.wrong) { opacity:.4; }
+  #s-trivia .t-msg { min-height:1.4em; margin-top:10px; font-size:17px; font-weight:900; }
+  #s-trivia .t-note { margin:12px 0 0; color:var(--muted); font-size:14.5px; font-weight:700; line-height:1.4; max-width:330px; }
+  #s-trivia .t-note b { color:var(--ink); }
+  #s-trivia .t-ticket { position:relative; width:100%; max-width:340px; margin-top:16px; padding:22px 18px 18px; border-radius:24px; color:#fff; overflow:hidden;
+    background:linear-gradient(135deg, #f28bb3, #6a7be8); box-shadow:0 12px 24px rgba(106,123,232,.3); animation:popin .6s cubic-bezier(.2,1.5,.4,1) both; }
+  #s-trivia .t-ticket.small { background:linear-gradient(135deg, #6cc070, #318bcf); }
+  #s-trivia .t-ticket::after { content:""; position:absolute; top:0; bottom:0; width:60%; left:-80%; background:linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent); animation:t-shine 2.4s ease-in-out infinite; }
+  @keyframes t-shine { to { left:130%; } }
+  #s-trivia .t-ticket small { display:block; font-size:13px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; opacity:.9; }
+  #s-trivia .t-big { font-size:52px; font-weight:900; line-height:1; margin:6px 0 2px; }
+  #s-trivia .t-at { font-size:18px; font-weight:800; }
+  #s-trivia .t-live { display:inline-flex; align-items:center; gap:7px; margin-top:14px; padding:6px 12px; border-radius:12px; background:rgba(255,255,255,.22); font-size:15px; font-weight:900; font-variant-numeric:tabular-nums; }
+  #s-trivia .t-live i { width:9px; height:9px; border-radius:50%; background:#7dff9a; animation:t-blink 1s ease-in-out infinite; }
+  @keyframes t-blink { 50% { opacity:.25; } }
+  #s-trivia .grow { flex:1; min-height:4px; }
+  #s-trivia [hidden] { display:none !important; }
+  .t-confetti { position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:30; }
+  .t-confetti i { position:absolute; top:-20px; width:9px; height:14px; border-radius:2px; animation:t-fall linear forwards; }
+  @keyframes t-fall { to { transform:translateY(110vh) rotate(720deg); } }
+  .walk-tag { position:fixed; left:50%; top:calc(env(safe-area-inset-top) + 4px); translate:-50% 0; z-index:40; opacity:.8; padding:3px 10px; border-radius:10px; background:rgba(47,59,69,.75); color:#fff; font-size:11px; font-weight:800; white-space:nowrap; pointer-events:none; }
+  @media (max-height:800px) { #s-trivia h1 { font-size:28px; } #s-trivia .t-duo img { width:112px; } #s-trivia .t-duo { margin:6px 0 0; } #s-trivia .t-opts { gap:9px; }
+    #s-trivia .t-opts button { padding:10px 12px; font-size:17px; } #s-trivia .t-card { padding:14px 14px 10px; } #s-trivia .t-q { font-size:20px; margin-bottom:10px; } #s-trivia .t-note { margin-top:8px; font-size:13.5px; } }
+</style>
+</head>
+<body>
+<div id="splash" class="splash"><img id="splash-v" alt="pop" src="media/pop-intro.gif"></div>
+<div id="toast" class="toast" hidden><img id="toast-av" alt=""><div><div class="toast-t" id="toast-t"></div><div class="toast-s" id="toast-s"></div></div><button type="button" class="toast-btn" id="toast-reload" hidden>Reload</button></div>
+<main>
+  <!-- 0. Front door: logo, tagline, Join the mix; organizers find the waitlist here -->
+  <section id="s-intro" class="screen">
+    <div class="mid"><img class="i-logo" id="i-logo" src="media/pop-logo-header.png" alt="pop"><div class="tag" id="i-tag">Your next friend is one booth away.</div></div>
+    <div class="bottom">
+      <button type="button" class="cta-down" id="i-go">Join the mix<span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg></span></button>
+      <button type="button" class="link bring" id="i-bring">Running an event? Bring Pop!</button>
+    </div>
+  </section>
+
+  <!-- 1. Welcome: logo on top, avatar as the star, name pre-filled, one button -->
+  <!-- 0.5 How Pop works + the fine print: for anyone not signed up yet -->
+  <section id="s-rules" class="screen">
+    <img class="w-logo" src="media/pop-logo-header.png" alt="Pop">
+    <h1>Welcome to the mix</h1>
+    <ul class="steps">
+      <li><i>🫧</i><span>Pick an avatar<small>No photos, no profile. Just you.</small></span></li>
+      <li><i>🔍</i><span>Pop finds you a match<small>Someone here, right now, also looking to meet.</small></span></li>
+      <li><i>📍</i><span>Meet at a booth<small>Only tap Accept if you'll go. They're on their way too.</small></span></li>
+      <li><i>💛</i><span>Be kind<small>Tell us if anything feels off.</small></span></li>
+    </ul>
+    <div class="grow"></div>
+    <p class="fine">By entering, you agree to meet only at the spot Pop picks. Leave anytime. We only keep your nickname, avatar, and matches.</p>
+    <button class="tbtn" id="rules-ok"><span class="lbl mid"><span>Enter the mix</span></span></button>
+    <button type="button" class="link tour-link" id="tour-open">Check out the tutorial</button>
+  </section>
+
+  <!-- 0.6 The tutorial: full-screen cards, swipe or tap Next; the first thing new people see -->
+  <section id="s-tour" class="screen">
+    <div class="k-deck" id="k-deck">
+      <section class="k-cd">
+        <div class="k-art"><div class="k-pick"><img class="k-stk" id="k-pick" alt=""><span class="k-dice" aria-hidden="true">🎲</span></div></div>
+        <div class="k-num">Step 1</div>
+        <h1>Pick your Popatar</h1>
+        <p>Your cartoon self. No photos, no profile.<br>Tap the die to change it.</p>
+      </section>
+      <section class="k-cd">
+        <div class="k-art" id="k-wart"><div class="k-sky" id="k-sky"></div>
+          <div class="k-mw"><div class="k-me" id="k-box"><div class="fig"><div class="collar" id="k-collar"></div><img class="face" id="k-me" alt=""><img class="face o" id="k-me-o" alt=""></div><div class="gum" id="k-gum"></div></div></div>
+        </div>
+        <div class="k-num">Step 2</div>
+        <h1>Pop finds you a match</h1>
+        <p>Someone here who's also looking to meet. Keep Pop open, or leave your number and we'll text you.</p>
+      </section>
+      <section class="k-cd">
+        <div class="k-art"><div class="k-clock" id="k-clock"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" class="trk"/><circle cx="50" cy="50" r="46" class="left" id="k-ring"/></svg>
+          <div class="k-pair"><span><img class="k-stk" data-seed="tour-me" alt=""><b class="k-mini" id="k-ok1">Accept</b></span><span><img class="k-stk" data-seed="pal-4" alt=""><b class="k-mini" id="k-ok2">Accept</b></span></div>
+          <div class="k-time"><i aria-hidden="true">⏳</i><b id="k-clock-t">2:00</b></div></div></div>
+        <div class="k-num">Step 3</div>
+        <h1>You both tap Accept</h1>
+        <p>You each have 2 minutes. Only accept if you'll go, because they're on their way too.</p>
+      </section>
+      <section class="k-cd">
+        <div class="k-art"><div class="k-meet"><div class="k-booth"><small>Meet at</small><b>A booth at this event</b></div>
+          <div class="k-phone"><img data-seed="pal-4" alt=""><span class="k-wave" aria-hidden="true">👋</span></div></div></div>
+        <div class="k-num">Step 4</div>
+        <h1>Meet at a booth</h1>
+        <p>Pop picks one of the vendor booths here. When you get there, show your Popatar on your phone so they can find you. Then say hi!</p>
+      </section>
+      <section class="k-cd">
+        <div class="k-art"><div><div class="k-duo"><img class="k-stk" data-seed="tour-me" alt=""><img class="k-stk" data-seed="pal-4" alt=""></div>
+          <div class="k-rate"><span>😕</span><span>🙂</span><span class="on">🤩</span></div></div></div>
+        <div class="k-num">Step 5</div>
+        <h1>Tell us how it went</h1>
+        <p>One tap after you meet. It helps Pop get better.</p>
+      </section>
+      <section class="k-cd k-last">
+        <div class="k-art"><div class="k-kind" aria-hidden="true">💛</div></div>
+        <h1>Be kind</h1>
+        <p>Tell us if anything feels off.</p>
+      </section>
+    </div>
+    <div class="k-chrome" id="k-chrome">
+      <div class="k-bars" id="k-bars"></div>
+      <button type="button" class="k-back" id="k-back" aria-label="Back"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button type="button" class="k-skip" id="k-skip">Skip</button>
+      <div class="k-next">
+        <p class="k-fine">By entering, you agree to meet only at the spot Pop picks. Leave anytime. We only keep your nickname, Popatar, and matches.</p>
+        <button class="tbtn" id="k-next"><span class="lbl mid"><span id="k-next-t">Next</span></span></button>
+      </div>
+    </div>
+  </section>
+  <section id="s-welcome" class="screen">
+    <div class="brand" id="w-brand"><img class="w-logo" id="w-logo" src="media/pop-logo-header.png" alt="pop"><span class="tm">™</span></div>
+    <div class="stage"><div class="sticker" id="w-shuffle" role="button" tabindex="0" aria-label="Change your look"><img class="avatar hero-img w-hero" id="w-avatar" alt=""><span class="dice" id="w-tapme" aria-hidden="true">🎲</span><button type="button" class="undo" id="w-undo" aria-label="Previous avatar" hidden><span aria-hidden="true">🔄</span></button><span class="tap-hint" id="w-hint" aria-hidden="true"><span class="tap-word">Tap to pick<br>your Popatar</span><svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M42 4 C 50 22, 44 40, 26 54"/><path d="M38 53 L 26 54 L 30 43"/></svg></span></div></div>
+    <div class="bottom">
+      <div class="hint">This is the name others will see.</div>
+      <div class="namebox"><input id="w-name" autocomplete="off" aria-label="Your name"><span class="fakecaret" id="w-caret"></span><button type="button" class="link inline" id="w-shuffle-name" aria-label="New nickname">↻</button></div>
+      <button id="w-go">Find my match</button>
+      <div class="err" id="w-err"></div>
+      <button type="button" class="link bring" id="w-bring">Want Pop at your next event?</button>
+    </div>
+  </section>
+
+  <!-- 2. Waiting: you blow bubble gum; each pop sends people in the room floating up in bubbles -->
+  <section id="s-wait" class="screen">
+    <button type="button" class="back" id="wt-back" aria-label="Back"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="wt-top"><h1>Finding your match…</h1><div class="err" id="wt-err"></div></div>
+    <div class="sky" id="wt-sky" aria-hidden="true"></div>
+    <div class="me" id="wt-box" aria-hidden="true">
+      <div class="fig"><div class="collar" id="wt-collar"></div><img class="face" id="wt-me" alt=""><img class="face o" id="wt-me-o" alt=""></div>
+      <div class="name-tag"><i class="clip"></i><div class="nt-band"><b>HELLO</b><small>my name is</small></div><div class="nt-name" id="wt-alias"></div></div>
+      <div class="gum" id="wt-gum"></div>
+    </div>
+    <div class="status" id="wt-pool"></div>
+    <div class="wt-still" id="wt-still" hidden>People are still trickling in.<button type="button" class="link" id="tx-open">Text me when someone joins</button></div>
+    <div class="go" id="go"><button class="tbtn" id="go-btn"><i class="fill" id="go-fill"></i><span class="lbl"><span id="go-t">Accept</span><small id="go-c">2:00</small></span></button><button class="under" id="go-no">Not this time</button><p class="go-note" id="go-note" hidden>They stepped away. We're texting them now.</p><div class="err" id="go-err"></div></div>
+  </section>
+
+  <!-- 3. It's on: both said yes; now the spot -->
+  <section id="s-on" class="screen flow">
+    <img class="logo" src="media/pop-logo-header.png" alt="pop"><h1>It's on!</h1>
+    <div class="pair2"><img id="on-me" alt=""><img id="on-them" alt=""></div><div class="names"><span>You</span><span id="on-name"></span></div><p class="outmsg" id="on-out"></p>
+    <div class="booth"><small>Meet at</small><b id="on-where"></b><span id="on-kind"></span></div>
+    <div class="grow"></div>
+    <button class="tbtn" id="here-btn"><i class="fill" id="here-fill"></i><span class="lbl"><span id="here-t">I'm here</span><small id="here-c">7:00</small></span></button>
+    <button class="under" id="here-no">Can't make it</button><div class="err" id="on-err"></div>
+  </section>
+
+  <!-- walkthrough: vendor trivia, each of you gets a different question -->
+  <section id="s-trivia" class="screen">
+    <div id="t-ask">
+      <h1>You're both here!</h1>
+      <div class="t-sub">at <b id="t-where"></b></div>
+    </div>
+    <div id="t-won" hidden><h1 id="t-h"></h1><div class="t-sub" id="t-sub"></div></div>
+    <div class="t-duo">
+      <div><img id="t-me" alt=""><b>You</b><span class="t-st" id="t-st-me" hidden></span></div>
+      <div><img id="t-them" alt=""><b id="t-name"></b><span class="t-st" id="t-st-them" hidden></span></div>
+    </div>
+    <div class="t-card" id="t-card">
+      <small>Ask the vendor</small>
+      <div class="t-q" id="t-q"></div>
+      <div class="t-opts" id="t-opts"></div>
+      <div class="t-msg" id="t-msg"></div>
+    </div>
+    <div class="t-ticket" id="t-ticket" hidden><small>Pop prize</small><div class="t-big" id="t-big"></div><div class="t-at" id="t-at"></div><div class="t-live"><i></i><span id="t-clock"></span></div></div>
+    <p class="t-note" id="t-note"></p>
+    <div class="grow"></div>
+    <button class="tbtn" id="t-next" hidden><span class="lbl mid"><span>How'd it go?</span></span></button>
+    <button class="under" id="t-skip">Skip the trivia</button>
+  </section>
+  <div class="t-confetti" id="t-confetti"></div>
+  <div class="walk-tag">Walkthrough: Sam is pretend</div>
+
+  <!-- 4. You're both here: hold up your phone; Found them! turns this screen into the review -->
+  <section id="s-bc" class="screen flow">
+    <div class="hd"><h1 id="bc-h">You're both here!</h1><div class="sub" id="bc-sub"></div></div>
+    <div class="bc"><div class="duo2"><img id="bc-me" alt=""><img id="bc-them" alt=""></div></div>
+    <div class="grow"></div>
+    <div class="revbox">
+      <div class="rv-q">How'd it go?</div>
+      <div class="rate3" id="rv-rate"><button type="button" data-r="1"><b>😕</b>Meh</button><button type="button" data-r="2"><b>🙂</b>Good</button><button type="button" data-r="3"><b>🤩</b>Amazing</button><button type="button" data-r="0"><b>👻</b>No show</button></div>
+      <textarea id="rv-txt" rows="2" placeholder="Anything else? (optional)"></textarea>
+      <button class="tbtn" id="rv-again"><span class="lbl mid"><span>Match again</span></span></button>
+      <button class="under" id="rv-done">I'm done for now</button>
+    </div>
+  </section>
+
+
+</main>
+<div class="sheet-bg" id="bug-bg" hidden></div>
+<div class="sheet" id="bug" hidden role="dialog" aria-modal="true" aria-labelledby="bug-title">
+  <div class="grab"></div><button type="button" class="x" id="bug-x" aria-label="Close">×</button>
+  <div id="bug-form">
+    <h2 id="bug-title">Report a bug</h2>
+    <textarea id="bug-txt" rows="4" placeholder="What went wrong? What were you doing?"></textarea>
+    <button id="bug-go">Send</button>
+    <div class="err" id="bug-err"></div>
+  </div>
+  <div id="bug-done" hidden><h2>Thank you!</h2><p class="sub">That helps a lot. If Pop is still stuck, try reloading the page.</p><button id="bug-close">Done</button></div>
+</div>
+<div class="sheet-bg" id="tx-bg" hidden></div>
+<div class="sheet" id="tx" hidden role="dialog" aria-modal="true" aria-labelledby="tx-title">
+  <div class="grab"></div><button type="button" class="x" id="tx-x" aria-label="Close">×</button>
+  <div id="tx-form">
+    <h2 id="tx-title">Get a text</h2>
+    <p class="sub">We'll text you once when we find you a match. Tap the link to see who.</p>
+    <input id="tx-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Phone number">
+    <p class="wl-fine">One text from Pop. Msg &amp; data rates may apply.</p>
+    <button id="tx-go">Text me</button>
+    <div class="err" id="tx-err"></div>
+  </div>
+  <div id="tx-done" hidden><h2>You're in the queue!</h2><p class="sub">We'll text you when you've got a match. You can close Pop until then.</p><button id="tx-close">Done</button></div>
+</div>
+<div class="sheet-bg" id="wl-bg" hidden></div>
+<div class="sheet" id="wl" hidden role="dialog" aria-modal="true" aria-labelledby="wl-title">
+  <div class="grab"></div><button type="button" class="x" id="wl-x" aria-label="Close">×</button>
+  <div id="wl-form">
+    <h2 id="wl-title">Join the waitlist</h2>
+    <div class="roles" id="wl-roles">
+      <button type="button" data-role="attendee" class="on">Attendee</button><button type="button" data-role="organizer">Organizer</button><button type="button" data-role="vendor">Vendor</button>
+    </div>
+    <input id="wl-email" type="email" inputmode="email" autocomplete="email" placeholder="Email">
+    <input id="wl-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Phone number (optional)">
+    <p class="wl-fine" id="wl-sms" hidden>By adding your number, you agree to get texts from Pop about upcoming events. Msg &amp; data rates may apply. Reply STOP to opt out.</p>
+    <textarea id="wl-note" rows="3" placeholder="Tell us about your event (optional)"></textarea>
+    <button id="wl-go">Count me in</button>
+    <a class="follow" href="https://www.instagram.com/popmeeter/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><defs><radialGradient id="iggw" cx="30%" cy="107%" r="150%"><stop offset="0" stop-color="#fdf497"/><stop offset=".05" stop-color="#fdf497"/><stop offset=".45" stop-color="#fd5949"/><stop offset=".6" stop-color="#d6249f"/><stop offset=".9" stop-color="#285AEB"/></radialGradient></defs><rect x="1" y="1" width="22" height="22" rx="6.5" fill="url(#iggw)"/><rect x="5.5" y="5.5" width="13" height="13" rx="4" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="3.1" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="16.3" cy="7.7" r="1" fill="#fff"/></svg>Follow @popmeeter</a>
+    <div class="err" id="wl-err"></div>
+  </div>
+  <div id="wl-done" hidden><h2>Thanks!</h2><p class="sub">We'll be in touch. Follow <a href="https://www.instagram.com/popmeeter/" target="_blank" rel="noopener">@popmeeter</a> for updates.</p><button id="wl-close">Done</button></div>
+</div>
+
+
+<script>
+// ---- walkthrough: a pretend backend. Nothing is saved; "Sam" is simulated. ----
+(() => {
+  const SAM = new URLSearchParams(location.search).get('sam') === 'wrong' ? 'wrong' : 'right';
+  window.WALK_SAM_RIGHT = SAM === 'right';
+  let me = null, m = null, searchT0 = null;
+  const now = () => new Date().toISOString();
+  const ok = data => Promise.resolve({ data, error: null });
+  const card = () => ({ id: m.id, my_slot: 1, partner_alias: 'Sam', partner_avatar: 'pal-4', partner_self_at: m.sam_here,
+    vendor_name: 'Hygro Receptions', vendor_location: 'Booth 12, by the stage', status_1: m.s1, status_2: m.s2,
+    self_at: m.me_here, partner_at: null, met_at: null, created_at: m.created, queued: false });
+  const rpcs = {
+    join_event: a => (me = { id: 'me', alias: a.p_alias, name: a.p_name, avatar_seed: a.p_avatar }),
+    update_profile: a => Object.assign(me, { name: a.p_name, avatar_seed: a.p_avatar, alias: a.p_alias }),
+    pool_size: () => 4,
+    find_match: () => { if (m && m.s1 !== 'passed') return { id: m.id };
+      searchT0 = searchT0 || Date.now(); if (Date.now() - searchT0 < 3500) return null;
+      searchT0 = null; m = { id: 'walk-' + Date.now(), s1: 'pending', s2: 'pending', created: now() }; return { id: m.id }; },
+    match_card: () => card(),
+    respond_to_match: a => { m.s1 = a.p_action; if (a.p_action === 'confirmed') setTimeout(() => { if (m) m.s2 = 'confirmed'; }, 2500);
+      const r = { person_2: 'sam', status_1: m.s1, status_2: m.s2 }; if (a.p_action !== 'confirmed') m = null; return r; },
+    check_in: () => { m.me_here = now(); setTimeout(() => { if (m) m.sam_here = now(); }, 3000); return null; },
+    leave_pool: () => { m = null; searchT0 = null; return null; },
+  };
+  const chain = { select() { return chain; }, order() { return chain; }, limit() { return chain; }, then(f, r) { return ok([]).then(f, r); } };
+  const client = {
+    auth: { getSession: () => ok({ session: { user: { id: 'me' } } }), signInAnonymously: () => ok({ session: { user: { id: 'me' } } }), signOut: () => ok(null) },
+    from: () => chain,
+    rpc: (name, args) => new Promise(res => setTimeout(() => res({ data: rpcs[name] ? rpcs[name](args || {}) : null, error: null }), 120)),
+  };
+  window.supabase = { createClient: () => client };
+  window.POP_CONFIG = {};
+})();
+</script>
+<script>
+(() => {
+  const cfg = window.POP_CONFIG;
+  const sb = supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey);
+  const $ = id => document.getElementById(id);
+  const show = name => { document.querySelectorAll('.screen').forEach(s => s.classList.remove('on')); $('s-' + name).classList.add('on'); 
+    const purple = $('s-' + name).classList.contains('purple');
+    setChrome(purple ? '#6a7be8' : '#ffffff');
+    if (purple) rain($('s-' + name).querySelector('.rain'));
+  };
+  // Safari picks its top/bottom bar color from the page and the theme-color tag; replacing the tag (not editing it) and a tiny scroll make it re-read
+  let chromeColor = null;
+  function setChrome(col) { /* page stays white; purple screens extend under Safari's bars instead */ }
+  const CONF = ['#7be07f', '#ff5c9a', '#ffb347', '#4fd8ff', '#ffe066', '#ffffff'];
+  const SHAPES = ['sq', 'strip', 'strip', 'dot', 'tri', 'sq2'];
+  function rain(box) {
+    if (!box) return; box.innerHTML = '';
+    for (let i = 0; i < 42; i++) {
+      const p = document.createElement('i'); const c = CONF[i % CONF.length];
+      p.className = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+      p.style.background = c; p.style.setProperty('--c', c);
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.setProperty('--dx', ((Math.random() - .5) * 80).toFixed(0) + 'px');
+      p.style.setProperty('--rot', ((Math.random() < .5 ? -1 : 1) * (360 + Math.random() * 540)).toFixed(0) + 'deg');
+      p.style.setProperty('--dur', (2.4 + Math.random() * 1.8).toFixed(2) + 's');
+      p.style.setProperty('--delay', (Math.random() * 1.2).toFixed(2) + 's');
+      box.appendChild(p);
+    }
+    setTimeout(() => { if (box) box.innerHTML = ''; }, 5500);
+  }
+  const YES_SECS = 120, QUEUED_SECS = 480, WALK_SECS = 420, POLL_MS = 3000;   // 2 min to say yes, 7 min to get to the spot
+  const ANIMAL = { Otter:'🦦', Heron:'🪶', Lynx:'🐱', Falcon:'🦅', Fox:'🦊', Badger:'🦡', Ibis:'🦩', Marten:'🐾', Puffin:'🐧', Stoat:'🐿️', Wren:'🐦', Yak:'🐂' };
+  const emojiFor = alias => ANIMAL[(alias || '').split(' ').pop()] || '🫧';
+  // hairstyles whose artwork stays inside the frame (8 of 45 run off the edge and look boxed as stickers)
+  const HAIR = 'long01,long02,long03,long04,long05,long07,long08,long10,long11,long12,long13,long14,long15,long19,long20,long21,long23,long24,long25,long26,short01,short02,short03,short04,short05,short06,short07,short08,short09,short10,short11,short12,short13,short14,short17,short18,short19';
+  const AV = 'https://api.dicebear.com/9.x/adventurer/svg?hair=' + HAIR + '&backgroundColor=cfe5f6,ffd4d0,fbd2e1,fff0b3&backgroundType=solid&radius=50&seed=';
+  const avatarFor = seed => AV + encodeURIComponent(seed || 'stranger');
+  function renderDuo(el, c) {
+    const mine = me.name || me.alias, theirs = c.partner_alias;
+    const who = (seed, name) => { const d = document.createElement('div'); d.className = 'who';
+      const im = document.createElement('img'); im.alt = ''; im.src = avatarBare(seed); const s = document.createElement('span'); s.textContent = name;
+      d.append(im, s); return d; };
+    el.innerHTML = ''; el.append(who(me.avatar_seed || me.alias, mine));
+    if (theirs) { const hs = document.createElement('div'); hs.className = 'shake'; hs.textContent = '🤝'; el.append(hs, who(c.partner_avatar || theirs, theirs)); }
+  }
+  const avatarBare = seed => 'https://api.dicebear.com/9.x/adventurer/svg?hair=' + HAIR + '&seed=' + encodeURIComponent(seed || 'stranger');   // no background, for the sticker look
+  // ---- waiting screen: you chew bubble gum; each pop sends a few people up in pink bubbles ----
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const newFace = () => avatarBare('orbit-' + Math.random().toString(36).slice(2, 9));
+  const facePool = Array.from({ length: 7 }, () => { const im = new Image(); im.src = newFace(); return im; });   // preloaded, so bubbles never show blank
+  const face = () => { const src = facePool[0].src; facePool.push(facePool.shift()); facePool[facePool.length - 1].src = newFace(); return src; };
+  const sky = $('wt-sky'), box = $('wt-box'), gum = $('wt-gum'), live = new Set();
+  const skyPos = el => { const r = el.getBoundingClientRect(), o = sky.getBoundingClientRect(); return { x: r.left - o.left + r.width / 2, y: r.top - o.top + r.height / 2, w: r.width }; };
+  function burst(x, y, s) {
+    const p = document.createElement('div'); p.className = 'pop'; p.style.cssText = `left:${x}px;top:${y}px;--s:${s}px`;
+    p.innerHTML = '<b></b>' + [0, 45, 90, 135, 180, 225, 270, 315].map(a => `<i style="--a:${a}deg"></i>`).join(''); sky.append(p); setTimeout(() => p.remove(), 500);
+  }
+  // one person in a bubble, drifting up from (x,y) with a wobble, popping somewhere near the top
+  function release(x, y, dx) {
+    const s = Math.round(50 + Math.random() * 28), b = document.createElement('div'); b.className = 'bub'; b.style.setProperty('--s', s + 'px'); b._s = s;
+    b.innerHTML = '<img alt="" src="' + face() + '">'; sky.append(b); live.add(b);
+    const top = 40 + Math.random() * 120, d = (4200 + Math.random() * 2200) * (calm ? 1.9 : 1), t0 = performance.now(), ph = Math.random() * 6, sway = calm ? 3 : 12;
+    (function step(t) {
+      if (!b.isConnected || b._taken) return;
+      const k = Math.min(1, (t - t0) / d), e = 1 - Math.pow(1 - k, 1.6);
+      b._x = x + dx * e + Math.sin(ph + k * 9) * sway; b._y = y + (top - y) * e;
+      b.style.left = b._x + 'px'; b.style.top = b._y + 'px';
+      if (calm) { b.style.opacity = Math.min(1, k * 5, (1 - k) * 4); }   // fade in and out, no pop
+      else b.style.transform = `scale(${Math.min(1, .25 + k * 4)})`;
+      if (k < 1) requestAnimationFrame(step); else { if (!calm) burst(b._x, b._y, s); b.remove(); live.delete(b); }
+    })(t0);
+  }
+  let chewing = false, revealing = false;
+  function chew() {
+    if (!$('s-wait').classList.contains('on') || revealing) { chewing = false; return; }
+    if (calm) {   // reduced motion (e.g. some power-saving modes): no gum, just people drifting up slowly
+      chewing = true; const w = sky.clientWidth, h = sky.clientHeight;
+      release(w * (.15 + Math.random() * .7), h * .62, (Math.random() - .5) * 60);
+      return setTimeout(chew, 2400);
+    }
+    chewing = true; box.classList.add('blowing');
+    const t0 = performance.now(), d = 2600;
+    (function step(t) {
+      if (revealing || !$('s-wait').classList.contains('on')) { gum.style.transform = 'scale(0)'; box.classList.remove('blowing'); chewing = false; return; }
+      const k = Math.min(1, (t - t0) / d); gum.style.transform = `scale(${.2 + k * 7.6})`;
+      if (k < 1) return requestAnimationFrame(step);
+      const p = skyPos(gum); gum.style.transform = 'scale(0)'; box.classList.remove('blowing'); burst(p.x, p.y, p.w);
+      for (let i = 0; i < 3; i++) release(p.x + (i - 1) * 30, p.y, (i - 1) * 120 + (Math.random() - .5) * 40);
+      setTimeout(chew, 900);
+    })(t0);
+  }
+  const startChewing = () => { if (!chewing) chew(); };
+  // the match: one bubble floats into the space under the heading, grows, pops, and your match is there
+  function foundCard(seed) {
+    const f = document.createElement('div'); f.className = 'found';
+    f.innerHTML = '<div class="who"><img alt="" src="' + avatarBare(seed) + '"><b>Found them!</b></div>';
+    $('s-wait').append(f); return f;
+  }
+  function reveal(seed, done) {
+    revealing = true;
+    if (calm) return done(foundCard(seed));   // reduced motion: no bubble flight, just the card
+    const sk = sky.getBoundingClientRect(), hd = document.querySelector('#s-wait .wt-top').getBoundingClientRect(), fc = $('wt-me').getBoundingClientRect();
+    const gTop = hd.bottom - sk.top + 6, gBot = fc.top - sk.top + fc.height * .12, fit = Math.max(.75, Math.min(1, (gBot - gTop) / 250));
+    const tx = sk.width / 2, ty = gTop + (gBot - gTop) * .5;
+    let b = [...live][0];
+    if (!b) { release(tx, gBot, 0); b = [...live][0]; }
+    b._taken = true; live.delete(b); b.querySelector('img').src = avatarBare(seed);
+    const sx = b._x ?? tx, sy = b._y ?? gBot, t0 = performance.now(), d = 1300;
+    (function step(t) {
+      const k = Math.min(1, (t - t0) / d), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      b.style.left = (sx + (tx - sx) * e) + 'px'; b.style.top = (sy + (ty - sy) * e) + 'px'; b.style.transform = `scale(${1 + e * 1.6})`;
+      if (k < 1) return requestAnimationFrame(step);
+      burst(tx, ty, b._s * 2.6); b.remove();
+      const f = foundCard(seed); f.style.top = (sk.top - $('s-wait').getBoundingClientRect().top + ty) + 'px'; f.firstChild.style.scale = fit;
+      try { navigator.vibrate && navigator.vibrate([60, 40, 90]); } catch (_) {}
+      setTimeout(() => done(f), 900);
+    })(t0);
+  }
+  // you: face, the "o" mouth for blowing, a sliver of neck in your skin tone, a white collar
+  const SKINS = ['f2d3b1', 'ecad80', '9e5622', '763900'];
+  const collarSvg = skin => `<svg viewBox="0 0 230 128">
+    <g transform="translate(115 12) scale(.8) translate(-115 -22)"><path d="M78 34 L80 18 Q115 0 150 18 L152 34 Z" fill="#fff" stroke="#111" stroke-width="3.6" stroke-linejoin="round"/></g>
+    <path d="M97 -30 L97 40 L133 40 L133 -30 Z" fill="#${skin}" stroke="#111" stroke-width="3.2" stroke-linejoin="round"/>
+    <g transform="translate(115 12) scale(.8) translate(-115 -22)"><path d="M80 24 L115 50 L94 84 L64 36 Z" fill="#fff" stroke="#111" stroke-width="3.6" stroke-linejoin="round"/>
+    <path d="M150 24 L115 50 L136 84 L166 36 Z" fill="#fff" stroke="#111" stroke-width="3.6" stroke-linejoin="round"/>
+    <circle cx="115" cy="58" r="3.6" fill="#fff" stroke="#111" stroke-width="2.4"/></g></svg>`;
+  let drawnSeed = null;
+  function drawMe(seed, name) {
+    $('wt-alias').textContent = name;
+    if (seed === drawnSeed) return; drawnSeed = seed;
+    const url = avatarBare(seed); $('wt-me').src = url; $('wt-me-o').src = url + '&mouth=variant18';
+    fetch(url).then(r => r.text()).then(t => { const skin = SKINS.find(c => t.toLowerCase().includes('#' + c)) || 'ecad80'; $('wt-collar').innerHTML = collarSvg(skin); })
+      .catch(() => { $('wt-collar').innerHTML = collarSvg('ecad80'); });
+  }
+  let me = null, match = null, pollTimer = null, cardTimer = null, lastCard = null;
+
+  // ---- reports: errors are sent automatically (with context); people can add details or report what looks wrong ----
+  const APP_VERSION = 'v75';
+  const context = extra => ({ screen: (document.querySelector('.screen.on') || {}).id || null, stage: (() => { try { return stage; } catch (_) { return null; } })(),
+    ua: navigator.userAgent, w: innerWidth, h: innerHeight, calm: matchMedia('(prefers-reduced-motion: reduce)').matches, url: location.href, ...extra });
+  const sentAuto = new Set(); let autoCount = 0, promptedBug = false;
+  function report(kind, message, extra) {
+    if (kind === 'auto') { if (sentAuto.has(message) || ++autoCount > 15) return; sentAuto.add(message); }
+    try { sb.rpc('report_issue', { p_kind: kind, p_message: String(message).slice(0, 2000), p_detail: context(extra), p_version: APP_VERSION }).then(() => {}, () => {}); } catch (_) {}
+    if (kind === 'auto' && !promptedBug) { promptedBug = true; bugToast(); }
+  }
+  window.addEventListener('error', e => report('auto', (e.message || 'error') + (e.filename ? ' @' + e.filename.split('/').pop() + ':' + e.lineno : '')));
+  window.addEventListener('unhandledrejection', e => report('auto', 'promise: ' + ((e.reason && e.reason.message) || e.reason)));
+  const rpc = async (fn, args) => {
+    const { data, error } = await sb.rpc(fn, args || {});
+    if (error) { if (fn !== 'report_issue') report('auto', 'rpc ' + fn + ': ' + error.message); throw new Error(error.message); }
+    return data;
+  };
+  const stopPolls = () => { clearInterval(pollTimer); clearTimeout(cardTimer); pollTimer = cardTimer = null; };
+  const err = (id, e) => { $(id).textContent = e ? (e.message || String(e)) : ''; };
+
+  // ---- identity: anonymous session persisted in this browser ----
+  async function session() {
+    let { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      const r = await sb.auth.signInAnonymously();
+      if (r.error) { report('auto', 'sign-in failed: ' + r.error.message); throw new Error('Couldn\'t connect. Try again in a moment.'); }
+      session = r.data.session;
+    }
+    if (!session) throw new Error('Couldn\'t connect. Try again in a moment.');
+    return session;
+  }
+
+  // ---- 1. welcome ----
+  async function boot() {
+    try {
+      await session();
+      const { data: rows } = await sb.from('people').select('*').limit(1);
+      if (rows && rows[0]) {
+        // joined before: mid-match? go back to it. Otherwise land on the avatar page, out of the queue, one tap to rejoin.
+        me = rows[0];
+        // came from a "someone's looking" text (link ends in ?find): straight back to searching
+        if (/[?&]find\b/.test(location.search)) { history.replaceState(null, '', location.pathname); return search(); }
+        const { data: ms } = await sb.from('matches').select('id,created_at,status_1,status_2,person_1,met_at').order('created_at', { ascending: false }).limit(1);
+        const m = ms && ms[0], gone = st => st === 'passed' || st === 'timed_out';
+        if (m && !m.met_at && Date.now() - Date.parse(m.created_at) < 12 * 60 * 1000
+              && !gone(m.person_1 === me.id ? m.status_1 : m.status_2) && !gone(m.person_1 === me.id ? m.status_2 : m.status_1)) return search();
+        return toWelcome(null);
+      }
+      // not signed up yet (new here, or after a reset): the rules come before picking your avatar
+      shuffle(); shuffleName();
+      openTour();   // the tutorial cards; the old rules list (s-rules) and front door (s-intro) are parked
+    } catch (e) { shuffle(); shuffleName(); show('welcome'); err('w-err', e); }
+  }
+  let mySeed = null, myAlias = null;
+  const ADJ = ['Neon','Velvet','Copper','Lunar','Amber','Indigo','Mossy','Scarlet','Golden','Cobalt','Pearl','Ember'];
+  const ANIMALS = ['Otter','Heron','Lynx','Falcon','Fox','Badger','Ibis','Marten','Puffin','Stoat','Wren','Yak'];
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  function shuffle() { mySeed = 'av-' + Math.random().toString(36).slice(2, 10); $('w-avatar').src = avatarBare(mySeed); }
+  // a new nickname clears anything typed, so the new name actually shows
+  function shuffleName() { myAlias = pick(ADJ) + ' ' + pick(ANIMALS); $('w-name').value = ''; $('w-name').placeholder = myAlias; placeCaret(); }
+  // a blinking cursor at the start of the empty box, so it's clear you can type (phones won't focus a field until tapped)
+  function placeCaret() {
+    const inp = $('w-name'), c = $('w-caret'); if (!inp || !c) return;
+    const cs = getComputedStyle(inp); c.style.left = (parseFloat(cs.paddingLeft) + inp.offsetLeft + 1) + 'px';
+    c.style.display = (inp.value || document.activeElement === inp) ? 'none' : 'block';
+  }
+  ['input','focus','blur'].forEach(ev => $('w-name').addEventListener(ev, placeCaret));
+  window.addEventListener('resize', placeCaret);
+  // nudge: wiggle the sticker now and then until it's tapped once; the bubble goes away after the first tap
+  let tapped = false, wiggleTimer = null;
+  function wiggle() { const s = $('w-shuffle'); if (tapped || !s) return; s.classList.remove('wiggle'); void s.offsetWidth; s.classList.add('wiggle'); }
+  // once per visit: the face flips through a few looks by itself (dice spinning each time) to show what a tap does
+  let demoed = false;
+  function rollDice() { const d = $('w-tapme'); d.classList.remove('roll'); void d.offsetWidth; d.classList.add('roll'); }
+  function demoRoll(done) {
+    if (demoed || tapped || matchMedia('(prefers-reduced-motion: reduce)').matches) return done();
+    demoed = true;
+    const seeds = [1, 2, 3].map(() => 'av-' + Math.random().toString(36).slice(2, 10));
+    // preload so each flip is instant; give up waiting after 1.5s
+    const loads = seeds.map(sd => new Promise(r => { const i = new Image(); i.onload = i.onerror = r; i.src = avatarBare(sd); }));
+    Promise.race([Promise.all(loads), new Promise(r => setTimeout(r, 1500))]).then(() => {
+      seeds.forEach((sd, k) => setTimeout(() => {
+        if (tapped) return;
+        mySeed = sd; $('w-avatar').src = avatarBare(sd); rollDice();
+        if (k === seeds.length - 1) done();
+      }, k * 650));
+    });
+  }
+  const toAvatarPage = () => { show('welcome'); placeCaret(); setTimeout(startNudge, 500); };
+  $('rules-ok').onclick = toAvatarPage;
+  // the tutorial: six full-screen cards, swipe or tap Next, then the avatar page. Its little animations only run while it's on screen.
+  const HAPPY = '&mouth=variant05,variant25,variant26,variant27&eyes=variant01,variant02,variant03,variant23,variant24,variant26&eyebrows=variant06,variant09,variant10,variant11,variant12';
+  const openTour = (() => {
+    const av = sd => avatarBare(sd) + HAPPY, on = () => $('s-tour').classList.contains('on');
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const anim = (d, f) => new Promise(res => { const t0 = performance.now(); (function st(t) { const k = Math.min(1, (t - t0) / d); f(k); k < 1 ? requestAnimationFrame(st) : res(); })(t0); });
+    const whenOn = async () => { while (!on()) await wait(400); };
+    let started = false;
+    document.querySelectorAll('#k-deck img[data-seed]').forEach(im => { im.dataset.src = av(im.dataset.seed); });
+    // the deck: bars fill as you go, Back and Skip on top, the last card has the fine print
+    const deck = $('k-deck'), cards = [...deck.querySelectorAll('.k-cd')];
+    $('k-bars').innerHTML = cards.map(() => '<i><b></b></i>').join('');
+    const idx = () => Math.round(deck.scrollLeft / deck.clientWidth);
+    function paint() {
+      const i = idx(), last = i === cards.length - 1;
+      [...$('k-bars').children].forEach((b, k) => b.classList.toggle('done', k <= i));
+      $('k-chrome').classList.toggle('last', last);
+      $('k-next-t').textContent = last ? 'Pick my Popatar' : 'Next';
+      $('k-skip').style.visibility = last ? 'hidden' : 'visible';
+      $('k-back').style.visibility = i === 0 ? 'hidden' : 'visible';
+    }
+    deck.addEventListener('scroll', () => requestAnimationFrame(paint));
+    const go = i => deck.scrollTo({ left: i * deck.clientWidth, behavior: 'smooth' });
+    $('k-next').onclick = () => { const i = idx(); if (i < cards.length - 1) go(i + 1); else toAvatarPage(); };
+    $('k-back').onclick = () => go(Math.max(0, idx() - 1));
+    $('k-skip').onclick = () => go(cards.length - 1);   // skip to the fine print, not past it
+    deck.addEventListener('click', e => { const x = e.clientX / innerWidth; if (x < .22) go(Math.max(0, idx() - 1)); else if (x > .78) go(Math.min(cards.length - 1, idx() + 1)); });
+    // 1. the avatar keeps re-rolling
+    async function rollLoop() { let n = 0; const im = $('k-pick');
+      for (;;) { await whenOn(); im.style.opacity = 0; await wait(180); im.src = av('pick-' + (n++ % 8)); im.style.opacity = 1; await wait(1600); } }
+    // 2. you blow gum, three people float up; one comes back, grows, pops: Found them! (same motion as the waiting screen, a bit quicker)
+    const sky = $('k-sky'), gum = $('k-gum'), box = $('k-box'), live = new Set(); let faceN = 0;
+    const pos = el => { const r = el.getBoundingClientRect(), o = sky.getBoundingClientRect(); return { x: r.left - o.left + r.width / 2, y: r.top - o.top + r.height / 2, w: r.width }; };
+    function pop(x, y, sz) { const p = document.createElement('div'); p.className = 'pop'; p.style.cssText = `left:${x}px;top:${y}px;--s:${sz}px`;
+      p.innerHTML = '<b></b>' + [0, 45, 90, 135, 180, 225, 270, 315].map(a => `<i style="--a:${a}deg"></i>`).join(''); sky.append(p); setTimeout(() => p.remove(), 500); }
+    function rise(x, y, dx) {
+      const sz = Math.round(44 + Math.random() * 20), b = document.createElement('div'); b.className = 'bub'; b.style.setProperty('--s', sz + 'px'); b._s = sz;
+      b.innerHTML = `<img alt="" src="${av('float-' + (faceN++ % 9))}">`; sky.append(b); live.add(b);
+      const top = 10 + Math.random() * sky.clientHeight * .22, d = 3000 + Math.random() * 1200, t0 = performance.now(), ph = Math.random() * 6;
+      (function st(t) {
+        if (!b.isConnected || b._taken) return;
+        const k = Math.min(1, (t - t0) / d), e = 1 - Math.pow(1 - k, 1.6);
+        b._x = x + dx * e + Math.sin(ph + k * 9) * 12; b._y = y + (top - y) * e;
+        b.style.left = b._x + 'px'; b.style.top = b._y + 'px'; b.style.transform = `scale(${Math.min(1, .25 + k * 4)})`;
+        if (k < 1) requestAnimationFrame(st); else { pop(b._x, b._y, sz); b.remove(); live.delete(b); }
+      })(t0);
+    }
+    async function matchLoop() {
+      const url = av('tour-me'); $('k-me').src = url; $('k-me-o').src = url + '&mouth=variant18';
+      fetch(url).then(r => r.text()).then(t => { $('k-collar').innerHTML = collarSvg(SKINS.find(c => t.toLowerCase().includes('#' + c)) || 'ecad80'); })
+        .catch(() => { $('k-collar').innerHTML = collarSvg('ecad80'); });
+      for (;;) {
+        await whenOn();
+        document.querySelector('#s-tour .k-mw').style.transform = `scale(${Math.min(1, $('k-wart').clientHeight * .5 / 300)})`;
+        box.classList.add('blowing');
+        await anim(1800, k => gum.style.transform = `scale(${.2 + k * 7.6})`);
+        const g = pos(gum); gum.style.transform = 'scale(0)'; box.classList.remove('blowing'); pop(g.x, g.y, g.w);
+        for (let i = 0; i < 3; i++) rise(g.x + (i - 1) * 24, g.y, (i - 1) * sky.clientWidth * .3 + (Math.random() - .5) * 30);
+        await wait(1100);
+        const m = [...live][0]; if (!m) continue;
+        m._taken = true; live.delete(m); live.forEach(b => { pop(b._x, b._y, b._s); b.remove(); }); live.clear();
+        m.style.zIndex = 9; m.querySelector('img').src = av('pal-4');
+        const W = sky.clientWidth, head = pos($('k-me')), room = Math.max(120, head.y - head.w * .45), fit = Math.min(1, room / 215), ty = room / 2, sx = m._x, sy = m._y;
+        await anim(1300, k => { const e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; m.style.left = (sx + (W / 2 - sx) * e) + 'px'; m.style.top = (sy + (ty - sy) * e) + 'px'; m.style.transform = `scale(${1 + e * 1.6 * fit})`; });
+        pop(W / 2, ty, m._s * 2.6 * fit); m.remove();
+        const who = document.createElement('div'); who.className = 'k-who'; who.style.top = ty + 'px'; who.style.scale = fit; who.innerHTML = `<img alt="" src="${av('pal-4')}"><b>Found them!</b>`; sky.append(who);
+        await wait(2600); who.style.opacity = 0; await wait(600); who.remove();
+      }
+    }
+    // 3. the 2-minute clock runs (sped up); you accept, then they do
+    async function clockLoop() {
+      const ring = $('k-ring'), t = $('k-clock-t'), clock = $('k-clock');
+      const show = sec => { t.textContent = Math.floor(sec / 60) + ':' + String(Math.floor(sec % 60)).padStart(2, '0'); ring.style.strokeDashoffset = 289 * (1 - sec / 120); clock.classList.toggle('low', sec < 30); };
+      const tap = async id => { const b = $(id); b.classList.add('press'); await wait(150); b.classList.remove('press'); b.classList.add('on'); b.textContent = '✓ Accepted'; };
+      for (;;) {
+        await whenOn();
+        ['k-ok1', 'k-ok2'].forEach(id => { $(id).classList.remove('on'); $(id).textContent = 'Accept'; }); show(120); await wait(300);
+        await anim(900, k => show(120 - k * 4)); await tap('k-ok1');
+        await anim(800, k => show(116 - k * 3)); await tap('k-ok2');
+        await anim(2200, k => show(113 - k * 9));
+      }
+    }
+    return () => {
+      show('tour'); deck.scrollLeft = 0; paint();
+      if (started) return; started = true;
+      document.querySelectorAll('#k-deck img[data-src]').forEach(im => { im.src = im.dataset.src; });
+      rollLoop();
+      if (!calm) { matchLoop(); clockLoop(); }
+    };
+  })();
+  function startNudge() { if (tapped) return; clearInterval(wiggleTimer);
+    demoRoll(() => { if (tapped) return; setTimeout(() => { if (!tapped) $('w-hint').classList.add('show'); }, 500); wiggleTimer = setInterval(wiggle, 4500); }); }
+  // the undo button brings back the faces you tapped past, newest first
+  const pastSeeds = [];
+  $('w-undo').onclick = e => { e.stopPropagation(); if (!pastSeeds.length) return;
+    mySeed = pastSeeds.pop(); $('w-avatar').src = avatarBare(mySeed); $('w-undo').hidden = !pastSeeds.length; };
+  $('w-shuffle').onclick = () => { if (mySeed) { pastSeeds.push(mySeed); if (pastSeeds.length > 30) pastSeeds.shift(); $('w-undo').hidden = false; } shuffle(); rollDice();
+    if (!tapped) { tapped = true; clearInterval(wiggleTimer); $('w-hint').classList.remove('show'); } };
+  $('w-shuffle').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('w-shuffle').onclick(); } };
+  $('w-shuffle-name').onclick = shuffleName;
+  // waitlist sheet
+  let wlRole = 'organizer', wlSource = 'welcome';
+  function openWaitlist(role, source) {
+    wlRole = role; wlSource = source; err('wl-err');
+    document.querySelectorAll('#wl-roles button').forEach(b => b.classList.toggle('on', b.dataset.role === role));
+    $('wl-note').placeholder = role === 'organizer' ? 'Tell us about your event (optional)' : 'Anything you want us to know (optional)';
+    $('wl-form').hidden = false; $('wl-done').hidden = true; $('wl-bg').hidden = false; $('wl').hidden = false;
+  }
+  function closeWaitlist() {
+    const sh = $('wl'); if (sh.hidden) return;
+    sh.classList.remove('dragging'); sh.classList.add('leaving'); sh.style.transform = 'translateY(100%)';
+    setTimeout(() => { sh.hidden = true; $('wl-bg').hidden = true; sh.classList.remove('leaving'); sh.style.transform = ''; }, 220);
+  }
+  // pull the sheet down to close it (from anywhere except while typing in a field)
+  (() => {
+    const sh = $('wl'); let y0 = null, dy = 0, t0 = 0;
+    sh.addEventListener('touchstart', e => {
+      if (e.target.closest('input, textarea')) return;
+      y0 = e.touches[0].clientY; dy = 0; t0 = Date.now(); sh.classList.add('dragging');
+    }, { passive: true });
+    sh.addEventListener('touchmove', e => {
+      if (y0 === null) return;
+      dy = Math.max(0, e.touches[0].clientY - y0); sh.style.transform = `translateY(${dy}px)`;
+      if (dy > 0) e.preventDefault();
+    }, { passive: false });
+    sh.addEventListener('touchend', () => {
+      if (y0 === null) return; y0 = null; sh.classList.remove('dragging');
+      const fast = dy > 30 && dy / Math.max(1, Date.now() - t0) > 0.5;
+      if (dy > sh.offsetHeight * 0.25 || fast) closeWaitlist();
+      else { sh.classList.add('leaving'); sh.style.transform = ''; setTimeout(() => sh.classList.remove('leaving'), 220); }
+    });
+  })();
+  $('i-bring').onclick = () => openWaitlist('organizer', 'welcome');
+  $('w-bring').onclick = () => openWaitlist('attendee', 'welcome');
+  // Join the mix: the big logo shrinks into the corner as the avatar screen comes in
+  // the intro animation is a square, 130vw wide (max 820px on big screens), centered; the logo lands at these fractions of it
+  function placeIntro() {
+    const W = innerWidth, H = innerHeight, g = W >= 700 ? Math.min(1.3 * W, 820) : 1.3 * W;
+    const left = W / 2 - g / 2 + g * 0.1872, top = H * 0.45 - g / 2 + g * 0.2962, width = g * 0.6372;
+    const L = $('i-logo'); Object.assign(L.style, { left: left + 'px', top: top + 'px', width: width + 'px' });
+    $('i-tag').style.top = (top + width * 584 / 900 + 14) + 'px';
+  }
+  placeIntro(); window.addEventListener('resize', placeIntro);
+  // swipe up on the front screen does the same as tapping Join the mix
+  let swipeY = null;
+  $('s-intro').addEventListener('touchstart', e => { swipeY = e.touches[0].clientY; }, { passive: true });
+  $('s-intro').addEventListener('touchend', e => { if (swipeY !== null && swipeY - e.changedTouches[0].clientY > 50) $('i-go').onclick(); swipeY = null; });
+  $('i-go').onclick = () => {
+    if (!$('s-intro').classList.contains('on')) return;
+    const from = $('i-logo').getBoundingClientRect();
+    show('welcome'); placeCaret();
+    const w = $('s-welcome'); w.classList.remove('rise'); void w.offsetWidth; w.classList.add('rise');
+    flyLogo(from, $('w-logo'), () => setTimeout(startNudge, 300));
+  };
+  function openBug(auto) { $('bug-form').hidden = false; $('bug-done').hidden = true; err('bug-err'); $('bug-bg').hidden = false; $('bug').hidden = false;
+    $('bug-txt').placeholder = auto ? 'Something went wrong on our end. What were you doing?' : 'What went wrong? What were you doing?'; }
+  // "Text me when someone joins": leave a number, Tyler texts by hand from the dashboard
+  function openTx() { $('tx-form').hidden = false; $('tx-done').hidden = true; err('tx-err'); $('tx-bg').hidden = false; $('tx').hidden = false; }
+  function closeTx() { $('tx').hidden = true; $('tx-bg').hidden = true; }
+  $('tx-open').onclick = openTx; $('tx-x').onclick = $('tx-bg').onclick = $('tx-close').onclick = closeTx;
+  $('tx-go').onclick = async () => {
+    const ph = $('tx-phone').value.trim(); if (ph.replace(/\D/g, '').length < 10) return err('tx-err', 'Add your phone number.');
+    $('tx-go').disabled = true;
+    try { await session(); await rpc('request_text', { p_phone: ph }); $('tx-form').hidden = true; $('tx-done').hidden = false; }
+    catch (e) { err('tx-err', e); } finally { $('tx-go').disabled = false; }
+  };
+  function closeBug() { $('bug').hidden = true; $('bug-bg').hidden = true; }
+  $('bug-x').onclick = $('bug-bg').onclick = $('bug-close').onclick = closeBug;
+  $('bug-go').onclick = async () => {
+    const t = $('bug-txt').value.trim(); if (!t) return err('bug-err', 'Tell us a little about what happened.');
+    $('bug-go').disabled = true;
+    try { await session(); await rpc('report_issue', { p_kind: 'user', p_message: t, p_detail: context(), p_version: APP_VERSION }); $('bug-txt').value = ''; $('bug-form').hidden = true; $('bug-done').hidden = false; }
+    catch (e) { err('bug-err', e); } finally { $('bug-go').disabled = false; }
+  };
+  // after an automatic report: a small note at the top; tapping it opens the bug sheet
+  function bugToast() {
+    $('toast-av').hidden = true; $('toast-t').textContent = 'Something went wrong'; $('toast-s').textContent = 'Reload, or tap here to tell us.'; $('toast-reload').hidden = false;
+    $('toast-reload').onclick = e => { e.stopPropagation(); location.reload(); };
+    $('toast').hidden = false; requestAnimationFrame(() => $('toast').classList.add('show'));
+    $('toast').onclick = () => { $('toast').classList.remove('show'); openBug(true); };
+    setTimeout(() => { $('toast').classList.remove('show'); setTimeout(() => $('toast').hidden = true, 400); }, 7000);
+  }
+  $('wl-bg').onclick = closeWaitlist; $('wl-close').onclick = closeWaitlist; $('wl-x').onclick = closeWaitlist;
+  document.querySelectorAll('#wl-roles button').forEach(b => b.onclick = () => openWaitlist(b.dataset.role, wlSource));
+  $('wl-phone').oninput = () => { $('wl-sms').hidden = !$('wl-phone').value.trim(); };   // texting consent shows as soon as they type a number
+  $('wl-go').onclick = async () => {
+    const email = $('wl-email').value.trim(), phone = $('wl-phone').value.trim(), digits = phone.replace(/[^0-9]/g, ''); err('wl-err');
+    if (!email) return err('wl-err', 'Add your email.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err('wl-err', 'Please check your email.');
+    if (phone && (digits.length < 7 || digits.length > 15)) return err('wl-err', 'Please check your phone number.');
+    $('wl-go').disabled = true;
+    try { await session(); await rpc('join_waitlist', { p_email: email || null, p_phone: phone || null, p_role: wlRole, p_note: $('wl-note').value || null, p_source: wlSource });
+          $('wl-form').hidden = true; $('wl-done').hidden = false; try { localStorage.setItem('pop-waitlisted', '1'); } catch (_) {} }
+    catch (e) { err('wl-err', e); }
+    finally { $('wl-go').disabled = false; }
+  };
+  $('wt-back').onclick = async () => {
+    stopPolls(); try { await rpc('leave_pool'); } catch (_) {}
+    mySeed = me.avatar_seed || me.alias; $('w-avatar').src = avatarBare(mySeed);
+    myAlias = me.alias; $('w-name').placeholder = myAlias; $('w-name').value = me.name || '';
+    $('w-go').disabled = false; err('w-err'); show('welcome'); placeCaret();
+  };
+  $('w-go').onclick = async () => {
+    unlockSound(); $('w-go').disabled = true; err('w-err');
+    const typed = $('w-name').value.trim();
+    const ownName = typed && typed !== myAlias ? typed : null;   // empty box = keep the nickname; anything typed is their name
+    const join = () => me ? rpc('update_profile', { p_name: ownName, p_avatar: mySeed, p_alias: myAlias })
+                          : rpc('join_event', { p_name: ownName, p_avatar: mySeed, p_alias: myAlias });
+    try {
+      await session();
+      try { me = await join(); }
+      catch (e) {
+        if (!/permission denied|jwt|not signed in/i.test(e.message)) throw e;
+        await sb.auth.signOut().catch(() => {}); me = null; await session(); me = await join();   // stale or missing sign-in: start fresh once
+      }
+      search();
+    }
+    catch (e) { err('w-err', /permission denied|jwt/i.test(e.message) ? 'Couldn\'t connect. Try again in a moment.' : e); $('w-go').disabled = false; }
+  };
+
+  // "N pop stars here": a plain number that pops when it changes
+  let poolN = null;
+  function setPool(n) {
+    const el = $('wt-pool');
+    if (n === 0) { el.textContent = 'You\'re the first one here'; poolN = 0; return; }
+    el.innerHTML = '<b></b> ' + (n === 1 ? 'pop star here' : 'pop stars here');
+    const b = el.querySelector('b'); b.textContent = n;
+    if (poolN !== null && poolN !== n) b.classList.add('bump');
+    poolN = n;
+  }
+  // ---- keeping people in the loop while they wait ----
+  const STILL_MS = 15 * 1000;   // after this long without a match, offer a text when someone joins
+  let wakeLock = null, stillTimer = null, audio = null, titleTimer = null;
+  const baseTitle = document.title;
+  async function stayAwake() { try { if ('wakeLock' in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => wakeLock = null); } } catch (_) {} }
+  function letSleep() { try { wakeLock && wakeLock.release(); } catch (_) {} wakeLock = null; }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && $('s-wait').classList.contains('on')) stayAwake(); });
+  // phones only allow sound after a tap, so "Find my match" unlocks it
+  function unlockSound() { try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume(); } catch (_) {} }
+  function ping() {
+    try {
+      if (!audio) return; const t = audio.currentTime;
+      [[880, 0], [1320, .12]].forEach(([f, d]) => { const o = audio.createOscillator(), g = audio.createGain(); o.type = 'sine'; o.frequency.value = f;
+        g.gain.setValueAtTime(.0001, t + d); g.gain.exponentialRampToValueAtTime(.25, t + d + .02); g.gain.exponentialRampToValueAtTime(.0001, t + d + .28);
+        o.connect(g).connect(audio.destination); o.start(t + d); o.stop(t + d + .3); });
+    } catch (_) {}
+  }
+  function flashTitle() {
+    clearInterval(titleTimer); let on = false;
+    titleTimer = setInterval(() => { document.title = (on = !on) ? '🎉 Match found!' : baseTitle; }, 900);
+  }
+  function stopFlash() { clearInterval(titleTimer); titleTimer = null; document.title = baseTitle; }
+  function matchAlert() { ping(); flashTitle(); try { navigator.vibrate && navigator.vibrate([120, 60, 120, 60, 200]); } catch (_) {} }
+  function resetStill() { clearTimeout(stillTimer); $('wt-still').hidden = true; $('s-wait').classList.remove('long');
+    stillTimer = setTimeout(() => { if ($('s-wait').classList.contains('on') && !match) { $('wt-still').hidden = false; $('s-wait').classList.add('long'); } }, STILL_MS); }
+  // ---- 2. waiting / search ----
+  async function search() {
+    stopPolls(); match = null;
+    drawMe(me.avatar_seed || me.alias, me.name || me.alias);
+    clearFlow(); $('s-wait').classList.remove('matched', 'out'); $('s-on').classList.remove('out'); revealing = false; $('wt-box').style.transform = '';
+    document.querySelectorAll('#s-wait .found').forEach(n => n.remove());
+    show('wait'); startChewing(); stayAwake(); stopFlash(); resetStill();
+    const tick = async () => {
+      try {
+        const m = await rpc('find_match');
+        if (m && m.id) {
+          stopPolls(); match = m;
+          let c = null; try { c = await rpc('match_card', { p_match: m.id }); } catch (_) {}
+          if (!c) return search();
+          return c.partner_alias ? reveal(c.partner_avatar || c.partner_alias, f => found(c, f)) : itsOn(c);
+        }
+        const n = await rpc('pool_size');            // includes you
+        const others = Math.max(0, (n || 1) - 1);
+        setPool(others);
+      } catch (e) { err('wt-err', e); }
+    };
+    await tick();
+    if (!match) pollTimer = setInterval(tick, POLL_MS);
+  }
+
+  // ---- 3. match found: on the bubble screen, "Let's go" with a 2-minute timer filling the button ----
+  let flowTimer = null, stage = null;   // 'found' | 'on' | 'bc' | 'rev'
+  const clearFlow = () => { clearInterval(flowTimer); flowTimer = null; stopPolls(); stage = null; };
+  // fills `fill` left to right over `secs` (counting from `since`), shows the time left, calls onEnd when full
+  function fillTimer(fill, clock, secs, since, onEnd) {
+    clearInterval(flowTimer);
+    const tick = () => {
+      const k = Math.min(1, Math.max(0, (Date.now() - since) / 1000 / secs)), left = Math.ceil(secs * (1 - k));
+      fill.style.transform = 'scaleX(' + k + ')'; clock.textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
+      if (k >= 1) { clearInterval(flowTimer); onEnd(); }
+    };
+    tick(); flowTimer = setInterval(tick, 250);
+  }
+  const otherOf = c => c.my_slot === 1 ? c.status_2 : c.status_1;
+  const mineOf = c => c.my_slot === 1 ? c.status_1 : c.status_2;
+  // leaving for real ("Can't make it", a timer running out, "I'm done for now"): out of the pool, back to the welcome screen
+  async function toWelcome(action) {
+    clearFlow();
+    if (match && action) { try { await rpc('respond_to_match', { p_match: match.id, p_action: action }); } catch (_) {} }
+    try { await rpc('leave_pool'); } catch (_) {}
+    match = null; $('s-wait').classList.remove('matched'); revealing = false; $('wt-box').style.transform = ''; letSleep(); stopFlash(); clearTimeout(stillTimer);
+    mySeed = me.avatar_seed || me.alias; $('w-avatar').src = avatarBare(mySeed);
+    myAlias = me.alias; $('w-name').placeholder = myAlias; $('w-name').value = me.name || '';
+    $('w-go').disabled = false; err('w-err'); show('welcome'); placeCaret();
+  }
+  // Fit "Found them!" (their face) above you, both above the Let's go button, on any screen height
+  const CARD_H = 215, ME_H = 245, ME_S = .8;     // card height; your figure's height (face + collar + tag) at full size
+  function layoutFound(f) {
+    const sw = $('s-wait'), H = sw.clientHeight, goTop = H - ($('go').offsetHeight + 12), box = $('wt-box');
+    const avail = goTop - 20 - 12, need = CARD_H + 10 + ME_H * ME_S, k = Math.min(1, avail / need), extra = Math.max(0, avail - need * k);
+    const cardTop = 20 + extra * .35, cardH = CARD_H * k, meTop = cardTop + cardH + 10 + extra * .3, sMe = ME_S * k;
+    if (f) { f.style.top = (cardTop + cardH / 2) + 'px'; f.firstChild.style.scale = k; }
+    box.style.transformOrigin = '50% 0'; box.style.transform = `translateY(${meTop - box.offsetTop}px) scale(${sMe})`;
+  }
+  function partnerOut(c2) {
+    clearFlow(); stage = 'out';
+    const who = (c2 && c2.partner_alias) || (lastCard && lastCard.partner_alias) || 'They';
+    if ($('s-on').classList.contains('on')) {
+      $('s-on').classList.add('out'); $('on-out').textContent = who + ' can\'t make it';
+    } else {
+      $('s-wait').classList.add('out'); const f = $('s-wait').querySelector('.found');
+      if (f) { f.classList.add('out'); f.querySelector('b').textContent = who + ' can\'t make it'; }
+    }
+    setTimeout(search, 2600);
+  }
+  function found(c, f) {
+    clearTimeout(stillTimer); $('wt-still').hidden = true; $('s-wait').classList.remove('long'); matchAlert();
+    stage = 'found'; lastCard = c; err('go-err');
+    $('s-wait').classList.add('matched'); layoutFound(f);
+    $('go-t').textContent = 'Accept'; $('go-btn').disabled = false;
+    // matches from the text queue: the other person has to see the text first, so 8 minutes instead of 2
+    $('go-note').hidden = !(c.queued && c.my_slot === 2);
+    fillTimer($('go-fill'), $('go-c'), c.queued ? QUEUED_SECS : YES_SECS, Date.parse(c.created_at) || Date.now(), () => toWelcome('timed_out'));
+    pollTimer = setInterval(async () => {
+      try {
+        const c2 = await rpc('match_card', { p_match: match.id });
+        if (stage !== 'found') return;
+        if (['passed', 'timed_out'].includes(otherOf(c2))) return partnerOut(c2);      // they passed: say so, then keep looking
+        if (mineOf(c2) === 'confirmed' && otherOf(c2) === 'confirmed') itsOn(c2);
+      } catch (_) {}
+    }, POLL_MS);
+  }
+  $('go-btn').onclick = async () => {
+    $('go-btn').disabled = true; err('go-err');
+    try {
+      const m = await rpc('respond_to_match', { p_match: match.id, p_action: 'confirmed' });
+      if (stage !== 'found') return;
+      if (!m.person_2 || (m.status_1 === 'confirmed' && m.status_2 === 'confirmed')) return itsOn(await rpc('match_card', { p_match: match.id }));
+      $('go-t').textContent = 'Waiting for ' + (lastCard.partner_alias || 'them') + '…';
+    } catch (e) { err('go-err', e); $('go-btn').disabled = false; }
+  };
+  $('go-no').onclick = async () => { clearFlow(); try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
+
+  // ---- 4. It's on: both faces, the spot, "I'm here" with a 7-minute timer ----
+  function itsOn(c) {
+    if (stage === 'on') return;
+    clearFlow(); stage = 'on'; lastCard = c; err('on-err'); stopFlash();
+    $('on-me').src = avatarBare(me.avatar_seed || me.alias); $('on-them').src = avatarBare(c.partner_avatar || c.partner_alias);
+    $('on-them').hidden = !c.partner_alias; $('on-name').textContent = c.partner_alias || '';
+    $('on-where').textContent = c.vendor_name; $('on-kind').textContent = c.vendor_location;
+    $('s-on').classList.remove('out'); $('s-on').querySelector('h1').textContent = 'It\'s on!';
+    $('here-t').textContent = 'I\'m here'; $('here-btn').disabled = false;
+    show('on'); try { navigator.vibrate && navigator.vibrate([80, 40, 80]); } catch (_) {}
+    if (c.self_at) $('here-t').textContent = 'Waiting for ' + (c.partner_alias || 'them') + '…';
+    fillTimer($('here-fill'), $('here-c'), WALK_SECS, Date.now(), () => toWelcome('timed_out'));
+    pollTimer = setInterval(async () => {
+      try {
+        const c2 = await rpc('match_card', { p_match: match.id });
+        if (stage !== 'on') return;
+        if (['passed', 'timed_out'].includes(otherOf(c2))) return partnerOut(c2);
+        if (c2.self_at && (c2.partner_self_at || !c2.partner_alias)) beacon(c2);
+      } catch (_) {}
+    }, POLL_MS);
+  }
+  $('here-btn').onclick = async () => {
+    $('here-btn').disabled = true; err('on-err');
+    try {
+      await rpc('check_in', { p_match: match.id, p_kind: 'self' });
+      const c2 = await rpc('match_card', { p_match: match.id });
+      if (stage !== 'on') return;
+      if (c2.partner_self_at || !c2.partner_alias) return beacon(c2);
+      $('here-t').textContent = 'Waiting for ' + c2.partner_alias + '…';
+    } catch (e) { err('on-err', e); $('here-btn').disabled = false; }
+  };
+  $('here-no').onclick = () => toWelcome('passed');
+
+  // ---- 5. You're both here: hold up your phones; Found them! becomes the review on the same screen ----
+  // both here: the faces to hold up, and the review right below (no separate Found them step)
+
+  // ---- walkthrough: after you're both here, the vendor trivia; then the usual review ----
+  const TRIVIA = { q: "What's Hygro Receptions' best-selling item?", opts: ['Candles', 'Plant mister', 'Tote bags', 'Air plants'], right: 1 };
+  let tvClock = null;
+  function beacon(c) {
+    if (stage === 'bc' || stage === 'tv') return;
+    clearFlow(); stage = 'tv'; lastCard = c;
+    const them = c.partner_alias || 'them';
+    $('t-me').src = avatarBare(me.avatar_seed || me.alias); $('t-them').src = avatarBare(c.partner_avatar || c.partner_alias);
+    $('t-name').textContent = them; $('t-where').textContent = c.vendor_name;
+    $('t-ask').hidden = false; $('t-won').hidden = true; $('t-card').hidden = false; $('t-ticket').hidden = true; $('t-next').hidden = true; $('t-skip').hidden = false;
+    ['t-st-me', 't-st-them'].forEach(id => $(id).hidden = true); $('t-msg').textContent = '';
+    $('t-q').textContent = TRIVIA.q; $('t-opts').className = 't-opts';
+    $('t-opts').innerHTML = TRIVIA.opts.map((o, i) => `<button type="button" data-i="${i}">${o}</button>`).join('');
+    $('t-note').innerHTML = them + ' has a <b>different question</b>. Both right: <b>10% off</b> each. One right: still <b>5% off</b> each.';
+    show('trivia'); try { navigator.vibrate && navigator.vibrate([80, 40, 80, 40, 160]); } catch (_) {}
+    let answered = false;
+    $('t-opts').onclick = async e => {
+      const b = e.target.closest('button'); if (!b || answered) return; answered = true;
+      const mine = +b.dataset.i === TRIVIA.right; $('t-opts').classList.add('done');
+      b.classList.add(mine ? 'right' : 'wrong'); if (!mine) $('t-opts').children[TRIVIA.right].classList.add('right');
+      $('t-st-me').hidden = false; $('t-st-me').textContent = mine ? '✅' : '❌';
+      $('t-msg').textContent = (mine ? 'You got it! ' : 'Not quite! ') + 'Waiting for ' + them + '…';
+      await new Promise(r => setTimeout(r, 1800));
+      const theirs = window.WALK_SAM_RIGHT !== false;
+      $('t-st-them').hidden = false; $('t-st-them').textContent = theirs ? '✅' : '❌';
+      await new Promise(r => setTimeout(r, 900));
+      prize(mine && theirs, mine || theirs, c);
+    };
+  }
+  function prize(both, one, c) {
+    $('t-ask').hidden = true; $('t-won').hidden = false; $('t-card').hidden = true; $('t-skip').hidden = true; $('t-next').hidden = false;
+    $('t-h').textContent = both ? 'You both got it! 🎉' : one ? 'One of you got it! 🙌' : 'So close!';
+    $('t-sub').textContent = both ? 'You each get 10% off. Show this at the booth.' : one ? 'That still counts: you each get 5% off.' : 'No prize this time, but say hi to the vendor anyway.';
+    $('t-ticket').hidden = !one; $('t-ticket').classList.toggle('small', !both);
+    $('t-big').textContent = both ? '10% off' : '5% off'; $('t-at').textContent = 'for each of you at ' + c.vendor_name;
+    $('t-note').textContent = one ? 'The live clock shows the vendor it\'s real.' : '';
+    const tick = () => { $('t-clock').textContent = 'Live · ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }); };
+    clearInterval(tvClock); tick(); tvClock = setInterval(tick, 1000);
+    if (both) { const cf = $('t-confetti'), cols = ['#f28bb3', '#6a7be8', '#6cc070', '#ffd166', '#318bcf'];
+      cf.innerHTML = Array.from({ length: 70 }, () => `<i style="left:${Math.random() * 100}%;background:${cols[Math.floor(Math.random() * 5)]};animation-duration:${1.8 + Math.random() * 1.6}s;animation-delay:${Math.random() * .5}s"></i>`).join('');
+      setTimeout(() => cf.innerHTML = '', 4500); }
+  }
+  const toReview = () => { clearInterval(tvClock); stage = null; beaconReal(lastCard); };
+  $('t-next').onclick = toReview; $('t-skip').onclick = toReview;
+  function beaconReal(c) {
+    if (stage === 'bc') return;
+    clearFlow(); stage = 'bc'; lastCard = c;
+    const them = c.partner_alias || 'them';
+    $('bc-me').src = avatarBare(me.avatar_seed || me.alias); $('bc-them').src = avatarBare(c.partner_avatar || c.partner_alias);
+    $('bc-h').textContent = 'You\'re both here!'; $('bc-sub').textContent = 'Hold up your phone. ' + them + '\'s screen matches yours.';
+    $('s-bc').classList.add('rev'); rating = null; $('rv-txt').value = '';
+    document.querySelectorAll('#rv-rate button').forEach(b => b.classList.remove('on'));
+    show('bc'); try { navigator.vibrate && navigator.vibrate([80, 40, 80, 40, 160]); } catch (_) {}
+  }
+
+  // ---- 6. review: optional face + note; then match again or call it a night ----
+  let rating = null;   // 1-3 = how it went; 0 = no show; null = skipped
+  document.querySelectorAll('#rv-rate button').forEach(b => b.onclick = () => {
+    const on = !b.classList.contains('on');
+    document.querySelectorAll('#rv-rate button').forEach(x => x.classList.toggle('on', on && x === b));
+    rating = on ? +b.dataset.r : null;
+  });
+  async function saveReview() {
+    const note = $('rv-txt').value.trim();
+    if (rating === null && !note) return;
+    if (rating > 0) { try { await rpc('confirm_met', { p_match: match.id }); } catch (_) {} }   // they met
+    try { await rpc('review_match', { p_match: match.id, p_rating: rating > 0 ? rating : null, p_tags: rating === 0 ? ['no_show'] : [], p_note: note || null }); } catch (_) {}
+  }
+  // the match is over either way; 'passed' frees both people (there's no separate 'met' status)
+  $('rv-again').onclick = async () => { await saveReview(); try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
+  let askedAfter = false;
+  $('rv-done').onclick = async () => { await saveReview(); await toWelcome('passed'); let joined = false; try { joined = localStorage.getItem('pop-waitlisted') === '1'; } catch (_) {}
+    if (!askedAfter && !joined) { askedAfter = true; setTimeout(() => openWaitlist('attendee', 'after-match'), 500); } };   // already on the list: don't ask again
+
+  // load screen: hide once the letters have landed (~2.2s) or the clip ends, and the app is ready; tap skips
+  const splashDone = new Promise(res => {
+    let done = false; const fin = () => { if (!done) { done = true; res(); } };
+    // restart the GIF from frame one on every load, then give it time to finish
+    const im = $('splash-v'); im.src = 'media/pop-intro.gif?t=' + Date.now();
+    const start = () => setTimeout(fin, 2000);
+    if (im.complete) start(); else { im.onload = start; im.onerror = fin; }
+    setTimeout(fin, 4000); $('splash').addEventListener('click', fin);
+  });
+  // move a copy of the logo from one box to where `target` sits, then reveal target (and its ™ if it has one)
+  function flyLogo(from, target, done) {
+    const to = target.getBoundingClientRect(), tm = target.parentElement.querySelector('.tm');
+    const fly = document.createElement('img'); fly.src = 'media/pop-logo-header.png'; fly.alt = '';
+    Object.assign(fly.style, { position:'fixed', left: from.left + 'px', top: from.top + 'px', width: from.width + 'px', height:'auto', margin:0,
+      zIndex: 101, transformOrigin: '0 0', transition: 'transform .7s cubic-bezier(.65,0,.25,1)' });
+    document.body.appendChild(fly); target.style.visibility = 'hidden'; if (tm) { tm.style.transition = ''; tm.style.opacity = 0; }
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      fly.style.transform = `translate(${to.left - from.left}px, ${to.top - from.top}px) scale(${to.width / from.width})`;
+    }));
+    setTimeout(() => { target.style.visibility = ''; if (tm) { tm.style.transition = 'opacity .3s'; tm.style.opacity = 1; } fly.remove(); if (done) done(); }, 760);
+  }
+  function endSplash() {
+    const sp = $('splash'), gif = $('splash-v');
+    const target = $('s-intro').classList.contains('on') ? $('i-logo') : $('s-welcome').classList.contains('on') ? $('w-logo') : null;
+    if (!target) { sp.classList.add('out'); setTimeout(() => sp.remove(), 500); return; }
+    // where the landed logo sits inside the animation's square (measured from the clip)
+    const g = gif.getBoundingClientRect();
+    const from = { left: g.left + g.width * 0.1872, top: g.top + g.height * 0.2962, width: g.width * 0.6372 };
+    gif.style.visibility = 'hidden'; sp.classList.add('out');
+    flyLogo(from, target, () => sp.remove());
+  }
+  Promise.all([splashDone, boot()]).finally(() => { placeCaret(); endSplash(); if ($('s-welcome').classList.contains('on')) setTimeout(startNudge, 700); });
+})();
+</script>
+</body>
+</html>

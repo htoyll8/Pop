@@ -32,14 +32,8 @@
   body.b .skip { top:calc(env(safe-area-inset-top) + 20px); right:30px; }
 
   /* card colors, borrowed from the avatar backgrounds */
-  .c1 { --bg:var(--purple); --fg:#fff; }
-  .c2 { --bg:#fbd2e1; }
-  .c3 { --bg:#cfe5f6; }
-  .c3b { --bg:var(--lav); }
-  .c4 { --bg:#fff0b3; }
-  .c4b { --bg:#d8f0d9; }
-  .c4c { --bg:#fbd2e1; }
-  .c5 { --bg:#fff; }
+  /* all white for now: Safari's bars don't change color with the cards */
+  .cd { --bg:#fff; }
 
   /* fixed chrome over the deck: progress bars, skip, the big button */
   .chrome { position:fixed; inset:0; pointer-events:none; z-index:5; }
@@ -64,9 +58,9 @@
   @keyframes popin { 0% { transform:scale(.3); opacity:0; } 100% { transform:scale(1); opacity:1; } }
 
   .logo { width:min(46vw, 190px); filter:drop-shadow(0 6px 10px rgba(20,24,60,.35)); position:relative; z-index:2; }
-  .cloud { position:absolute; inset:0; }
-  .bub { position:absolute; width:var(--s, 74px); aspect-ratio:1; border-radius:50%; border:1.5px solid rgba(255,255,255,.6);
-         background:radial-gradient(circle at 32% 28%, #fff 0 9%, rgba(255,255,255,0) 10%), radial-gradient(circle, rgba(255,255,255,.12) 55%, rgba(255,255,255,.35) 100%);
+  .cloud { position:absolute; inset:0 4px 12px; }
+  .bub { position:absolute; width:var(--s, 74px); aspect-ratio:1; border-radius:50%; border:1.5px solid rgba(240,111,164,.6);
+         background:radial-gradient(circle at 32% 28%, #fff 0 9%, rgba(255,255,255,0) 10%), radial-gradient(circle, rgba(255,236,244,.45) 58%, rgba(255,143,189,.45) 100%);
          animation:floatt 3.2s ease-in-out infinite; }
   .bub img { position:absolute; inset:12%; width:76%; }
 
@@ -81,13 +75,13 @@
   .duo img:last-child { rotate:8deg; margin-left:-14px; animation:floatt 2.8s ease-in-out infinite -1.4s; }
   .spark { position:absolute; top:-26px; left:50%; translate:-50% 0; font-size:46px; animation:popin .6s cubic-bezier(.2,1.6,.4,1) infinite alternate; animation-duration:1.2s; }
 
-  .booth { margin-top:18px; padding:12px 18px; border-radius:18px; background:#fff; box-shadow:0 6px 0 rgba(47,59,69,.1); display:inline-block; }
+  .booth { margin-top:18px; padding:12px 18px; border-radius:18px; background:#f4f6f8; display:inline-block; }
   .booth small { display:block; font-size:12px; font-weight:900; color:#e8463c; text-transform:uppercase; letter-spacing:.08em; }
   .booth b { font-size:20px; font-weight:900; }
 
   .hunt { position:relative; width:min(78vw, 300px); aspect-ratio:1; display:grid; place-items:center; }
   .hunt .me { width:56%; animation:floatt 2.4s ease-in-out infinite; }
-  .bub.dk { border-color:rgba(49,139,207,.45); background:radial-gradient(circle at 32% 28%, #fff 0 9%, rgba(255,255,255,0) 10%), radial-gradient(circle, rgba(255,255,255,.35) 55%, rgba(49,139,207,.25) 100%); }
+  .bub.dk-off { border-color:rgba(49,139,207,.45); background:radial-gradient(circle at 32% 28%, #fff 0 9%, rgba(255,255,255,0) 10%), radial-gradient(circle, rgba(255,255,255,.35) 55%, rgba(49,139,207,.25) 100%); }
   .pill { display:inline-block; margin-top:20px; padding:14px 40px; border-radius:18px; background:var(--blue); color:#fff; font-weight:900; font-size:20px; box-shadow:0 5px 0 var(--blue2); animation:press 2.4s ease-in-out infinite; }
   .pill.here { background:#6cc070; box-shadow:0 5px 0 #57a35b; }
   @keyframes press { 0%,60%,100% { transform:none; } 70% { transform:translateY(4px); box-shadow:none; } }
@@ -98,7 +92,7 @@
   .wave { position:absolute; right:-36px; top:-10px; font-size:52px; transform-origin:70% 90%; animation:wave 1.6s ease-in-out infinite; }
   @keyframes wave { 0%,100% { rotate:0deg; } 25% { rotate:-18deg; } 50% { rotate:12deg; } }
   .rate { display:flex; justify-content:center; gap:10px; margin-top:20px; }
-  .rate span { font-size:32px; width:58px; height:58px; display:grid; place-items:center; border-radius:16px; background:rgba(255,255,255,.7); border:2px solid transparent; }
+  .rate span { font-size:32px; width:58px; height:58px; display:grid; place-items:center; border-radius:16px; background:#f4f6f8; border:2px solid transparent; }
   .rate span.on { background:#fff; border-color:var(--blue); transform:scale(1.1); }
   .kind { font-size:min(34vw, 140px); line-height:1; animation:floatt 2.6s ease-in-out infinite; }
 
@@ -111,9 +105,8 @@
   <section class="cd c1">
     <div class="art">
       <div class="cloud" id="cloud"></div>
-      <img class="logo" src="media/pop-logo-header.png" alt="Pop">
     </div>
-    <h1>Welcome to the mix</h1>
+    <h1>Welcome to Pop</h1>
     <p>Meet someone new here. It takes 10 seconds.</p>
   </section>
 
@@ -125,8 +118,8 @@
   </section>
 
   <section class="cd c3">
-    <div class="art"><div class="hunt"><div class="bub dk" style="left:0;top:6%;--s:64px"><img data-seed="hunt-a" alt=""></div><div class="bub dk" style="right:0;top:0;--s:76px;animation-delay:-1s"><img data-seed="tour-b" alt=""></div>
-      <div class="bub dk" style="left:8%;bottom:4%;--s:56px;animation-delay:-2s"><img data-seed="hunt-c" alt=""></div><img class="stk me" data-seed="tour-me" alt=""></div></div>
+    <div class="art"><div class="hunt"><div class="bub" style="left:0;top:6%;--s:64px"><img data-seed="hunt-a" alt=""></div><div class="bub" style="right:0;top:0;--s:76px;animation-delay:-1s"><img data-seed="tour-b" alt=""></div>
+      <div class="bub" style="left:8%;bottom:4%;--s:56px;animation-delay:-2s"><img data-seed="hunt-c" alt=""></div><img class="stk me" data-seed="tour-me" alt=""></div></div>
     <div class="num">Step 2</div>
     <h1>Pop finds you a match</h1>
     <p>Someone here, right now, also looking to meet. Keep Pop open while it looks. Busy? Leave your number and we'll text you.</p>
@@ -170,7 +163,7 @@
   </section>
 </div>
 
-<div class="chrome dark" id="chrome">
+<div class="chrome" id="chrome">
   <div class="bars" id="bars"></div>
   <button class="skip" id="skip">Skip</button>
   <div class="next-wrap">
@@ -187,7 +180,7 @@
   document.querySelectorAll('img[data-seed]').forEach(im => im.src = av(im.dataset.seed));
 
   // card 1: avatar bubbles drifting around the logo
-  const spots = [[4,8,70],[62,2,84],[2,58,62],[70,56,76],[34,74,58],[40,-4,52]];
+  const spots = [[6,4,78],[60,0,96],[30,30,120],[0,52,70],[70,46,84],[14,80,64],[56,78,74],[42,-6,52],[84,26,54]];
   document.getElementById('cloud').innerHTML = spots.map(([x,y,s], i) =>
     `<div class="bub" style="left:${x}%;top:${y}%;--s:${s}px;animation-delay:${-i*.7}s"><img src="${av('mix-' + i)}" alt=""></div>`).join('');
 
@@ -204,7 +197,7 @@
   function paint() {
     const i = idx(), last = i === cards.length - 1;
     [...bars.children].forEach((b, k) => b.classList.toggle('done', k <= i));
-    chrome.classList.toggle('dark', i === 0);
+    
     chrome.classList.toggle('last', last);
     document.getElementById('next').textContent = last ? 'Pick my avatar' : i === 0 ? "Let's see how" : 'Next';
     document.getElementById('skip').style.visibility = last ? 'hidden' : 'visible';

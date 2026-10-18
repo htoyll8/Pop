@@ -104,7 +104,7 @@
   @keyframes spark { to { transform:rotate(var(--a)) translateY(calc(var(--s) * -.75)); opacity:0; } }
   @keyframes ring { to { transform:scale(1.5); opacity:0; } }
   .who { position:absolute; z-index:10; left:0; right:0; text-align:center; translate:0 -50%; animation:popin .5s cubic-bezier(.2,1.6,.4,1) both; transition:opacity .4s; }
-  .who img { width:132px; filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
+  .who img { width:170px; filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
   .who b { display:block; font-size:20px; font-weight:900; color:var(--ink); margin-top:-4px; }
   .found-old { position:relative; width:min(84vw, 330px); height:260px; display:flex; align-items:center; justify-content:center; }
   .found .me { width:46%; rotate:-8deg; margin-right:-6%; position:relative; z-index:2; }
@@ -231,7 +231,7 @@
   roll(); setInterval(roll, 1600);
 
   // swipe or tap Next; bars fill as you go; the last card says Enter the mix
-  const deck = document.getElementById('deck'), cards = [...deck.children], chrome = document.getElementById('chrome');
+  const deck = document.getElementById('deck'), cards = [...deck.querySelectorAll('.cd')], chrome = document.getElementById('chrome');
   const bars = document.getElementById('bars'); bars.innerHTML = cards.map(() => '<i><b></b></i>').join('');
   const step = () => cards[0].offsetWidth + (parseFloat(getComputedStyle(deck).columnGap) || 0);
   const idx = () => Math.round(deck.scrollLeft / step());
@@ -246,7 +246,7 @@
   }
   deck.addEventListener('scroll', () => requestAnimationFrame(paint));
   const go = i => deck.scrollTo({ left: i * step(), behavior: 'smooth' });
-  document.getElementById('next').onclick = () => { const i = idx(); if (i < cards.length - 1) go(i + 1); else alert('Demo: this opens the avatar page.'); };
+  document.getElementById('next').onclick = () => { const i = idx(); if (i < cards.length - 1) go(i + 1); else { const n = document.getElementById('next'); n.textContent = 'Demo: avatar page is next'; setTimeout(paint, 1500); } };
   document.getElementById('back').onclick = () => go(Math.max(0, idx() - 1));
   document.getElementById('skip').onclick = () => go(cards.length - 1);
   // tapping the left or right edge of a card also moves, like stories
@@ -265,7 +265,7 @@
   const meUrl = av('tour-me'); document.getElementById('me').src = meUrl; document.getElementById('me-o').src = meUrl + '&mouth=variant18';
   fetch(meUrl).then(r => r.text()).then(t => { document.getElementById('collar').innerHTML = collarSvg(SKINS.find(c => t.toLowerCase().includes('#' + c)) || 'ecad80'); })
     .catch(() => { document.getElementById('collar').innerHTML = collarSvg('ecad80'); });
-  const mw = document.querySelector('.mw'), fitMe = () => { mw.style.transform = `scale(${Math.min(.8, document.getElementById('wart').clientHeight * .42 / 300)})`; };
+  const mw = document.querySelector('.mw'), fitMe = () => { mw.style.transform = `scale(${Math.min(1, document.getElementById('wart').clientHeight * .5 / 300)})`; };
   fitMe(); addEventListener('resize', fitMe);
   const sky = document.getElementById('sky'), gum = document.getElementById('gum'), mbox = document.getElementById('box');
   const pos = el => { const r = el.getBoundingClientRect(), o = sky.getBoundingClientRect(); return { x: r.left - o.left + r.width / 2, y: r.top - o.top + r.height / 2, w: r.width }; };
@@ -300,7 +300,7 @@
     const m = [...live][0]; if (!m) return cycle();
     m._taken = true; live.delete(m);
     live.forEach(b => { burst(b._x, b._y, b._s); b.remove(); }); live.clear(); m.style.zIndex = 9; m.querySelector('img').src = av('pal-4');
-    const W = sky.clientWidth, head = pos(document.getElementById('me')), headTop = head.y - head.w * .45, room = Math.max(120, headTop), fit = Math.min(1, room / 190), ty = room / 2, sx = m._x, sy = m._y;
+    const W = sky.clientWidth, head = pos(document.getElementById('me')), headTop = head.y - head.w * .45, room = Math.max(120, headTop), fit = Math.min(1, room / 215), ty = room / 2, sx = m._x, sy = m._y;
     await anim(1300, k => { const e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; m.style.left = (sx + (W / 2 - sx) * e) + 'px'; m.style.top = (sy + (ty - sy) * e) + 'px'; m.style.transform = `scale(${1 + e * 1.6 * fit})`; });
     burst(W / 2, ty, m._s * 2.6 * fit); m.remove();
     const who = document.createElement('div'); who.className = 'who'; who.style.top = ty + 'px'; who.style.scale = fit; who.innerHTML = `<img alt="" src="${av('pal-4')}"><b>Found them!</b>`; sky.append(who);

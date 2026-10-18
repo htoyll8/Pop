@@ -271,7 +271,7 @@
   #s-on .names > span { width:140px; display:flex; flex-direction:column; align-items:center; line-height:1.2; }
   #s-on .names i { font-style:normal; }
   /* who's on the way and who's there: "🚶 Walking over" until you tap I'm here */
-  #s-on .names small { margin-top:3px; font-size:14px; font-weight:800; color:var(--muted); white-space:nowrap; }
+  #s-on .names small { margin-top:3px; min-height:1.3em; font-size:14px; font-weight:800; color:var(--muted); white-space:nowrap; }
   #s-on .names small.here { color:var(--green2); }
   #s-on .pair2 img { transition:opacity .4s, filter .4s; }
   #s-on.waiting .pair2 img:last-child { opacity:.35; filter:grayscale(1); }
@@ -747,7 +747,7 @@
   let me = null, m = null, searchT0 = null;
   const now = () => new Date().toISOString();
   const ok = data => Promise.resolve({ data, error: null });
-  const card = () => (SAM_FIRST && m.s2 === 'confirmed' && m.s1 === 'confirmed' && !m.sam_here && (m.onAt = m.onAt || Date.now(), Date.now() - m.onAt > 6000) && (m.sam_here = now()), { id: m.id, my_slot: 1, partner_alias: 'Sam', partner_avatar: 'pal-4', partner_self_at: m.sam_here,
+  const card = () => (m.s2 === 'confirmed' && m.s1 === 'confirmed' && (m.onAt = m.onAt || Date.now(), !m.sam_walk && Date.now() - m.onAt > 2500 && (m.sam_walk = now()), SAM_FIRST && !m.sam_here && Date.now() - m.onAt > 7000 && (m.sam_here = now())), { id: m.id, my_slot: 1, partner_alias: 'Sam', partner_avatar: 'pal-4', partner_self_at: m.sam_here, partner_walking_at: m.sam_walk || null, walking_at: m.me_walk || null,
     vendor_name: 'Hygro Receptions', vendor_location: 'Booth 12, by the stage', status_1: m.s1, status_2: m.s2,
     self_at: m.me_here, partner_at: null, met_at: null, created_at: m.created, queued: false });
   const rpcs = {
@@ -760,7 +760,7 @@
     match_card: () => card(),
     respond_to_match: a => { m.s1 = a.p_action; if (a.p_action === 'confirmed') setTimeout(() => { if (m) m.s2 = 'confirmed'; }, 2500);
       const r = { person_2: 'sam', status_1: m.s1, status_2: m.s2 }; if (a.p_action !== 'confirmed') m = null; return r; },
-    check_in: () => { m.me_here = now(); setTimeout(() => { if (m && !m.sam_here) m.sam_here = now(); }, 6000); return null; },
+    check_in: a => { if (a.p_kind === 'walking') { m.me_walk = m.me_walk || now(); return null; } m.me_here = now(); m.me_walk = m.me_walk || now(); setTimeout(() => { if (m && !m.sam_here) { m.sam_walk = m.sam_walk || now(); m.sam_here = now(); } }, 6000); return null; },
     leave_pool: () => { m = null; searchT0 = null; return null; },
   };
   const chain = { select() { return chain; }, order() { return chain; }, limit() { return chain; }, then(f, r) { return ok([]).then(f, r); } };
@@ -1360,12 +1360,16 @@
     ping(); try { navigator.vibrate && navigator.vibrate([120, 60, 120, 60, 200]); } catch (_) {}
     clearTimeout(arriveTimer); arriveTimer = setTimeout(() => $('arrive').classList.remove('show'), 4000);
   }
-  // under each face: walking over, or here; their face goes gray while you wait for them
+  // two taps: "I'm walking over", then "I'm here". Under each face: nothing yet, walking over, or here.
+  // Their face goes gray while you wait for them at the spot.
+  let walking = false;
   function onStatus(c) {
-    const mine = !!c.self_at, theirs = !!c.partner_self_at;
-    $('on-st-me').textContent = mine ? '✓ Here' : '🚶 Walking over'; $('on-st-me').classList.toggle('here', mine);
-    $('on-st-them').textContent = theirs ? '✓ Here' : mine ? 'On the way…' : '🚶 Walking over'; $('on-st-them').classList.toggle('here', theirs);
+    const mine = !!c.self_at, theirs = !!c.partner_self_at, theyWalk = !!c.partner_walking_at;
+    walking = walking || !!c.walking_at || mine;
+    $('on-st-me').textContent = mine ? '✓ Here' : walking ? '🚶 Walking over' : ''; $('on-st-me').classList.toggle('here', mine);
+    $('on-st-them').textContent = theirs ? '✓ Here' : theyWalk ? '🚶 Walking over' : mine ? 'Not here yet' : ''; $('on-st-them').classList.toggle('here', theirs);
     $('s-on').classList.toggle('waiting', mine && !theirs && !!c.partner_alias);
+    if (!mine) $('here-t').textContent = walking ? 'I\'m here' : 'I\'m walking over';
   }
   function itsOn(c) {
     if (stage === 'on') return;
@@ -1374,7 +1378,7 @@
     $('on-them').hidden = !c.partner_alias; $('on-name').textContent = c.partner_alias || '';
     $('on-where').textContent = c.vendor_name; $('on-kind').textContent = c.vendor_location;
     $('s-on').classList.remove('out'); $('s-on').querySelector('h1').textContent = 'It\'s on!';
-    $('here-t').textContent = 'I\'m here'; $('here-btn').disabled = false;
+    walking = false; $('here-btn').disabled = false;
     show('on'); try { navigator.vibrate && navigator.vibrate([80, 40, 80]); } catch (_) {}
     if (c.self_at) $('here-t').textContent = 'Waiting for ' + (c.partner_alias || 'them') + '…';
     onStatus(c); let theyWereHere = !!c.partner_self_at;
@@ -1395,6 +1399,11 @@
   }
   $('here-btn').onclick = async () => {
     $('here-btn').disabled = true; err('on-err');
+    if (!walking) {   // first tap: on my way (still moves on if the server doesn't know "walking" yet)
+      walking = true; $('here-t').textContent = 'I\'m here'; $('on-st-me').textContent = '🚶 Walking over';
+      try { await sb.rpc('check_in', { p_match: match.id, p_kind: 'walking' }); } catch (_) {}   // no error toast if the database isn't updated yet
+      $('here-btn').disabled = false; return;
+    }
     try {
       await rpc('check_in', { p_match: match.id, p_kind: 'self' });
       const c2 = await rpc('match_card', { p_match: match.id });
@@ -1466,7 +1475,9 @@
   }
   const toReview = () => { clearInterval(tvClock); clearInterval(tvPoll); $('t-arrive').classList.remove('show'); stage = null; beaconReal(lastCard); };
   // "I'm here" goes straight to the question; no waiting for them first
+  const hereFirst = $('here-btn').onclick;
   if (!window.WALK_NO_TRIVIA) $('here-btn').onclick = async () => {
+    if (!walking) return hereFirst();
     $('here-btn').disabled = true; err('on-err');
     try { await rpc('check_in', { p_match: match.id, p_kind: 'self' }); const c2 = await rpc('match_card', { p_match: match.id }); if (stage === 'on') beacon(c2); }
     catch (e) { err('on-err', e); $('here-btn').disabled = false; }

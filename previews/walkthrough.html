@@ -500,6 +500,13 @@
   #s-trivia .t-live i { width:9px; height:9px; border-radius:50%; background:#7dff9a; animation:t-blink 1s ease-in-out infinite; }
   @keyframes t-blink { 50% { opacity:.25; } }
   #s-trivia .grow { flex:1; min-height:4px; }
+  #s-trivia .t-duo > div.away img { opacity:.35; filter:grayscale(1); }
+  #s-trivia .t-duo > div img { transition:opacity .4s, filter .4s; }
+  #s-trivia .t-duo .t-way { font-size:12.5px; font-weight:800; color:var(--muted); }
+  .t-arrive { position:fixed; left:16px; right:16px; top:calc(env(safe-area-inset-top) + 10px); z-index:35; padding:14px 16px; border-radius:18px; background:var(--green); color:#fff;
+    font-size:18px; font-weight:900; text-align:center; box-shadow:0 10px 24px rgba(47,59,69,.25); transform:translateY(-140%); transition:transform .45s cubic-bezier(.3,1.4,.5,1); }
+  .t-arrive.show { transform:none; }
+  .t-arrive small { display:block; font-size:14px; font-weight:700; opacity:.92; }
   #s-trivia [hidden] { display:none !important; }
   .t-confetti { position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:30; }
   .t-confetti i { position:absolute; top:-20px; width:9px; height:14px; border-radius:2px; animation:t-fall linear forwards; }
@@ -634,13 +641,13 @@
   <!-- walkthrough: vendor trivia, each of you gets a different question -->
   <section id="s-trivia" class="screen">
     <div id="t-ask">
-      <h1>You're both here!</h1>
+      <h1 id="t-ask-h">You're here!</h1>
       <div class="t-sub">at <b id="t-where"></b></div>
     </div>
     <div id="t-won" hidden><h1 id="t-h"></h1><div class="t-sub" id="t-sub"></div></div>
     <div class="t-duo">
       <div><img id="t-me" alt=""><b>You</b><span class="t-st" id="t-st-me" hidden></span></div>
-      <div><img id="t-them" alt=""><b id="t-name"></b><span class="t-st" id="t-st-them" hidden></span></div>
+      <div id="t-them-box"><img id="t-them" alt=""><b id="t-name"></b><span class="t-way" id="t-way">On the way…</span><span class="t-st" id="t-st-them" hidden></span></div>
     </div>
     <div class="t-card" id="t-card">
       <small>Ask the vendor</small>
@@ -655,6 +662,7 @@
     <button class="under" id="t-skip">Skip the trivia</button>
   </section>
   <div class="t-confetti" id="t-confetti"></div>
+  <div class="t-arrive" id="t-arrive"></div>
   <div class="walk-tag">Walkthrough: Sam is pretend</div>
 
   <!-- 4. You're both here: hold up your phone; Found them! turns this screen into the review -->
@@ -1368,7 +1376,7 @@
 
   // ---- walkthrough: after you're both here, the vendor trivia; then the usual review ----
   const TRIVIA = { q: "What's Hygro Receptions' best-selling item?", opts: ['Candles', 'Plant mister', 'Tote bags', 'Air plants'], right: 1 };
-  let tvClock = null;
+  let tvClock = null, tvPoll = null;
   function beacon(c) {
     if (stage === 'bc' || stage === 'tv') return;
     clearFlow(); stage = 'tv'; lastCard = c;
@@ -1380,19 +1388,32 @@
     $('t-q').textContent = TRIVIA.q; $('t-opts').className = 't-opts';
     $('t-opts').innerHTML = TRIVIA.opts.map((o, i) => `<button type="button" data-i="${i}">${o}</button>`).join('');
     $('t-note').innerHTML = them + ' has a <b>different question</b>. Both right: <b>10% off</b> each. One right: still <b>5% off</b> each.';
-    show('trivia'); try { navigator.vibrate && navigator.vibrate([80, 40, 80, 40, 160]); } catch (_) {}
+    show('trivia');
+    // they may not be here yet: their face is faded until they tap "I'm here", then a banner, a ping, and a buzz
+    let here = !!c.partner_self_at, mine = null, theirs = null;
+    const setHere = () => { $('t-them-box').classList.toggle('away', !here); $('t-way').hidden = here; $('t-ask-h').textContent = here ? 'You\'re both here!' : 'You\'re here!'; };
+    setHere();
+    const finish = () => { if (mine !== null && theirs !== null) { clearInterval(tvPoll); setTimeout(() => prize(mine && theirs, mine || theirs, c), 900); } };
+    const theyAnswer = () => setTimeout(() => { if (stage !== 'tv') return; theirs = window.WALK_SAM_RIGHT !== false;
+      $('t-st-them').hidden = false; $('t-st-them').textContent = theirs ? '✅' : '❌'; if (mine !== null) $('t-msg').textContent = ''; finish(); }, 2500);
+    const arrived = () => {
+      here = true; setHere(); ping(); try { navigator.vibrate && navigator.vibrate([120, 60, 120, 60, 200]); } catch (_) {}
+      $('t-arrive').innerHTML = '👋 ' + them + ' is here!<small>Look for their Popatar on their phone.</small>'; $('t-arrive').classList.add('show');
+      setTimeout(() => $('t-arrive').classList.remove('show'), 4000);
+      if (mine !== null) $('t-msg').textContent = 'Waiting for ' + them + '\'s answer…';
+      theyAnswer();
+    };
+    if (here) theyAnswer();
+    clearInterval(tvPoll);
+    tvPoll = setInterval(async () => { if (here) return; try { const c2 = await rpc('match_card', { p_match: match.id }); if (stage === 'tv' && c2.partner_self_at && !here) arrived(); } catch (_) {} }, 1000);
     let answered = false;
-    $('t-opts').onclick = async e => {
+    $('t-opts').onclick = e => {
       const b = e.target.closest('button'); if (!b || answered) return; answered = true;
-      const mine = +b.dataset.i === TRIVIA.right; $('t-opts').classList.add('done');
+      mine = +b.dataset.i === TRIVIA.right; $('t-opts').classList.add('done');
       b.classList.add(mine ? 'right' : 'wrong'); if (!mine) $('t-opts').children[TRIVIA.right].classList.add('right');
       $('t-st-me').hidden = false; $('t-st-me').textContent = mine ? '✅' : '❌';
-      $('t-msg').textContent = (mine ? 'You got it! ' : 'Not quite! ') + 'Waiting for ' + them + '…';
-      await new Promise(r => setTimeout(r, 1800));
-      const theirs = window.WALK_SAM_RIGHT !== false;
-      $('t-st-them').hidden = false; $('t-st-them').textContent = theirs ? '✅' : '❌';
-      await new Promise(r => setTimeout(r, 900));
-      prize(mine && theirs, mine || theirs, c);
+      $('t-msg').textContent = (mine ? 'You got it! ' : 'Not quite! ') + (theirs !== null ? '' : here ? 'Waiting for ' + them + '\'s answer…' : 'Waiting for ' + them + ' to get here…');
+      finish();
     };
   }
   function prize(both, one, c) {
@@ -1408,7 +1429,13 @@
       cf.innerHTML = Array.from({ length: 70 }, () => `<i style="left:${Math.random() * 100}%;background:${cols[Math.floor(Math.random() * 5)]};animation-duration:${1.8 + Math.random() * 1.6}s;animation-delay:${Math.random() * .5}s"></i>`).join('');
       setTimeout(() => cf.innerHTML = '', 4500); }
   }
-  const toReview = () => { clearInterval(tvClock); stage = null; beaconReal(lastCard); };
+  const toReview = () => { clearInterval(tvClock); clearInterval(tvPoll); $('t-arrive').classList.remove('show'); stage = null; beaconReal(lastCard); };
+  // "I'm here" goes straight to the question; no waiting for them first
+  $('here-btn').onclick = async () => {
+    $('here-btn').disabled = true; err('on-err');
+    try { await rpc('check_in', { p_match: match.id, p_kind: 'self' }); const c2 = await rpc('match_card', { p_match: match.id }); if (stage === 'on') beacon(c2); }
+    catch (e) { err('on-err', e); $('here-btn').disabled = false; }
+  };
   $('t-next').onclick = toReview; $('t-skip').onclick = toReview;
   function beaconReal(c) {
     if (stage === 'bc') return;

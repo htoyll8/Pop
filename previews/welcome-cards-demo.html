@@ -347,12 +347,12 @@
     const show = sec => { t.textContent = Math.floor(sec / 60) + ':' + String(Math.floor(sec % 60)).padStart(2, '0'); ring.style.strokeDashoffset = 289 * (1 - sec / 120); clock.classList.toggle('low', sec < 30); };
     for (;;) {
       const tap = async id => { const b = document.getElementById(id); b.classList.add('press'); await wait(150); b.classList.remove('press'); b.classList.add('on'); b.textContent = '✓ Accepted'; };
-      ['ok1', 'ok2'].forEach(id => { const b = document.getElementById(id); b.classList.remove('on'); b.textContent = 'Accept'; }); show(120); await wait(500);
-      await anim(1800, k => show(120 - k * 7));
+      ['ok1', 'ok2'].forEach(id => { const b = document.getElementById(id); b.classList.remove('on'); b.textContent = 'Accept'; }); show(120); await wait(300);
+      await anim(900, k => show(120 - k * 4));
       await tap('ok1');
-      await anim(2200, k => show(113 - k * 9));
+      await anim(800, k => show(116 - k * 3));
       await tap('ok2');
-      await anim(1800, k => show(104 - k * 7));
+      await anim(2200, k => show(113 - k * 9));
     }
   })();
 

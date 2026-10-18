@@ -103,7 +103,7 @@
   .pop b { position:absolute; inset:0; border-radius:50%; border:2px solid rgba(240,111,164,.8); animation:ring .35s ease-out forwards; }
   @keyframes spark { to { transform:rotate(var(--a)) translateY(calc(var(--s) * -.75)); opacity:0; } }
   @keyframes ring { to { transform:scale(1.5); opacity:0; } }
-  .who { position:absolute; left:0; right:0; text-align:center; translate:0 -50%; animation:popin .5s cubic-bezier(.2,1.6,.4,1) both; transition:opacity .4s; }
+  .who { position:absolute; z-index:10; left:0; right:0; text-align:center; translate:0 -50%; animation:popin .5s cubic-bezier(.2,1.6,.4,1) both; transition:opacity .4s; }
   .who img { width:132px; filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
   .who b { display:block; font-size:20px; font-weight:900; color:var(--ink); margin-top:-4px; }
   .found-old { position:relative; width:min(84vw, 330px); height:260px; display:flex; align-items:center; justify-content:center; }
@@ -144,6 +144,8 @@
 </head>
 <body>
 <div class="deck" id="deck">
+  <!-- the pitch card, parked for now -->
+  <template id="pitch">
   <section class="cd c1">
     <div class="art">
       <div class="cloud" id="cloud"></div>
@@ -152,12 +154,13 @@
     <h1>Meet someone new here</h1>
     <p>Stay anonymous with just an avatar. Pop pairs you with someone nearby and picks a booth to meet.</p>
   </section>
+  </template>
 
   <section class="cd c2">
     <div class="art"><div class="pick"><img class="stk" id="pick" alt=""><span class="dice">🎲</span></div></div>
     <div class="num">Step 1</div>
     <h1>Pick an avatar</h1>
-    <p>No photos, no profile. Just you.</p>
+    <p>No photos, no profile. Just you.<br>Tap the die to change it.</p>
   </section>
 
   <section class="cd c3">
@@ -166,7 +169,7 @@
     </div>
     <div class="num">Step 2</div>
     <h1>Pop finds you a match</h1>
-    <p>Someone here right now who's also looking to meet. Keep Pop open while it looks, or leave your number and we'll text you.</p>
+    <p>Someone here who's also looking to meet. Keep Pop open, or leave your number and we'll text you.</p>
   </section>
 
   <section class="cd c3b">
@@ -219,7 +222,7 @@
 
   // card 1: avatar bubbles drifting around the logo
   const spots = [[6,4,78],[60,0,96],[30,30,120],[0,52,70],[70,46,84],[14,80,64],[56,78,74],[42,-6,52],[84,26,54]];
-  document.getElementById('cloud').innerHTML = spots.map(([x,y,s], i) =>
+  (document.getElementById('cloud') || {}).innerHTML = spots.map(([x,y,s], i) =>
     `<div class="bub" style="left:${x}%;top:${y}%;--s:${s}px;animation-delay:${-i*.7}s"><img src="${av('mix-' + i)}" alt=""></div>`).join('');
 
   // card 2: the avatar keeps re-rolling
@@ -237,7 +240,7 @@
     [...bars.children].forEach((b, k) => b.classList.toggle('done', k <= i));
     
     chrome.classList.toggle('last', last);
-    document.getElementById('next').textContent = last ? 'Pick my avatar' : i === 0 ? "Let's see how" : 'Next';
+    document.getElementById('next').textContent = last ? 'Pick my avatar' : 'Next';
     document.getElementById('skip').style.visibility = last ? 'hidden' : 'visible';
     document.getElementById('back').style.visibility = i === 0 ? 'hidden' : 'visible';
   }
@@ -262,6 +265,8 @@
   const meUrl = av('tour-me'); document.getElementById('me').src = meUrl; document.getElementById('me-o').src = meUrl + '&mouth=variant18';
   fetch(meUrl).then(r => r.text()).then(t => { document.getElementById('collar').innerHTML = collarSvg(SKINS.find(c => t.toLowerCase().includes('#' + c)) || 'ecad80'); })
     .catch(() => { document.getElementById('collar').innerHTML = collarSvg('ecad80'); });
+  const mw = document.querySelector('.mw'), fitMe = () => { mw.style.transform = `scale(${Math.min(.8, document.getElementById('wart').clientHeight * .42 / 300)})`; };
+  fitMe(); addEventListener('resize', fitMe);
   const sky = document.getElementById('sky'), gum = document.getElementById('gum'), mbox = document.getElementById('box');
   const pos = el => { const r = el.getBoundingClientRect(), o = sky.getBoundingClientRect(); return { x: r.left - o.left + r.width / 2, y: r.top - o.top + r.height / 2, w: r.width }; };
   function burst(x, y, sz) { const p = document.createElement('div'); p.className = 'pop'; p.style.cssText = `left:${x}px;top:${y}px;--s:${sz}px`;
@@ -273,7 +278,7 @@
   function release(x, y, dx) {
     const sz = Math.round(44 + Math.random() * 20), b = document.createElement('div'); b.className = 'bub'; b.style.setProperty('--s', sz + 'px'); b._s = sz;
     b.innerHTML = `<img alt="" src="${av('float-' + (faceN++ % 9))}">`; sky.append(b); live.add(b);
-    const top = 10 + Math.random() * sky.clientHeight * .22, d = 4200 + Math.random() * 2200, t0 = performance.now(), ph = Math.random() * 6;
+    const top = 10 + Math.random() * sky.clientHeight * .22, d = 3000 + Math.random() * 1200, t0 = performance.now(), ph = Math.random() * 6;
     (function st(t) {
       if (!b.isConnected || b._taken) return;
       const k = Math.min(1, (t - t0) / d), e = 1 - Math.pow(1 - k, 1.6);
@@ -284,20 +289,21 @@
   }
   async function blow() {
     mbox.classList.add('blowing');
-    await anim(2600, k => gum.style.transform = `scale(${.2 + k * 7.6})`);
+    await anim(1800, k => gum.style.transform = `scale(${.2 + k * 7.6})`);
     const g = pos(gum); gum.style.transform = 'scale(0)'; mbox.classList.remove('blowing'); burst(g.x, g.y, g.w);
     const W = sky.clientWidth;
     for (let i = 0; i < 3; i++) release(g.x + (i - 1) * 24, g.y, (i - 1) * W * .3 + (Math.random() - .5) * 30);
   }
   async function cycle() {
-    await blow(); await wait(900); await blow(); await wait(1600);
+    await blow(); await wait(1100);
     // the match: one floating bubble comes to the middle, grows, pops
     const m = [...live][0]; if (!m) return cycle();
-    m._taken = true; live.delete(m); m.querySelector('img').src = av('pal-4');
-    const W = sky.clientWidth, H = sky.clientHeight, sx = m._x, sy = m._y, ty = H * .3;
-    await anim(1300, k => { const e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; m.style.left = (sx + (W / 2 - sx) * e) + 'px'; m.style.top = (sy + (ty - sy) * e) + 'px'; m.style.transform = `scale(${1 + e * 1.6})`; });
-    burst(W / 2, ty, m._s * 2.6); m.remove();
-    const who = document.createElement('div'); who.className = 'who'; who.style.top = ty + 'px'; who.innerHTML = `<img alt="" src="${av('pal-4')}"><b>Found them!</b>`; sky.append(who);
+    m._taken = true; live.delete(m);
+    live.forEach(b => { burst(b._x, b._y, b._s); b.remove(); }); live.clear(); m.style.zIndex = 9; m.querySelector('img').src = av('pal-4');
+    const W = sky.clientWidth, head = pos(document.getElementById('me')), headTop = head.y - head.w * .45, room = Math.max(120, headTop), fit = Math.min(1, room / 190), ty = room / 2, sx = m._x, sy = m._y;
+    await anim(1300, k => { const e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; m.style.left = (sx + (W / 2 - sx) * e) + 'px'; m.style.top = (sy + (ty - sy) * e) + 'px'; m.style.transform = `scale(${1 + e * 1.6 * fit})`; });
+    burst(W / 2, ty, m._s * 2.6 * fit); m.remove();
+    const who = document.createElement('div'); who.className = 'who'; who.style.top = ty + 'px'; who.style.scale = fit; who.innerHTML = `<img alt="" src="${av('pal-4')}"><b>Found them!</b>`; sky.append(who);
     await wait(2600); who.style.opacity = 0; await wait(600); who.remove();
     cycle();
   }

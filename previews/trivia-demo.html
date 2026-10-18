@@ -21,7 +21,7 @@
   /* the two of you, each with a status badge for their own question */
   .duo { display:flex; justify-content:center; gap:22px; margin:12px 0 2px; }
   .duo > div { position:relative; display:flex; flex-direction:column; align-items:center; }
-  .duo img { width:min(33vw, 128px); }
+  .duo img { width:min(36vw, 140px); }
   .duo > div:first-child img { rotate:-6deg; } .duo > div:last-child img { rotate:6deg; }
   .duo b { font-size:15px; font-weight:900; margin-top:2px; }
   .st { position:absolute; right:-4px; top:0; font-size:32px; line-height:1; animation:popin .4s cubic-bezier(.2,1.6,.4,1) both;
@@ -65,7 +65,7 @@
   @keyframes fall { to { transform:translateY(110vh) rotate(720deg); } }
 
   .grow { flex:1; min-height:4px; }
-  @media (max-height:800px) { h1 { font-size:28px; } .duo img { width:100px; } .duo { margin:6px 0 0; } .opts { gap:9px; } .opts button { padding:10px 12px; font-size:17px; } .qcard { padding:14px 14px 10px; } .qcard .q { font-size:20px; margin-bottom:10px; } .note { margin-top:8px; font-size:13.5px; } }
+  @media (max-height:800px) { h1 { font-size:28px; } .duo img { width:112px; } .duo { margin:6px 0 0; } .opts { gap:9px; } .opts button { padding:10px 12px; font-size:17px; } .qcard { padding:14px 14px 10px; } .qcard .q { font-size:20px; margin-bottom:10px; } .note { margin-top:8px; font-size:13.5px; } }
   .tbtn { width:100%; max-width:420px; height:58px; border:0; border-radius:18px; font:inherit; font-size:19px; font-weight:900; color:#fff; background:var(--blue); box-shadow:0 5px 0 var(--blue2); flex-shrink:0; }
   .under { background:none; border:0; font:inherit; font-size:16px; font-weight:800; color:var(--muted); padding:8px 12px; }
   .demo { position:fixed; left:0; right:0; bottom:0; z-index:20; display:flex; justify-content:center; gap:8px; padding:6px; background:rgba(47,59,69,.85); color:#fff; font-size:12px; font-weight:800; }

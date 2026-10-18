@@ -396,7 +396,7 @@
     <ul class="steps">
       <li><i>🫧</i><span>Pick an avatar<small>No photos, no profile. Just you.</small></span></li>
       <li><i>🔍</i><span>Pop finds you a match<small>Someone here, right now, also looking to meet.</small></span></li>
-      <li><i>📍</i><span>Meet at a booth<small>Only tap Let's go if you'll go. They're on their way too.</small></span></li>
+      <li><i>📍</i><span>Meet at a booth<small>Only tap Accept if you'll go. They're on their way too.</small></span></li>
       <li><i>💛</i><span>Be kind<small>Tell us if anything feels off.</small></span></li>
     </ul>
     <div class="grow"></div>
@@ -417,7 +417,7 @@
       <div class="card-t">
         <div class="pic pic2"><div class="duo-t"><img alt="" data-seed="tour-me"><img alt="" data-seed="tour-b"></div>
           <div class="mini-booth"><small>Meet at</small><b>Sound Design Lab</b></div></div>
-        <h2>You both say "Let's go"</h2><p>You each have 2 minutes to say yes. Then Pop shows you where to meet.</p>
+        <h2>You both tap Accept</h2><p>You each have 2 minutes to say yes. Then Pop shows you where to meet.</p>
       </div>
       <div class="card-t">
         <div class="pic pic3"><div class="duo-t"><img alt="" data-seed="tour-me"><img alt="" data-seed="tour-b"></div>
@@ -452,7 +452,7 @@
     </div>
     <div class="status" id="wt-pool"></div>
     <div class="wt-still" id="wt-still" hidden>People are still trickling in.<button type="button" class="link" id="tx-open">Text me when someone joins</button></div>
-    <div class="go" id="go"><button class="tbtn" id="go-btn"><i class="fill" id="go-fill"></i><span class="lbl"><span id="go-t">Let's go</span><small id="go-c">2:00</small></span></button><button class="under" id="go-no">Not this time</button><p class="go-note" id="go-note" hidden>They stepped away. We're texting them now.</p><div class="err" id="go-err"></div></div>
+    <div class="go" id="go"><button class="tbtn" id="go-btn"><i class="fill" id="go-fill"></i><span class="lbl"><span id="go-t">Accept</span><small id="go-c">2:00</small></span></button><button class="under" id="go-no">Not this time</button><p class="go-note" id="go-note" hidden>They stepped away. We're texting them now.</p><div class="err" id="go-err"></div></div>
   </section>
 
   <!-- 3. It's on: both said yes; now the spot -->
@@ -664,7 +664,7 @@
   let me = null, match = null, pollTimer = null, cardTimer = null, lastCard = null;
 
   // ---- reports: errors are sent automatically (with context); people can add details or report what looks wrong ----
-  const APP_VERSION = 'v72';
+  const APP_VERSION = 'v73';
   const context = extra => ({ screen: (document.querySelector('.screen.on') || {}).id || null, stage: (() => { try { return stage; } catch (_) { return null; } })(),
     ua: navigator.userAgent, w: innerWidth, h: innerHeight, calm: matchMedia('(prefers-reduced-motion: reduce)').matches, url: location.href, ...extra });
   const sentAuto = new Set(); let autoCount = 0, promptedBug = false;
@@ -1002,7 +1002,7 @@
     clearTimeout(stillTimer); $('wt-still').hidden = true; $('s-wait').classList.remove('long'); matchAlert();
     stage = 'found'; lastCard = c; err('go-err');
     $('s-wait').classList.add('matched'); layoutFound(f);
-    $('go-t').textContent = 'Let\'s go'; $('go-btn').disabled = false;
+    $('go-t').textContent = 'Accept'; $('go-btn').disabled = false;
     // matches from the text queue: the other person has to see the text first, so 8 minutes instead of 2
     $('go-note').hidden = !(c.queued && c.my_slot === 2);
     fillTimer($('go-fill'), $('go-c'), c.queued ? QUEUED_SECS : YES_SECS, Date.parse(c.created_at) || Date.now(), () => toWelcome('timed_out'));

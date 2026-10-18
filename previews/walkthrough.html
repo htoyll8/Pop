@@ -267,7 +267,19 @@
   .pair2 img { width:min(50vw, 206px); height:auto; aspect-ratio:1 / 1; animation:popin .5s cubic-bezier(.2,1.6,.4,1) both;
                filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(47,59,69,.25)); }
   .pair2 img:first-child { rotate:-7deg; margin-right:-18px; } .pair2 img:last-child { rotate:7deg; margin-left:-18px; animation-delay:.12s; }
-  #s-on .names { display:flex; justify-content:center; gap:120px; font-weight:900; font-size:17px; margin-top:2px; }
+  #s-on .names { display:flex; justify-content:center; gap:30px; font-weight:900; font-size:17px; margin-top:2px; }
+  #s-on .names > span { width:140px; display:flex; flex-direction:column; align-items:center; line-height:1.2; }
+  #s-on .names i { font-style:normal; }
+  /* who's on the way and who's there: "🚶 Walking over" until you tap I'm here */
+  #s-on .names small { margin-top:3px; font-size:14px; font-weight:800; color:var(--muted); white-space:nowrap; }
+  #s-on .names small.here { color:var(--green2); }
+  #s-on .pair2 img { transition:opacity .4s, filter .4s; }
+  #s-on.waiting .pair2 img:last-child { opacity:.35; filter:grayscale(1); }
+  /* "Sam is here!": drops in from the top with a ping and a buzz */
+  .arrive { position:fixed; left:16px; right:16px; top:calc(env(safe-area-inset-top) + 10px); z-index:40; padding:14px 16px; border-radius:18px; background:var(--green); color:#fff;
+    font-size:18px; font-weight:900; text-align:center; box-shadow:0 10px 24px rgba(47,59,69,.25); transform:translateY(-160%); transition:transform .45s cubic-bezier(.3,1.4,.5,1); pointer-events:none; }
+  .arrive.show { transform:none; }
+  .arrive small { display:block; font-size:14px; font-weight:700; opacity:.92; }
   #s-on .booth { margin:22px auto 0; padding:16px 18px; border-radius:20px; background:#f4f6f8; width:100%; max-width:340px; animation:popin .5s .25s cubic-bezier(.2,1.4,.4,1) both; }
   #s-on .booth small { display:block; font-size:15px; font-weight:900; color:#e8463c; text-transform:uppercase; letter-spacing:.06em; }
   #s-on .booth b { display:block; font-size:24px; font-weight:900; color:var(--ink); margin-top:2px; }
@@ -614,6 +626,7 @@
   </section>
 
   <!-- 2. Waiting: you blow bubble gum; each pop sends people in the room floating up in bubbles -->
+  <div class="arrive" id="arrive" role="status" aria-live="polite"></div>
   <section id="s-wait" class="screen">
     <button type="button" class="back" id="wt-back" aria-label="Back"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
     <div class="wt-top"><h1>Finding your match…</h1><div class="err" id="wt-err"></div></div>
@@ -631,7 +644,7 @@
   <!-- 3. It's on: both said yes; now the spot -->
   <section id="s-on" class="screen flow">
     <img class="logo" src="media/pop-logo-header.png" alt="pop"><h1>It's on!</h1>
-    <div class="pair2"><img id="on-me" alt=""><img id="on-them" alt=""></div><div class="names"><span>You</span><span id="on-name"></span></div><p class="outmsg" id="on-out"></p>
+    <div class="pair2"><img id="on-me" alt=""><img id="on-them" alt=""></div><div class="names"><span>You<small id="on-st-me"></small></span><span><i id="on-name"></i><small id="on-st-them"></small></span></div><p class="outmsg" id="on-out"></p>
     <div class="booth"><small>Meet at</small><b id="on-where"></b><span id="on-kind"></span></div>
     <div class="grow"></div>
     <button class="tbtn" id="here-btn"><i class="fill" id="here-fill"></i><span class="lbl"><span id="here-t">I'm here</span><small id="here-c">7:00</small></span></button>
@@ -728,12 +741,13 @@
 <script>
 // ---- walkthrough: a pretend backend. Nothing is saved; "Sam" is simulated. ----
 (() => {
-  const SAM = new URLSearchParams(location.search).get('sam') === 'wrong' ? 'wrong' : 'right';
+  const qs = new URLSearchParams(location.search), SAM = qs.get('sam') === 'wrong' ? 'wrong' : 'right', SAM_FIRST = qs.has('samfirst');
+  window.WALK_NO_TRIVIA = qs.has('notrivia');
   window.WALK_SAM_RIGHT = SAM === 'right';
   let me = null, m = null, searchT0 = null;
   const now = () => new Date().toISOString();
   const ok = data => Promise.resolve({ data, error: null });
-  const card = () => ({ id: m.id, my_slot: 1, partner_alias: 'Sam', partner_avatar: 'pal-4', partner_self_at: m.sam_here,
+  const card = () => (SAM_FIRST && m.s2 === 'confirmed' && m.s1 === 'confirmed' && !m.sam_here && (m.onAt = m.onAt || Date.now(), Date.now() - m.onAt > 6000) && (m.sam_here = now()), { id: m.id, my_slot: 1, partner_alias: 'Sam', partner_avatar: 'pal-4', partner_self_at: m.sam_here,
     vendor_name: 'Hygro Receptions', vendor_location: 'Booth 12, by the stage', status_1: m.s1, status_2: m.s2,
     self_at: m.me_here, partner_at: null, met_at: null, created_at: m.created, queued: false });
   const rpcs = {
@@ -746,7 +760,7 @@
     match_card: () => card(),
     respond_to_match: a => { m.s1 = a.p_action; if (a.p_action === 'confirmed') setTimeout(() => { if (m) m.s2 = 'confirmed'; }, 2500);
       const r = { person_2: 'sam', status_1: m.s1, status_2: m.s2 }; if (a.p_action !== 'confirmed') m = null; return r; },
-    check_in: () => { m.me_here = now(); setTimeout(() => { if (m) m.sam_here = now(); }, 3000); return null; },
+    check_in: () => { m.me_here = now(); setTimeout(() => { if (m && !m.sam_here) m.sam_here = now(); }, 6000); return null; },
     leave_pool: () => { m = null; searchT0 = null; return null; },
   };
   const chain = { select() { return chain; }, order() { return chain; }, limit() { return chain; }, then(f, r) { return ok([]).then(f, r); } };
@@ -896,7 +910,7 @@
   let me = null, match = null, pollTimer = null, cardTimer = null, lastCard = null;
 
   // ---- reports: errors are sent automatically (with context); people can add details or report what looks wrong ----
-  const APP_VERSION = 'v75';
+  const APP_VERSION = 'v76';
   const context = extra => ({ screen: (document.querySelector('.screen.on') || {}).id || null, stage: (() => { try { return stage; } catch (_) { return null; } })(),
     ua: navigator.userAgent, w: innerWidth, h: innerHeight, calm: matchMedia('(prefers-reduced-motion: reduce)').matches, url: location.href, ...extra });
   const sentAuto = new Set(); let autoCount = 0, promptedBug = false;
@@ -1339,6 +1353,20 @@
   $('go-no').onclick = async () => { clearFlow(); try { await rpc('respond_to_match', { p_match: match.id, p_action: 'passed' }); } catch (_) {} search(); };
 
   // ---- 4. It's on: both faces, the spot, "I'm here" with a 7-minute timer ----
+  // "Sam is here!": a banner from the top, a ping, a buzz
+  let arriveTimer = null;
+  function arriveAlert(who, hint) {
+    $('arrive').innerHTML = '👋 ' + who + ' is here!<small>' + hint + '</small>'; $('arrive').classList.add('show');
+    ping(); try { navigator.vibrate && navigator.vibrate([120, 60, 120, 60, 200]); } catch (_) {}
+    clearTimeout(arriveTimer); arriveTimer = setTimeout(() => $('arrive').classList.remove('show'), 4000);
+  }
+  // under each face: walking over, or here; their face goes gray while you wait for them
+  function onStatus(c) {
+    const mine = !!c.self_at, theirs = !!c.partner_self_at;
+    $('on-st-me').textContent = mine ? '✓ Here' : '🚶 Walking over'; $('on-st-me').classList.toggle('here', mine);
+    $('on-st-them').textContent = theirs ? '✓ Here' : mine ? 'On the way…' : '🚶 Walking over'; $('on-st-them').classList.toggle('here', theirs);
+    $('s-on').classList.toggle('waiting', mine && !theirs && !!c.partner_alias);
+  }
   function itsOn(c) {
     if (stage === 'on') return;
     clearFlow(); stage = 'on'; lastCard = c; err('on-err'); stopFlash();
@@ -1349,12 +1377,18 @@
     $('here-t').textContent = 'I\'m here'; $('here-btn').disabled = false;
     show('on'); try { navigator.vibrate && navigator.vibrate([80, 40, 80]); } catch (_) {}
     if (c.self_at) $('here-t').textContent = 'Waiting for ' + (c.partner_alias || 'them') + '…';
+    onStatus(c); let theyWereHere = !!c.partner_self_at;
     fillTimer($('here-fill'), $('here-c'), WALK_SECS, Date.now(), () => toWelcome('timed_out'));
     pollTimer = setInterval(async () => {
       try {
         const c2 = await rpc('match_card', { p_match: match.id });
         if (stage !== 'on') return;
         if (['passed', 'timed_out'].includes(otherOf(c2))) return partnerOut(c2);
+        onStatus(c2);
+        if (c2.partner_self_at && !theyWereHere) {   // they just got there
+          theyWereHere = true;
+          arriveAlert(c2.partner_alias || 'They', c2.self_at ? 'Look for their Popatar on their phone.' : 'Tap I\'m here when you get there.');
+        }
         if (c2.self_at && (c2.partner_self_at || !c2.partner_alias)) beacon(c2);
       } catch (_) {}
     }, POLL_MS);
@@ -1366,7 +1400,7 @@
       const c2 = await rpc('match_card', { p_match: match.id });
       if (stage !== 'on') return;
       if (c2.partner_self_at || !c2.partner_alias) return beacon(c2);
-      $('here-t').textContent = 'Waiting for ' + c2.partner_alias + '…';
+      onStatus(c2); $('here-t').textContent = 'Waiting for ' + c2.partner_alias + '…';
     } catch (e) { err('on-err', e); $('here-btn').disabled = false; }
   };
   $('here-no').onclick = () => toWelcome('passed');
@@ -1377,7 +1411,8 @@
   // ---- walkthrough: after you're both here, the vendor trivia; then the usual review ----
   const TRIVIA = { q: "What's Hygro Receptions' best-selling item?", opts: ['Candles', 'Plant mister', 'Tote bags', 'Air plants'], right: 1 };
   let tvClock = null, tvPoll = null;
-  function beacon(c) {
+  function beacon(c) { return window.WALK_NO_TRIVIA ? beaconReal(c) : beaconTrivia(c); }
+  function beaconTrivia(c) {
     if (stage === 'bc' || stage === 'tv') return;
     clearFlow(); stage = 'tv'; lastCard = c;
     const them = c.partner_alias || 'them';
@@ -1431,7 +1466,7 @@
   }
   const toReview = () => { clearInterval(tvClock); clearInterval(tvPoll); $('t-arrive').classList.remove('show'); stage = null; beaconReal(lastCard); };
   // "I'm here" goes straight to the question; no waiting for them first
-  $('here-btn').onclick = async () => {
+  if (!window.WALK_NO_TRIVIA) $('here-btn').onclick = async () => {
     $('here-btn').disabled = true; err('on-err');
     try { await rpc('check_in', { p_match: match.id, p_kind: 'self' }); const c2 = await rpc('match_card', { p_match: match.id }); if (stage === 'on') beacon(c2); }
     catch (e) { err('on-err', e); $('here-btn').disabled = false; }
